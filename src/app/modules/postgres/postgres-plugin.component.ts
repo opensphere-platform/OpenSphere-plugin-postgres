@@ -107,7 +107,7 @@ const DEFAULT_FORM: PgForm = {
     </section>
 
     <ng-container *ngIf="tab() === 'overview'">
-      <section class="pgp-workspace" aria-label="선택한 Namespace의 PostgreSQL">
+      <section class="pgp-workspace pgp-workspace--full" aria-label="선택한 Namespace의 PostgreSQL">
         <clr-alert *ngIf="fleet.state()==='error'" clrAlertType="danger" [clrAlertClosable]="false"><clr-alert-item><span class="alert-text">{{fleet.error()}}</span></clr-alert-item></clr-alert>
         <div class="pgp-loading" *ngIf="fleet.busy() && fleet.state()==='loading'">Namespace와 PostgreSQL 클러스터를 확인하고 있습니다.</div>
         <article class="pgp-empty-state" *ngIf="!fleet.busy() && !selectedContextCluster()">

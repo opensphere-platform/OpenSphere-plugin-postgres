@@ -426,6 +426,7 @@ pg-metric { display: block; height: 100%; }
 .pgp-description a, .pgp-description button { display: block; width: fit-content; margin: 3px 0; color: var(--os-brand-500); font-size: 0.76rem; }
 
 .pgp-workspace { max-width: 82rem; }
+.pgp-workspace--full { width: 100%; max-width: none; }
 .pgp-section-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 12px; }
 .pgp-section-head h2 { margin: 3px 0 0; color: var(--os-ink); font-size: 1.45rem; font-weight: 400; }
 .pgp-section-head p { margin: 6px 0 0; max-width: 46rem; color: var(--os-text-sec); font-size: 0.76rem; line-height: 1.45; }
