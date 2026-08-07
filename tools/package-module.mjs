@@ -60,7 +60,7 @@ writeFileSync(resolve(root, 'module-package.json.sig'), `${signature(descriptorT
 
 const yamlPath = resolve(root, 'uipluginpackage.yaml');
 const yaml = readFileSync(yamlPath, 'utf8')
-  .replace(/(\n    sha256:\s*)[a-f0-9]{64}/, `$1${descriptor.manifest.sha256}`)
+  .replace(/(\n    sha256:\s*)(["']?)[a-f0-9]{64}\2/, `$1$2${descriptor.manifest.sha256}$2`)
   .replace(/(\n    keyId:\s*).+/, `$1${keyId}`);
 writeFileSync(yamlPath, yaml);
 console.log(`packaged ${descriptor.id}@${descriptor.version} manifest=${descriptor.manifest.sha256}`);
