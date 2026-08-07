@@ -101,6 +101,13 @@ test('time-series charts expose range selection and zoom', () => {
   assert.match(chart, /구조 입력이 바뀔 때만 options를 갈아끼운다/);
 });
 
+test('Carbon overflow menu stays open after a mouse click inside the plugin shadow root', () => {
+  const chart = read('src/app/modules/postgres/ui/pg-timeseries.ts');
+  assert.match(chart, /@HostListener\('click', \['\$event'\]\)/);
+  assert.match(chart, /closest\('\.cds--overflow-menu__trigger'\)/);
+  assert.match(chart, /event\.stopPropagation\(\)/);
+});
+
 test('Clarity/Carbon class collision on .header stays neutralised', () => {
   const css = read('src/app/app.component.css');
   // Clarity의 `header, .header`가 Carbon 차트 레이아웃의 `.header`를 덮으면 모든 차트 위에

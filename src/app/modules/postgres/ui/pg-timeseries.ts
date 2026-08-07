@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, HostListener, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { LineChartComponent } from '@carbon/charts-angular';
 import { ScaleTypes, ToolbarControlTypes, ZoomBarTypes } from '@carbon/charts';
 import type { ChartTabularData, LineChartOptions } from '@carbon/charts';
@@ -50,6 +50,20 @@ export class PgTimeseries implements OnChanges {
 
   chartData: ChartTabularData = [];
   chartOptions: LineChartOptions = this.buildOptions();
+
+  /**
+   * Carbon 1.27.18은 overflow trigger의 click 처리 중 document.body에 닫기
+   * listener를 등록한다. Shadow DOM 안에서는 같은 click이 body까지 계속 전파되어
+   * 메뉴가 열린 직후 다시 닫힌다. trigger click만 host 경계에서 멈추면 바깥 클릭
+   * 닫기와 menu item 실행은 그대로 유지된다.
+   */
+  @HostListener('click', ['$event'])
+  keepOverflowMenuOpen(event: MouseEvent): void {
+    const target = event.target;
+    if (target instanceof Element && target.closest('.cds--overflow-menu__trigger')) {
+      event.stopPropagation();
+    }
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     // 구조 입력이 바뀔 때만 options를 갈아끼운다(줌 도메인 보존).
