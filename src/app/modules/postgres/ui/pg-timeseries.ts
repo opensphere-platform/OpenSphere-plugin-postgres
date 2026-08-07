@@ -37,7 +37,7 @@ export interface PgSeries {
 export class PgTimeseries implements OnChanges, AfterViewInit, OnDestroy {
   private readonly host = inject(ElementRef<HTMLElement>);
   private readonly guardedOverflowTriggers = new WeakSet<Element>();
-  private overflowTriggerObserver?: MutationObserver;
+  private overflowTriggerTimer?: number;
   private readonly repairOverflowMenuMouseClick = (event: Event): void => {
     const trigger = event.currentTarget;
     if (!(trigger instanceof HTMLElement)) return;
@@ -72,21 +72,30 @@ export class PgTimeseries implements OnChanges, AfterViewInit, OnDestroy {
    * 다시 열면 menu item 실행과 이후 바깥 클릭 닫기를 모두 유지할 수 있다.
    */
   ngAfterViewInit(): void {
-    this.guardOverflowTriggers();
-    this.overflowTriggerObserver = new MutationObserver(() => this.guardOverflowTriggers());
-    this.overflowTriggerObserver.observe(this.host.nativeElement, { childList: true, subtree: true });
+    requestAnimationFrame(() => this.guardOverflowTriggers());
+    // Carbon Angular chart는 내부 open Shadow Root에서 toolbar를 만들고 갱신할 수 있다.
+    // 데이터 polling으로 trigger 노드가 교체되어도 다음 주기에 다시 연결한다.
+    this.overflowTriggerTimer = window.setInterval(() => this.guardOverflowTriggers(), 1000);
   }
 
   ngOnDestroy(): void {
-    this.overflowTriggerObserver?.disconnect();
+    if (this.overflowTriggerTimer !== undefined) window.clearInterval(this.overflowTriggerTimer);
   }
 
   private guardOverflowTriggers(): void {
-    for (const trigger of this.host.nativeElement.querySelectorAll('.cds--overflow-menu__trigger')) {
+    for (const trigger of this.findOverflowTriggers(this.host.nativeElement)) {
       if (this.guardedOverflowTriggers.has(trigger)) continue;
       trigger.addEventListener('click', this.repairOverflowMenuMouseClick, true);
       this.guardedOverflowTriggers.add(trigger);
     }
+  }
+
+  private findOverflowTriggers(root: ParentNode): Element[] {
+    const triggers = [...root.querySelectorAll('.cds--overflow-menu__trigger')];
+    for (const element of root.querySelectorAll('*')) {
+      if (element.shadowRoot) triggers.push(...this.findOverflowTriggers(element.shadowRoot));
+    }
+    return triggers;
   }
 
   ngOnChanges(changes: SimpleChanges): void {
