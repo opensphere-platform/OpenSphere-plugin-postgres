@@ -103,11 +103,10 @@ test('time-series charts expose range selection and zoom', () => {
 
 test('Carbon overflow menu stays open after a mouse click inside the plugin shadow root', () => {
   const chart = read('src/app/modules/postgres/ui/pg-timeseries.ts');
-  assert.match(chart, /setInterval\(\(\) => this\.guardOverflowTriggers\(\), 1000\)/);
-  assert.match(chart, /findOverflowTriggers\(this\.host\.nativeElement\)/);
-  assert.match(chart, /element\.shadowRoot/);
-  assert.match(chart, /this\.findOverflowTriggers\(element\.shadowRoot\)/);
-  assert.match(chart, /addEventListener\('click', this\.repairOverflowMenuMouseClick, true\)/);
+  assert.match(chart, /@HostListener\('pointerdown', \['\$event'\]\)/);
+  assert.match(chart, /event\s*\.composedPath\(\)/);
+  assert.match(chart, /matches\('\.cds--overflow-menu__trigger'\)/);
+  assert.match(chart, /addEventListener\('click',[\s\S]*\{ capture: true, once: true \}\)/);
   assert.match(chart, /requestAnimationFrame\(\(\) =>/);
   assert.match(chart, /getAttribute\('aria-expanded'\) !== 'true'/);
   assert.match(chart, /new KeyboardEvent\('keydown', \{ key: 'Enter', bubbles: true, composed: true \}\)/);
