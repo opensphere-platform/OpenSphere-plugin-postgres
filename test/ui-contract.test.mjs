@@ -104,7 +104,8 @@ test('time-series charts expose range selection and zoom', () => {
 test('Carbon overflow menu stays open after a mouse click inside the plugin shadow root', () => {
   const chart = read('src/app/modules/postgres/ui/pg-timeseries.ts');
   assert.match(chart, /@HostListener\('click', \['\$event'\]\)/);
-  assert.match(chart, /closest\('\.cds--overflow-menu__trigger'\)/);
+  assert.match(chart, /\.composedPath\(\)/);
+  assert.match(chart, /matches\('\.cds--overflow-menu__trigger'\)/);
   assert.match(chart, /event\.stopPropagation\(\)/);
 });
 

@@ -22,7 +22,7 @@ spec:
     label: "PostgreSQL"
   manifest:
     path: /plugins/ui-shell.manifest.json
-    sha256: "26e3619d8edabec91a273d7c2f18e936c6c6a2fa1a322193918f24a702397d6d"
+    sha256: "de9b86b475c1cf59e9313e1f634b3983760464f0d75e32595402ca9be702240b"
     signaturePath: /plugins/ui-shell.manifest.json.sig
   trust:
     keyId: opensphere-edge-local-v1

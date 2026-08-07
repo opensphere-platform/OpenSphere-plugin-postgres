@@ -59,8 +59,10 @@ export class PgTimeseries implements OnChanges {
    */
   @HostListener('click', ['$event'])
   keepOverflowMenuOpen(event: MouseEvent): void {
-    const target = event.target;
-    if (target instanceof Element && target.closest('.cds--overflow-menu__trigger')) {
+    const clickedOverflowTrigger = event
+      .composedPath()
+      .some((target) => target instanceof Element && target.matches('.cds--overflow-menu__trigger'));
+    if (clickedOverflowTrigger) {
       event.stopPropagation();
     }
   }
