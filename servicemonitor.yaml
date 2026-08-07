@@ -1,0 +1,17 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: opensphere-plugin-postgres
+  namespace: opensphere-system
+  labels:
+    app.kubernetes.io/name: opensphere-plugin-postgres
+spec:
+  namespaceSelector:
+    matchNames: [opensphere-system]
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: opensphere-plugin-postgres
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s

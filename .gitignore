@@ -1,0 +1,7 @@
+/node_modules/
+/dist/
+/.angular/
+/module-package.json
+/module-package.json.sig
+/ui-shell/ui-shell.manifest.json.sig
+*.log

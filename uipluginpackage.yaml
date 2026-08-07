@@ -1,0 +1,61 @@
+apiVersion: plugins.opensphere.io/v1alpha1
+kind: UIPluginPackage
+metadata:
+  name: postgres
+  namespace: opensphere-system
+  labels: { opensphere.io/host-ref: foundation }
+spec:
+  kind: plugin
+  hostRef: foundation
+  hostApiVersion: "1.0.0"
+  hostCompat: ">=1.0.0 <2.0.0"
+  displayName: "PostgreSQL"
+  owner: platform-foundation
+  version: 0.1.0
+  description: "Foundation/Data PostgreSQL Fleet, monitoring, lifecycle and pgAdmin plugin."
+  serviceAccountName: opensphere-plugin-postgres
+  image:
+    repository: ghcr.io/opensphere-platform/opensphere-plugin-postgres
+    digest: sha256:0000000000000000000000000000000000000000000000000000000000000000
+  nav:
+    band: "운영 Operate"
+    label: "PostgreSQL"
+  manifest:
+    path: /plugins/ui-shell.manifest.json
+    sha256: "0000000000000000000000000000000000000000000000000000000000000000"
+    signaturePath: /plugins/ui-shell.manifest.json.sig
+  trust:
+    keyId: opensphere-edge-local-v1
+  shellCompat: ">=0.2.0 <0.9.0"
+  permissions:
+    - api:proxy
+    - manual:contribute
+  contributions:
+    page: { enabled: false, reason: "Mounted inside the Foundation subShell" }
+    navigation: { enabled: false, mode: "none", reason: "Foundation owns child navigation" }
+    api: { enabled: false, reason: "Governed PostgreSQL writes remain on the Foundation host API" }
+    cli: { enabled: true, namespace: "postgres", manifestPath: "/cli/manifest" }
+    manual: { enabled: true, sourceId: "plugin:postgres", mode: "runtime" }
+    search: { enabled: true, mode: "index" }
+    notification: { enabled: false, frontend: false, backend: false, reason: "No notification producer" }
+    observability: { enabled: true, logs: true, metrics: true, traces: false, reason: "Runtime health and load metrics only" }
+  cli:
+    namespace: postgres
+    manifestPath: /cli/manifest
+---
+apiVersion: plugins.opensphere.io/v1alpha1
+kind: UIPluginRegistration
+metadata:
+  name: postgres
+  namespace: opensphere-system
+spec:
+  packageRef:
+    name: postgres
+  desiredState: Enabled
+  installPolicy:
+    createWorkload: true
+    createProxyRoute: true
+    exposeInNavigation: false
+  approval:
+    requestedBy: cmars
+    reason: "PostgreSQL Foundation/Data plugin — hostRef=foundation"

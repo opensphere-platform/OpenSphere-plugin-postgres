@@ -1,0 +1,67 @@
+{
+  "manifestVersion": 3,
+  "kind": "plugin",
+  "id": "postgres",
+  "hostRef": "foundation",
+  "hostApiVersion": "1.0.0",
+  "hostCompat": ">=1.0.0 <2.0.0",
+  "version": "0.1.0",
+  "title": "PostgreSQL",
+  "description": "StackGres 기반 PostgreSQL Fleet 관리와 pgAdmin 운영 화면.",
+  "entry": "main.js",
+  "entrySha256": "b902f286552398c1202050b52a98f7d7adcbd994c06af46cbb04bacfb2226152",
+  "shellCompat": ">=0.2.0 <0.9.0",
+  "sdkVersion": "0.3.6",
+  "permissions": [
+    "api:proxy",
+    "manual:contribute"
+  ],
+  "nav": {
+    "band": "운영 Operate",
+    "label": "PostgreSQL"
+  },
+  "designSystem": "clarity",
+  "renderMode": "esm",
+  "contributions": {
+    "page": {
+      "enabled": false,
+      "reason": "Mounted inside the Foundation subShell"
+    },
+    "navigation": {
+      "enabled": false,
+      "mode": "none",
+      "reason": "Foundation owns child navigation"
+    },
+    "api": {
+      "enabled": false,
+      "reason": "Governed PostgreSQL writes remain on the Foundation host API"
+    },
+    "cli": {
+      "enabled": true,
+      "namespace": "postgres",
+      "manifestPath": "/cli/manifest"
+    },
+    "manual": {
+      "enabled": true,
+      "sourceId": "plugin:postgres",
+      "mode": "runtime"
+    },
+    "search": {
+      "enabled": true,
+      "mode": "index"
+    },
+    "notification": {
+      "enabled": false,
+      "frontend": false,
+      "backend": false,
+      "reason": "No notification producer"
+    },
+    "observability": {
+      "enabled": true,
+      "logs": true,
+      "metrics": true,
+      "traces": false,
+      "reason": "Runtime health and load metrics only"
+    }
+  }
+}

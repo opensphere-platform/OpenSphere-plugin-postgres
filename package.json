@@ -1,0 +1,35 @@
+{
+  "name": "@opensphere/plugin-postgres",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Independent Foundation-hosted PostgreSQL plugin for OpenSphere.",
+  "scripts": {
+    "build": "ng build --configuration production",
+    "package:module": "node tools/package-module.mjs",
+    "verify:artifacts": "node tools/verify-artifacts.mjs",
+    "test": "node --test test/*.test.mjs"
+  },
+  "dependencies": {
+    "@angular/animations": "^22.0.0",
+    "@angular/common": "^22.0.0",
+    "@angular/core": "^22.0.0",
+    "@angular/elements": "^22.0.1",
+    "@angular/forms": "^22.0.0",
+    "@angular/platform-browser": "^22.0.0",
+    "@angular/router": "^22.0.0",
+    "@carbon/charts": "^1.27.18",
+    "@carbon/icons": "^11.82.0",
+    "@clr/angular": "^18.2.0",
+    "@clr/ui": "^18.2.0",
+    "chart.js": "^4.5.1",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.6.0"
+  },
+  "devDependencies": {
+    "@angular/build": "^22.0.0",
+    "@angular/cli": "^22.0.0",
+    "@angular/compiler": "^22.0.0",
+    "@angular/compiler-cli": "^22.0.0",
+    "typescript": "~6.0.0"
+  }
+}
