@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, HostListener, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, OnChanges, OnDestroy, SimpleChanges, inject } from '@angular/core';
 import { LineChartComponent } from '@carbon/charts-angular';
 import { ScaleTypes, ToolbarControlTypes, ZoomBarTypes } from '@carbon/charts';
 import type { ChartTabularData, LineChartOptions } from '@carbon/charts';
@@ -34,7 +34,11 @@ export interface PgSeries {
     :host ::ng-deep .cds--cc--chart-wrapper { font-family: inherit; }
   `],
 })
-export class PgTimeseries implements OnChanges {
+export class PgTimeseries implements OnChanges, AfterViewInit, OnDestroy {
+  private readonly host = inject(ElementRef<HTMLElement>);
+  private readonly guardedOverflowTriggers = new WeakSet<Element>();
+  private overflowTriggerObserver?: MutationObserver;
+  private readonly keepOverflowTriggerClickInsideChart = (event: Event): void => event.stopPropagation();
   /** epoch 초. Prometheus query_range가 돌려준 표본 시각 그대로. */
   @Input() timestamps: number[] = [];
   @Input() series: PgSeries[] = [];
@@ -57,13 +61,22 @@ export class PgTimeseries implements OnChanges {
    * 메뉴가 열린 직후 다시 닫힌다. trigger click만 host 경계에서 멈추면 바깥 클릭
    * 닫기와 menu item 실행은 그대로 유지된다.
    */
-  @HostListener('click', ['$event'])
-  keepOverflowMenuOpen(event: MouseEvent): void {
-    const clickedOverflowTrigger = event
-      .composedPath()
-      .some((target) => target instanceof Element && target.matches('.cds--overflow-menu__trigger'));
-    if (clickedOverflowTrigger) {
-      event.stopPropagation();
+  ngAfterViewInit(): void {
+    this.guardOverflowTriggers();
+    this.overflowTriggerObserver = new MutationObserver(() => this.guardOverflowTriggers());
+    this.overflowTriggerObserver.observe(this.host.nativeElement, { childList: true, subtree: true });
+  }
+
+  ngOnDestroy(): void {
+    this.overflowTriggerObserver?.disconnect();
+  }
+
+  private guardOverflowTriggers(): void {
+    for (const trigger of this.host.nativeElement.querySelectorAll('.cds--overflow-menu__trigger')) {
+      if (this.guardedOverflowTriggers.has(trigger)) continue;
+      // target capture에서 전파만 멈춘다. 같은 target의 Carbon click handler는 그대로 실행된다.
+      trigger.addEventListener('click', this.keepOverflowTriggerClickInsideChart, true);
+      this.guardedOverflowTriggers.add(trigger);
     }
   }
 
