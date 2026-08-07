@@ -10,6 +10,10 @@ const descriptor = JSON.parse(readFileSync(resolve(root, 'module-package.json'),
 const entry = readFileSync(resolve(root, 'dist/postgres/browser', manifest.entry));
 
 if (manifest.id !== 'postgres' || manifest.hostRef !== 'foundation') throw new Error('manifest identity/hostRef mismatch');
+if (manifest.apiBase !== '/api/plugins/postgres') throw new Error('manifest canonical apiBase mismatch');
+if (!manifest.permissions?.includes('api:proxy')) throw new Error('api:proxy permission missing');
+if (manifest.contributions?.api?.enabled !== false) throw new Error('governed Foundation API contribution must remain disabled');
+if (descriptor.api?.basePath !== manifest.apiBase) throw new Error('descriptor apiBase mismatch');
 if (manifest.entrySha256 !== hash(entry)) throw new Error('entry hash mismatch');
 if (descriptor.manifest.sha256 !== hash(manifestText)) throw new Error('manifest hash mismatch');
 if (!readFileSync(resolve(root, 'module-package.json.sig'), 'utf8').trim()) throw new Error('descriptor signature missing');

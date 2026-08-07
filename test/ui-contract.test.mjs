@@ -11,9 +11,20 @@ test('PostgreSQL plugin owns the external Foundation-hosted custom element', () 
   const manifest = JSON.parse(read('ui-shell/ui-shell.manifest.json'));
   assert.equal(manifest.id, 'postgres');
   assert.equal(manifest.hostRef, 'foundation');
+  assert.equal(manifest.apiBase, '/api/plugins/postgres');
+  assert.ok(manifest.permissions.includes('api:proxy'));
+  assert.equal(manifest.contributions.api.enabled, false);
   assert.match(main, /osp-foundation-postgres/);
   assert.match(main, /export async function activate/);
   assert.match(main, /sourceId: 'plugin:postgres'/);
+});
+
+test('plugin-owned reads use the canonical proxy while governed writes remain on Foundation', () => {
+  const packager = read('tools/package-module.mjs');
+  const manifest = JSON.parse(read('ui-shell/ui-shell.manifest.json'));
+  assert.equal(manifest.apiBase, '/api/plugins/postgres');
+  assert.match(packager, /api: manifest\.apiBase \? \{ basePath: manifest\.apiBase \} : undefined/);
+  assert.equal(manifest.contributions.api.enabled, false);
 });
 
 test('PostgreSQL keeps the complete operations menu in canonical order', () => {

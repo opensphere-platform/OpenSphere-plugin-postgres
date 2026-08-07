@@ -4,7 +4,7 @@ const path = require('path');
 
 const PORT = Number(process.env.PORT || 8080);
 const PLUGIN_DIR = process.env.PLUGIN_DIR || '/plugins';
-const VERSION = process.env.APP_VERSION || '0.1.0';
+const VERSION = process.env.APP_VERSION || '0.1.1';
 
 function text(res, status, body, type = 'text/plain; charset=utf-8') {
   res.writeHead(status, { 'content-type': type });

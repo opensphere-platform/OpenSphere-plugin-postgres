@@ -5,13 +5,14 @@
   "hostRef": "foundation",
   "hostApiVersion": "1.0.0",
   "hostCompat": ">=1.0.0 <2.0.0",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "title": "PostgreSQL",
   "description": "StackGres 기반 PostgreSQL Fleet 관리와 pgAdmin 운영 화면.",
   "entry": "main.js",
   "entrySha256": "b902f286552398c1202050b52a98f7d7adcbd994c06af46cbb04bacfb2226152",
   "shellCompat": ">=0.2.0 <0.9.0",
   "sdkVersion": "0.3.6",
+  "apiBase": "/api/plugins/postgres",
   "permissions": [
     "api:proxy",
     "manual:contribute"

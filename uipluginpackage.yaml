@@ -11,7 +11,7 @@ spec:
   hostCompat: ">=1.0.0 <2.0.0"
   displayName: "PostgreSQL"
   owner: platform-foundation
-  version: 0.1.0
+  version: 0.1.1
   description: "Foundation/Data PostgreSQL Fleet, monitoring, lifecycle and pgAdmin plugin."
   serviceAccountName: opensphere-plugin-postgres
   image:
@@ -30,6 +30,8 @@ spec:
   permissions:
     - api:proxy
     - manual:contribute
+  api:
+    basePath: /api/plugins/postgres
   contributions:
     page: { enabled: false, reason: "Mounted inside the Foundation subShell" }
     navigation: { enabled: false, mode: "none", reason: "Foundation owns child navigation" }

@@ -9,7 +9,7 @@ LABEL org.opencontainers.image.title="OpenSphere PostgreSQL Plugin" \
       org.opencontainers.image.revision=$OS_SOURCE_REVISION \
       org.opencontainers.image.source="https://github.com/opensphere-platform/OpenSphere-plugin-postgres" \
       io.opensphere.channel="edge" \
-      io.opensphere.compatibility-version="0.1.0" \
+      io.opensphere.compatibility-version="0.1.1" \
       io.opensphere.foundation.plugin-id="postgres" \
       io.opensphere.image-platform="linux/amd64" \
       io.opensphere.module.descriptor=$OS_MODULE_DESCRIPTOR \
@@ -21,7 +21,7 @@ LABEL org.opencontainers.image.title="OpenSphere PostgreSQL Plugin" \
       opensphere.io/ga-eligible="false" \
       opensphere.io/release-class="pre-ga"
 RUN apk upgrade --no-cache && rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx
-ENV PORT=8080 PLUGIN_DIR=/plugins APP_VERSION=0.1.0
+ENV PORT=8080 PLUGIN_DIR=/plugins APP_VERSION=0.1.1
 WORKDIR /app
 COPY server.js /app/server.js
 COPY dist/postgres/browser/main.js /plugins/main.js
