@@ -38,7 +38,17 @@ export class PgTimeseries implements OnChanges, AfterViewInit, OnDestroy {
   private readonly host = inject(ElementRef<HTMLElement>);
   private readonly guardedOverflowTriggers = new WeakSet<Element>();
   private overflowTriggerObserver?: MutationObserver;
-  private readonly keepOverflowTriggerClickInsideChart = (event: Event): void => event.stopPropagation();
+  private readonly repairOverflowMenuMouseClick = (event: Event): void => {
+    const trigger = event.currentTarget;
+    if (!(trigger instanceof HTMLElement)) return;
+    requestAnimationFrame(() => {
+      // Carbon의 mouse click이 같은 이벤트에 설치한 body listener로 즉시 닫힌 경우,
+      // 공식 keyboard 경로를 다음 프레임에 호출해 메뉴를 열고 바깥 클릭 닫기도 복구한다.
+      if (trigger.getAttribute('aria-expanded') !== 'true') {
+        trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, composed: true }));
+      }
+    });
+  };
   /** epoch 초. Prometheus query_range가 돌려준 표본 시각 그대로. */
   @Input() timestamps: number[] = [];
   @Input() series: PgSeries[] = [];
@@ -58,8 +68,8 @@ export class PgTimeseries implements OnChanges, AfterViewInit, OnDestroy {
   /**
    * Carbon 1.27.18은 overflow trigger의 click 처리 중 document.body에 닫기
    * listener를 등록한다. Shadow DOM 안에서는 같은 click이 body까지 계속 전파되어
-   * 메뉴가 열린 직후 다시 닫힌다. trigger click만 host 경계에서 멈추면 바깥 클릭
-   * 닫기와 menu item 실행은 그대로 유지된다.
+   * 메뉴가 열린 직후 다시 닫힌다. mouse click이 끝난 다음 Carbon의 keyboard 경로로
+   * 다시 열면 menu item 실행과 이후 바깥 클릭 닫기를 모두 유지할 수 있다.
    */
   ngAfterViewInit(): void {
     this.guardOverflowTriggers();
@@ -74,8 +84,7 @@ export class PgTimeseries implements OnChanges, AfterViewInit, OnDestroy {
   private guardOverflowTriggers(): void {
     for (const trigger of this.host.nativeElement.querySelectorAll('.cds--overflow-menu__trigger')) {
       if (this.guardedOverflowTriggers.has(trigger)) continue;
-      // target capture에서 전파만 멈춘다. 같은 target의 Carbon click handler는 그대로 실행된다.
-      trigger.addEventListener('click', this.keepOverflowTriggerClickInsideChart, true);
+      trigger.addEventListener('click', this.repairOverflowMenuMouseClick, true);
       this.guardedOverflowTriggers.add(trigger);
     }
   }

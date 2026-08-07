@@ -105,8 +105,10 @@ test('Carbon overflow menu stays open after a mouse click inside the plugin shad
   const chart = read('src/app/modules/postgres/ui/pg-timeseries.ts');
   assert.match(chart, /new MutationObserver\(\(\) => this\.guardOverflowTriggers\(\)\)/);
   assert.match(chart, /querySelectorAll\('\.cds--overflow-menu__trigger'\)/);
-  assert.match(chart, /addEventListener\('click', this\.keepOverflowTriggerClickInsideChart, true\)/);
-  assert.match(chart, /event\.stopPropagation\(\)/);
+  assert.match(chart, /addEventListener\('click', this\.repairOverflowMenuMouseClick, true\)/);
+  assert.match(chart, /requestAnimationFrame\(\(\) =>/);
+  assert.match(chart, /getAttribute\('aria-expanded'\) !== 'true'/);
+  assert.match(chart, /new KeyboardEvent\('keydown', \{ key: 'Enter', bubbles: true, composed: true \}\)/);
 });
 
 test('Clarity/Carbon class collision on .header stays neutralised', () => {
