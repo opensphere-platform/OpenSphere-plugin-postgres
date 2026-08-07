@@ -103,8 +103,10 @@ test('time-series charts expose range selection and zoom', () => {
 
 test('plugin-owned overflow provides table and CSV without Carbon Shadow DOM click coupling', () => {
   const chart = read('src/app/modules/postgres/ui/pg-timeseries.ts');
-  assert.match(chart, /<details #utilityMenu>/);
-  assert.match(chart, /<summary aria-label="More options"/);
+  assert.match(chart, /class="pg-chart-menu-trigger"/);
+  assert.match(chart, /aria-label="More options"/);
+  assert.match(chart, /menuOpen = !menuOpen/);
+  assert.doesNotMatch(chart, /<details #utilityMenu>/);
   assert.match(chart, /role="menuitem"[\s\S]*표로 보기/);
   assert.match(chart, /role="menuitem"[\s\S]*CSV 내려받기/);
   assert.match(chart, /downloadCsv\(\): void/);

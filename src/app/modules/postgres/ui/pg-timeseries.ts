@@ -16,7 +16,7 @@ export interface PgSeries {
  *
  * 확대/축소는 세 경로로 제공한다: zoom bar 드래그, toolbar의 Zoom in/out·Reset,
  * 그리고 상위 화면의 구간 선택(1h~7d). Carbon 1.27.18의 Shadow DOM overflow
- * mouse 회귀를 피하기 위해 표 보기와 CSV는 플러그인 소유 native details로 제공한다.
+ * mouse 회귀를 피하기 위해 표 보기와 CSV는 플러그인 소유 상태 기반 메뉴로 제공한다.
  *
  * options 아이덴티티는 구조 입력이 바뀔 때만 새로 만든다. 15초 폴링마다 새 options를
  * 넘기면 wrapper가 model.setOptions()를 호출해 사용자가 잡아둔 줌 도메인이 풀린다.
@@ -28,15 +28,24 @@ export interface PgSeries {
   imports: [CommonModule, LineChartComponent],
   template: `
     <div class="pg-chart-utility">
-      <details #utilityMenu>
-        <summary aria-label="More options" title="More options">⋮</summary>
+      <div class="pg-chart-menu-wrap">
+        <button
+          class="pg-chart-menu-trigger"
+          type="button"
+          aria-label="More options"
+          title="More options"
+          [attr.aria-expanded]="menuOpen"
+          (click)="menuOpen = !menuOpen; $event.stopPropagation()"
+        >⋮</button>
+        @if (menuOpen) {
         <div class="pg-chart-menu" role="menu">
-          <button type="button" role="menuitem" (click)="showTable = !showTable; utilityMenu.open = false">
+          <button type="button" role="menuitem" (click)="showTable = !showTable; menuOpen = false">
             {{ showTable ? '차트로 보기' : '표로 보기' }}
           </button>
-          <button type="button" role="menuitem" (click)="downloadCsv(); utilityMenu.open = false">CSV 내려받기</button>
+          <button type="button" role="menuitem" (click)="downloadCsv(); menuOpen = false">CSV 내려받기</button>
         </div>
-      </details>
+        }
+      </div>
     </div>
     <ibm-line-chart [data]="chartData" [options]="chartOptions" [height]="height"></ibm-line-chart>
     @if (showTable) {
@@ -56,9 +65,9 @@ export interface PgSeries {
     :host { display: block; min-width: 0; }
     :host ::ng-deep .cds--cc--chart-wrapper { font-family: inherit; }
     .pg-chart-utility { display: flex; justify-content: flex-end; height: 28px; position: relative; z-index: 5; }
-    details { position: relative; }
-    summary { cursor: pointer; list-style: none; width: 28px; height: 28px; display: grid; place-items: center; font-size: 20px; }
-    summary::-webkit-details-marker { display: none; }
+    .pg-chart-menu-wrap { position: relative; }
+    .pg-chart-menu-trigger { cursor: pointer; border: 0; background: transparent; width: 28px; height: 28px; display: grid; place-items: center; font-size: 20px; }
+    .pg-chart-menu-trigger:hover, .pg-chart-menu-trigger:focus { background: #eef6ff; }
     .pg-chart-menu { position: absolute; right: 0; top: 30px; min-width: 132px; padding: 4px 0; background: #fff; border: 1px solid #c8c8c8; box-shadow: 0 2px 8px rgb(0 0 0 / 18%); }
     .pg-chart-menu button { display: block; width: 100%; border: 0; background: transparent; padding: 7px 12px; text-align: left; cursor: pointer; }
     .pg-chart-menu button:hover, .pg-chart-menu button:focus { background: #eef6ff; }
@@ -80,6 +89,7 @@ export class PgTimeseries implements OnChanges {
   @Input() includeZero = false;
   @Input() showZoomBar = true;
   showTable = false;
+  menuOpen = false;
 
   chartData: ChartTabularData = [];
   chartOptions: LineChartOptions = this.buildOptions();
