@@ -94,22 +94,22 @@ test('time-series charts expose range selection and zoom', () => {
   assert.match(monitoring, /aria-label="조회 구간 선택"/);
   assert.match(service, /selectRange\(id: PgRangeId\)/);
   assert.match(chart, /zoomBar: \{ top: \{ enabled/);
-  for (const control of ['ZOOM_IN', 'ZOOM_OUT', 'RESET_ZOOM', 'SHOW_AS_DATATABLE']) {
+  for (const control of ['ZOOM_IN', 'ZOOM_OUT', 'RESET_ZOOM']) {
     assert.match(chart, new RegExp(`ToolbarControlTypes\\.${control}`), `toolbar must keep ${control}`);
   }
   // 폴링마다 options를 새로 넘기면 model.setOptions()가 사용자의 줌 도메인을 되돌린다.
   assert.match(chart, /구조 입력이 바뀔 때만 options를 갈아끼운다/);
 });
 
-test('Carbon overflow menu stays open after a mouse click inside the plugin shadow root', () => {
+test('plugin-owned overflow provides table and CSV without Carbon Shadow DOM click coupling', () => {
   const chart = read('src/app/modules/postgres/ui/pg-timeseries.ts');
-  assert.match(chart, /@HostListener\('pointerdown', \['\$event'\]\)/);
-  assert.match(chart, /event\s*\.composedPath\(\)/);
-  assert.match(chart, /matches\('\.cds--overflow-menu__trigger'\)/);
-  assert.match(chart, /addEventListener\('click',[\s\S]*\{ capture: true, once: true \}\)/);
-  assert.match(chart, /requestAnimationFrame\(\(\) =>/);
-  assert.match(chart, /getAttribute\('aria-expanded'\) !== 'true'/);
-  assert.match(chart, /new KeyboardEvent\('keydown', \{ key: 'Enter', bubbles: true, composed: true \}\)/);
+  assert.match(chart, /<details #utilityMenu>/);
+  assert.match(chart, /<summary aria-label="More options"/);
+  assert.match(chart, /role="menuitem"[\s\S]*표로 보기/);
+  assert.match(chart, /role="menuitem"[\s\S]*CSV 내려받기/);
+  assert.match(chart, /downloadCsv\(\): void/);
+  assert.doesNotMatch(chart, /ToolbarControlTypes\.SHOW_AS_DATATABLE/);
+  assert.doesNotMatch(chart, /ToolbarControlTypes\.EXPORT_CSV/);
 });
 
 test('Clarity/Carbon class collision on .header stays neutralised', () => {

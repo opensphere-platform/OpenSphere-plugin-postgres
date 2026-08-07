@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, HostListener, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { LineChartComponent } from '@carbon/charts-angular';
 import { ScaleTypes, ToolbarControlTypes, ZoomBarTypes } from '@carbon/charts';
 import type { ChartTabularData, LineChartOptions } from '@carbon/charts';
@@ -15,8 +15,8 @@ export interface PgSeries {
  * PostgreSQL 시계열 차트 — Carbon Charts 단일 렌더러.
  *
  * 확대/축소는 세 경로로 제공한다: zoom bar 드래그, toolbar의 Zoom in/out·Reset,
- * 그리고 상위 화면의 구간 선택(1h~7d). toolbar의 Show as data-table이 차트의
- * 접근성 대체 표현을 담당하므로 별도 sr-only 요약을 손으로 만들지 않는다.
+ * 그리고 상위 화면의 구간 선택(1h~7d). Carbon 1.27.18의 Shadow DOM overflow
+ * mouse 회귀를 피하기 위해 표 보기와 CSV는 플러그인 소유 native details로 제공한다.
  *
  * options 아이덴티티는 구조 입력이 바뀔 때만 새로 만든다. 15초 폴링마다 새 options를
  * 넘기면 wrapper가 model.setOptions()를 호출해 사용자가 잡아둔 줌 도메인이 풀린다.
@@ -27,11 +27,43 @@ export interface PgSeries {
   standalone: true,
   imports: [CommonModule, LineChartComponent],
   template: `
+    <div class="pg-chart-utility">
+      <details #utilityMenu>
+        <summary aria-label="More options" title="More options">⋮</summary>
+        <div class="pg-chart-menu" role="menu">
+          <button type="button" role="menuitem" (click)="showTable = !showTable; utilityMenu.open = false">
+            {{ showTable ? '차트로 보기' : '표로 보기' }}
+          </button>
+          <button type="button" role="menuitem" (click)="downloadCsv(); utilityMenu.open = false">CSV 내려받기</button>
+        </div>
+      </details>
+    </div>
     <ibm-line-chart [data]="chartData" [options]="chartOptions" [height]="height"></ibm-line-chart>
+    @if (showTable) {
+      <div class="pg-chart-table-wrap">
+        <table class="table table-compact" [attr.aria-label]="ariaLabel + ' data table'">
+          <thead><tr><th>시각</th>@for (item of series; track item.label) { <th>{{ item.label }}</th> }</tr></thead>
+          <tbody>
+            @for (timestamp of timestamps; track timestamp; let index = $index) {
+              <tr><td>{{ formatTimestamp(timestamp) }}</td>@for (item of series; track item.label) { <td>{{ formatValue(item.data[index]) }}</td> }</tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
   `,
   styles: [`
     :host { display: block; min-width: 0; }
     :host ::ng-deep .cds--cc--chart-wrapper { font-family: inherit; }
+    .pg-chart-utility { display: flex; justify-content: flex-end; height: 28px; position: relative; z-index: 5; }
+    details { position: relative; }
+    summary { cursor: pointer; list-style: none; width: 28px; height: 28px; display: grid; place-items: center; font-size: 20px; }
+    summary::-webkit-details-marker { display: none; }
+    .pg-chart-menu { position: absolute; right: 0; top: 30px; min-width: 132px; padding: 4px 0; background: #fff; border: 1px solid #c8c8c8; box-shadow: 0 2px 8px rgb(0 0 0 / 18%); }
+    .pg-chart-menu button { display: block; width: 100%; border: 0; background: transparent; padding: 7px 12px; text-align: left; cursor: pointer; }
+    .pg-chart-menu button:hover, .pg-chart-menu button:focus { background: #eef6ff; }
+    .pg-chart-table-wrap { max-height: 280px; overflow: auto; border-top: 1px solid #d8d8d8; }
+    .pg-chart-table-wrap table { margin: 0; width: 100%; }
   `],
 })
 export class PgTimeseries implements OnChanges {
@@ -47,31 +79,36 @@ export class PgTimeseries implements OnChanges {
    */
   @Input() includeZero = false;
   @Input() showZoomBar = true;
+  showTable = false;
 
   chartData: ChartTabularData = [];
   chartOptions: LineChartOptions = this.buildOptions();
 
-  /**
-   * Carbon 1.27.18은 overflow trigger의 click 처리 중 document.body에 닫기
-   * listener를 등록한다. Shadow DOM 안에서는 같은 click이 body까지 계속 전파되어
-   * 메뉴가 열린 직후 다시 닫힌다. mouse click이 끝난 다음 Carbon의 keyboard 경로로
-   * 다시 열면 menu item 실행과 이후 바깥 클릭 닫기를 모두 유지할 수 있다.
-   */
-  @HostListener('pointerdown', ['$event'])
-  prepareOverflowMenuMouseClick(event: PointerEvent): void {
-    const trigger = event
-      .composedPath()
-      .find((target) => target instanceof HTMLElement && target.matches('.cds--overflow-menu__trigger'));
-    if (!(trigger instanceof HTMLElement)) return;
-    trigger.addEventListener('click', () => {
-      requestAnimationFrame(() => {
-        // mouse click이 같은 이벤트에 설치한 body listener로 즉시 닫힌 경우,
-        // Carbon의 공식 keyboard 경로로 다시 열어 이후 바깥 클릭 닫기도 복구한다.
-        if (trigger.getAttribute('aria-expanded') !== 'true') {
-          trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, composed: true }));
-        }
-      });
-    }, { capture: true, once: true });
+  formatTimestamp(timestamp: number): string {
+    return new Date(timestamp * 1000).toLocaleString('ko-KR');
+  }
+
+  formatValue(value: number | undefined): string {
+    return Number.isFinite(value) ? String(value) : '—';
+  }
+
+  downloadCsv(): void {
+    const header = ['timestamp', ...this.series.map((item) => item.label)];
+    const rows = this.timestamps.map((timestamp, index) => [
+      new Date(timestamp * 1000).toISOString(),
+      ...this.series.map((item) => Number.isFinite(item.data[index]) ? String(item.data[index]) : ''),
+    ]);
+    const csv = [header, ...rows].map((row) => row.map((value) => this.csvCell(value)).join(',')).join('\n');
+    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `${this.ariaLabel.toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'postgresql-chart'}.csv`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  }
+
+  private csvCell(value: string): string {
+    return `"${value.replace(/"/g, '""')}"`;
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -131,8 +168,6 @@ export class PgTimeseries implements OnChanges {
           { type: ToolbarControlTypes.ZOOM_IN, title: '시간 구간 확대' },
           { type: ToolbarControlTypes.ZOOM_OUT, title: '시간 구간 축소' },
           { type: ToolbarControlTypes.RESET_ZOOM, title: '선택 구간 전체 보기' },
-          { type: ToolbarControlTypes.SHOW_AS_DATATABLE, title: '표로 보기' },
-          { type: ToolbarControlTypes.EXPORT_CSV, title: 'CSV 내려받기' },
         ],
       },
       height: this.height,
