@@ -105,7 +105,8 @@ test('plugin-owned overflow provides table and CSV without Carbon Shadow DOM cli
   const chart = read('src/app/modules/postgres/ui/pg-timeseries.ts');
   assert.match(chart, /class="pg-chart-menu-trigger"/);
   assert.match(chart, /aria-label="More options"/);
-  assert.match(chart, /menuOpen = !menuOpen/);
+  assert.match(chart, /readonly menuOpen = signal\(false\)/);
+  assert.match(chart, /menuOpen\.update\(\(open\) => !open\)/);
   assert.doesNotMatch(chart, /<details #utilityMenu>/);
   assert.match(chart, /role="menuitem"[\s\S]*표로 보기/);
   assert.match(chart, /role="menuitem"[\s\S]*CSV 내려받기/);

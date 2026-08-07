@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, signal } from '@angular/core';
 import { LineChartComponent } from '@carbon/charts-angular';
 import { ScaleTypes, ToolbarControlTypes, ZoomBarTypes } from '@carbon/charts';
 import type { ChartTabularData, LineChartOptions } from '@carbon/charts';
@@ -34,21 +34,21 @@ export interface PgSeries {
           type="button"
           aria-label="More options"
           title="More options"
-          [attr.aria-expanded]="menuOpen"
-          (click)="menuOpen = !menuOpen; $event.stopPropagation()"
+          [attr.aria-expanded]="menuOpen()"
+          (click)="toggleMenu($event)"
         >⋮</button>
-        @if (menuOpen) {
+        @if (menuOpen()) {
         <div class="pg-chart-menu" role="menu">
-          <button type="button" role="menuitem" (click)="showTable = !showTable; menuOpen = false">
-            {{ showTable ? '차트로 보기' : '표로 보기' }}
+          <button type="button" role="menuitem" (click)="toggleTable()">
+            {{ showTable() ? '차트로 보기' : '표로 보기' }}
           </button>
-          <button type="button" role="menuitem" (click)="downloadCsv(); menuOpen = false">CSV 내려받기</button>
+          <button type="button" role="menuitem" (click)="downloadCsv(); menuOpen.set(false)">CSV 내려받기</button>
         </div>
         }
       </div>
     </div>
     <ibm-line-chart [data]="chartData" [options]="chartOptions" [height]="height"></ibm-line-chart>
-    @if (showTable) {
+    @if (showTable()) {
       <div class="pg-chart-table-wrap">
         <table class="table table-compact" [attr.aria-label]="ariaLabel + ' data table'">
           <thead><tr><th>시각</th>@for (item of series; track item.label) { <th>{{ item.label }}</th> }</tr></thead>
@@ -88,8 +88,8 @@ export class PgTimeseries implements OnChanges {
    */
   @Input() includeZero = false;
   @Input() showZoomBar = true;
-  showTable = false;
-  menuOpen = false;
+  readonly showTable = signal(false);
+  readonly menuOpen = signal(false);
 
   chartData: ChartTabularData = [];
   chartOptions: LineChartOptions = this.buildOptions();
@@ -100,6 +100,16 @@ export class PgTimeseries implements OnChanges {
 
   formatValue(value: number | undefined): string {
     return Number.isFinite(value) ? String(value) : '—';
+  }
+
+  toggleMenu(event: MouseEvent): void {
+    event.stopPropagation();
+    this.menuOpen.update((open) => !open);
+  }
+
+  toggleTable(): void {
+    this.showTable.update((visible) => !visible);
+    this.menuOpen.set(false);
   }
 
   downloadCsv(): void {
