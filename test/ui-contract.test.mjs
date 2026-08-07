@@ -62,12 +62,70 @@ test('namespace-first fleet and pgAdmin layout contracts are preserved', () => {
 test('monitoring and StackGres-only runtime contracts are preserved', () => {
   const monitoring = read('src/app/modules/postgres/tabs/pg-monitoring.tab.ts');
   const service = read('src/app/modules/postgres/cnpg.service.ts');
-  for (const marker of ['OPERATIONS · PROMETHEUS', '활성 연결', 'WAL 생성량', '복제 지연', 'CPU 사용량', '메모리 사용량']) {
+  // WAL은 gauge라 rate()가 아니라 deriv()로 읽는다 — 카드 제목도 "생성량"이 아닌 "변화율"이다.
+  for (const marker of ['OPERATIONS · PROMETHEUS', '활성 연결', 'WAL 크기 변화율', '복제 지연', 'CPU 사용량', '메모리 사용량']) {
     assert.match(monitoring, new RegExp(marker));
   }
+  assert.match(service, /deriv\(pg_wal_size_bytes/);
+  assert.doesNotMatch(service, /rate\(pg_wal_size_bytes/);
   assert.match(monitoring, /grid-template-columns: repeat\(6, minmax\(0, 1fr\)\)/);
   assert.match(service, /selectTarget\(provider: 'stackgres'/);
   assert.match(read('src/app/modules/postgres/postgres-plugin.component.ts'), /ngOnInit\(\): void \{[\s\S]*this\.pg\.start\(\)/);
   assert.doesNotMatch(service, /postgresql\.cnpg\.io|cnpg\.io\/cluster|cnpg_/);
   assert.match(service, /stackgres\.io\/cluster-name/);
+});
+
+test('charts render through a single pinned Carbon vendor', () => {
+  const pkg = JSON.parse(read('package.json'));
+  assert.equal(pkg.dependencies['@carbon/charts'], '1.27.18');
+  assert.equal(pkg.dependencies['@carbon/charts-angular'], '1.27.18');
+  assert.equal(pkg.dependencies['chart.js'], undefined, 'chart.js must not return as a second chart vendor');
+  for (const file of [
+    'src/app/modules/postgres/ui/pg-timeseries.ts',
+    'src/app/modules/postgres/tabs/pg-monitoring.tab.ts',
+    'src/app/modules/postgres/tabs/pg-overview.tab.ts',
+  ]) assert.doesNotMatch(read(file), /chart\.js/, `${file} must not import a second chart engine`);
+});
+
+test('time-series charts expose range selection and zoom', () => {
+  const monitoring = read('src/app/modules/postgres/tabs/pg-monitoring.tab.ts');
+  const chart = read('src/app/modules/postgres/ui/pg-timeseries.ts');
+  const service = read('src/app/modules/postgres/cnpg.service.ts');
+  assert.match(monitoring, /aria-label="조회 구간 선택"/);
+  assert.match(service, /selectRange\(id: PgRangeId\)/);
+  assert.match(chart, /zoomBar: \{ top: \{ enabled/);
+  for (const control of ['ZOOM_IN', 'ZOOM_OUT', 'RESET_ZOOM', 'SHOW_AS_DATATABLE']) {
+    assert.match(chart, new RegExp(`ToolbarControlTypes\\.${control}`), `toolbar must keep ${control}`);
+  }
+  // 폴링마다 options를 새로 넘기면 model.setOptions()가 사용자의 줌 도메인을 되돌린다.
+  assert.match(chart, /구조 입력이 바뀔 때만 options를 갈아끼운다/);
+});
+
+test('Clarity/Carbon class collision on .header stays neutralised', () => {
+  const css = read('src/app/app.component.css');
+  // Clarity의 `header, .header`가 Carbon 차트 레이아웃의 `.header`를 덮으면 모든 차트 위에
+  // 앱 헤더 배경이 칠해지고 높이가 끌려간다. 두 벤더가 한 shadow root에 있는 한 계속 유효한 위험이다.
+  assert.match(css, /@import '@clr\/ui\/clr-ui\.min\.css';/);
+  assert.match(css, /@import '@carbon\/charts\/styles\.css';/);
+  const guard = css.match(/\.cds--cc--chart-wrapper \.header\[class\*='cds--cc--layout'\]\s*\{[^}]*\}/);
+  assert.ok(guard, 'Carbon chart header guard must stay next to the vendor imports');
+  for (const declaration of ['height: auto', 'background-color: transparent']) {
+    assert.ok(guard[0].includes(declaration), `header guard must keep "${declaration}"`);
+  }
+});
+
+test('every range stays inside the SVG sample budget', () => {
+  const service = read('src/app/modules/postgres/cnpg.service.ts');
+  const catalog = service.match(/export const PG_RANGES[\s\S]*?\n\] as const;/);
+  assert.ok(catalog, 'PG_RANGES catalog must stay declared in the service');
+  const ranges = [...catalog[0].matchAll(/id: '([^']+)'[^}]*?windowSeconds: (\d+), stepSeconds: (\d+)/g)]
+    .map(([, id, windowSeconds, stepSeconds]) => ({ id, windowSeconds: Number(windowSeconds), stepSeconds: Number(stepSeconds) }));
+  assert.equal(ranges.length, 4);
+  for (const range of ranges) {
+    const points = range.windowSeconds / range.stepSeconds;
+    assert.ok(Number.isInteger(points), `${range.id} window must divide evenly by step`);
+    // Carbon Charts는 SVG 렌더러다. 표본 하나가 DOM 노드 하나이므로 구간이 넓어질수록
+    // step을 굵혀 표본 수를 묶는다. 이 상한이 깨지면 7일 구간에서 화면이 죽는다.
+    assert.ok(points <= 400, `${range.id} draws ${points} samples, over the 400-sample budget`);
+  }
 });

@@ -6,6 +6,18 @@
 @import '@clr/ui/clr-ui.min.css';
 @import '@carbon/charts/styles.css';
 
+/* 벤더 클래스명 충돌 복구 — Clarity와 Carbon Charts가 같은 shadow root에 공존한다.
+   Clarity: `header, .header { display:flex; color; background-color; height: var(--clr-header-height) }`
+   Carbon:  차트 제목·toolbar 행의 레이아웃 컨테이너에 `header` 클래스를 붙인다.
+   그대로 두면 모든 차트 위에 앱 헤더 배경(#0d233a)이 칠해지고 높이까지 끌려간다.
+   Carbon 래퍼 안에서만, Carbon 레이아웃 클래스를 함께 요구해 좁게 되돌린다. */
+.cds--cc--chart-wrapper .header[class*='cds--cc--layout'] {
+  height: auto;
+  color: inherit;
+  background-color: transparent;
+  white-space: normal;
+}
+
 :host {
   /* 라이트 디자인 토큰(os-* 유틸이 소비). 크롬(내비·breadcrumb·레이아웃)은 app.component.ts 인라인 styles가 소유. */
   /* Clarity h1/h2/h3(--clr-hN-font-family → --clr-display-font → 이 토큰)가 Metropolis 하드 참조 —

@@ -4,19 +4,22 @@ import { CnpgService } from '../cnpg.service';
 import { TlItem } from '../cnpg.types';
 import { PgTimeline } from '../ui/pg-timeline';
 import { PgState } from '../ui/pg-state';
-import { PgChart, PgChartSeries } from '../ui/pg-chart';
+import { DonutChartComponent, SimpleBarChartComponent } from '@carbon/charts-angular';
+import { ScaleTypes } from '@carbon/charts';
+import type { BarChartOptions, ChartTabularData, DonutChartOptions } from '@carbon/charts';
+import { PgSeries, PgTimeseries } from '../ui/pg-timeseries';
 
 @Component({
   selector: 'pg-overview',
   standalone: true,
-  imports: [CommonModule, PgTimeline, PgState, PgChart],
+  imports: [CommonModule, PgTimeline, PgState, PgTimeseries, DonutChartComponent, SimpleBarChartComponent],
   template: `
     <section class="pg-live" *ngIf="part === 'monitoring'" aria-labelledby="pg-live-title">
       <header class="pg-live-head">
         <div>
           <span class="pg-live-eyebrow">LIVE MONITORING</span>
           <h2 id="pg-live-title">PostgreSQL 운영 상태</h2>
-          <p>Kubernetes 상태와 {{ providerLabel() }} exporter의 최근 1시간 시계열을 함께 표시합니다.</p>
+          <p>Kubernetes 상태와 {{ providerLabel() }} exporter의 {{ svc.range().label }} 시계열을 함께 표시합니다.</p>
         </div>
         <div class="pg-live-sync">
           <span [class.pg-live-ok]="svc.metricsState() === 'ok'">{{ monitoringStatus() }}</span>
@@ -30,9 +33,8 @@ import { PgChart, PgChartSeries } from '../ui/pg-chart';
           <div class="card-header"><span>인스턴스 가용성</span><small>현재 Pod 상태</small></div>
           <div class="card-block">
             <p>Primary와 replica가 Kubernetes Ready 조건을 충족하는지 비교합니다.</p>
-            <pg-chart *ngIf="svc.instances().length; else noInstances" kind="horizontalBar"
-              [labels]="instanceLabels()" [series]="instanceSeries()" [showLegend]="false"
-              [ariaLabel]="'PostgreSQL 인스턴스별 Ready 비율. ' + instanceSummary()"></pg-chart>
+            <ibm-simple-bar-chart *ngIf="svc.instances().length; else noInstances"
+              [data]="instanceData()" [options]="instanceOptions()" height="200px"></ibm-simple-bar-chart>
             <ng-template #noInstances><div class="pg-live-empty">인스턴스가 발견되면 상태 차트를 표시합니다.</div></ng-template>
             <footer><span><b>{{ svc.readyN() }}</b> / {{ svc.totalN() }} Ready</span><span>재시작 {{ restartTotal() }}회</span></footer>
           </div>
@@ -42,26 +44,25 @@ import { PgChart, PgChartSeries } from '../ui/pg-chart';
           <div class="card-header"><span>클러스터 가용성</span><small>현재 상태</small></div>
           <div class="card-block">
             <p>선언한 인스턴스 대비 실제 Ready 인스턴스 비율입니다.</p>
-            <pg-chart kind="doughnut" [labels]="['Ready', 'Unavailable']" [series]="availabilitySeries()"
-              [centerValue]="availability() + '%'" centerLabel="instances ready" [showLegend]="false"
-              [ariaLabel]="'PostgreSQL 클러스터 가용성 ' + availability() + '퍼센트'"></pg-chart>
+            <ibm-donut-chart [data]="availabilityData()" [options]="availabilityOptions()" height="200px"></ibm-donut-chart>
             <footer><span class="pg-live-state" [class.pg-live-ok]="svc.allReady()">{{ svc.phase() }}</span><span>Primary {{ primaryShort() }}</span></footer>
           </div>
         </article>
 
         <article class="card pg-live-card">
-          <div class="card-header"><span>트랜잭션 처리량</span><small>최근 1시간</small></div>
+          <div class="card-header"><span>트랜잭션 처리량</span><small>{{ svc.range().label }}</small></div>
           <div class="card-block">
             <p>초당 commit과 rollback 변화로 쓰기 부하와 오류 징후를 확인합니다.</p>
-            <pg-chart *ngIf="hasTransactionMetrics(); else noTransactions" kind="line"
-              [labels]="svc.transactionMetrics().labels" [series]="transactionSeries()"
-              ariaLabel="최근 1시간 PostgreSQL 초당 commit 및 rollback 추이"></pg-chart>
+            <pg-timeseries *ngIf="hasTransactionMetrics(); else noTransactions"
+              [timestamps]="svc.transactionMetrics().timestamps" [series]="transactionSeries()"
+              valueTitle="tx / s" [includeZero]="true" [showZoomBar]="false" height="200px"
+              ariaLabel="PostgreSQL 초당 commit 및 rollback 추이"></pg-timeseries>
             <ng-template #noTransactions><div class="pg-live-empty pg-live-empty--metrics"><b>{{ svc.metricsState() === 'error' ? 'Prometheus 조회 실패' : '시계열 대기 중' }}</b><span>{{ svc.metricsHint() }}</span></div></ng-template>
             <footer><span>Commit {{ latestTransaction('commit') }}/s</span><span>Rollback {{ latestTransaction('rollback') }}/s</span></footer>
           </div>
         </article>
       </div>
-      <p class="pg-live-note"><b>수집:</b> 15초 자동 갱신 · {{ providerLabel() }} exporter · Prometheus query_range(60초 간격). 메트릭 부재를 정상값 0으로 표시하지 않습니다.</p>
+      <p class="pg-live-note"><b>수집:</b> 상태 15초 자동 갱신 · {{ providerLabel() }} exporter · Prometheus query_range({{ svc.range().label }}, {{ svc.range().stepSeconds }}초 간격). 메트릭 부재를 정상값 0으로 표시하지 않습니다. 구간 변경과 확대/축소는 Monitoring 탭에서 제공합니다.</p>
     </section>
 
     <ng-container *ngIf="part === 'details'">
@@ -155,18 +156,44 @@ export class PgOverviewTab {
   primaryShort(): string { const p = this.svc.primary(); return p ? p.replace(this.svc.name + '-', '#') : '—'; }
   providerLabel(): string { return 'StackGres'; }
 
-  readonly instanceLabels = computed(() => this.svc.instances().map((item) => item.name.replace(`${this.svc.name}-`, '#')));
-  readonly instanceSeries = computed<PgChartSeries[]>(() => [{ label: 'Ready', data: this.svc.instances().map((item) => item.ready ? 100 : 0), color: '#003b5c' }]);
-  readonly availabilitySeries = computed<PgChartSeries[]>(() => {
+  readonly instanceData = computed<ChartTabularData>(() => this.svc.instances().map((item) => ({
+    group: item.ready ? 'Ready' : 'Not ready',
+    key: item.name.replace(`${this.svc.name}-`, '#'),
+    value: item.ready ? 100 : 0,
+  })));
+  readonly instanceOptions = computed<BarChartOptions>(() => ({
+    axes: {
+      left: { mapsTo: 'key', scaleType: ScaleTypes.LABELS },
+      bottom: { mapsTo: 'value', title: 'Ready %', domain: [0, 100] },
+    },
+    legend: { enabled: false },
+    toolbar: { enabled: false },
+    color: { scale: { Ready: 'var(--os-brand-500)', 'Not ready': 'var(--os-danger)' } },
+    accessibility: { svgAriaLabel: `PostgreSQL 인스턴스별 Ready 상태. ${this.instanceSummary()}` },
+    height: '200px',
+  } as BarChartOptions));
+
+  readonly availabilityData = computed<ChartTabularData>(() => {
     const ready = this.svc.readyN();
-    const unavailable = Math.max(0, this.svc.totalN() - ready);
-    return [{ label: 'Instances', data: [ready, unavailable], color: '#24a148', colors: ['#24a148', '#d7dcdf'] }];
+    return [{ group: 'Ready', value: ready }, { group: 'Unavailable', value: Math.max(0, this.svc.totalN() - ready) }];
   });
-  readonly transactionSeries = computed<PgChartSeries[]>(() => [
-    { label: 'Commit /s', data: this.svc.transactionMetrics().commit, color: '#003b5c' },
-    { label: 'Rollback /s', data: this.svc.transactionMetrics().rollback, color: '#da1e28' },
+  readonly availabilityOptions = computed<DonutChartOptions>(() => {
+    const percent = this.availability();
+    return {
+      donut: { center: { label: 'instances ready', numberFormatter: () => `${percent}%` } },
+      legend: { enabled: false },
+      toolbar: { enabled: false },
+      color: { scale: { Ready: 'var(--os-success)', Unavailable: 'var(--os-border)' } },
+      accessibility: { svgAriaLabel: `PostgreSQL 클러스터 가용성 ${percent}퍼센트` },
+      height: '200px',
+    } as DonutChartOptions;
+  });
+
+  readonly transactionSeries = computed<PgSeries[]>(() => [
+    { label: 'Commit /s', data: this.svc.transactionMetrics().commit, color: 'var(--os-brand-500)' },
+    { label: 'Rollback /s', data: this.svc.transactionMetrics().rollback, color: 'var(--os-danger)' },
   ]);
-  readonly hasTransactionMetrics = computed(() => this.svc.metricsState() === 'ok' && this.svc.transactionMetrics().labels.length > 0);
+  readonly hasTransactionMetrics = computed(() => this.svc.metricsState() === 'ok' && this.svc.transactionMetrics().timestamps.length > 0);
 
   availability(): number { return this.svc.totalN() ? Math.round((this.svc.readyN() / this.svc.totalN()) * 100) : 0; }
   restartTotal(): number { return this.svc.instances().reduce((sum, item) => sum + item.restarts, 0); }
@@ -178,9 +205,9 @@ export class PgOverviewTab {
     return 'Metrics pending';
   }
   latestTransaction(kind: 'commit' | 'rollback'): string {
-    const values = this.svc.transactionMetrics()[kind];
-    const value = values.at(-1);
-    return value == null || !Number.isFinite(value) ? '—' : String(Math.round(value * 100) / 100);
+    // 마지막 표본이 결측이면 그 앞의 관측값을 쓴다. Monitoring 탭의 metricsLatest와 같은 규칙.
+    const value = this.svc.metricsLatest()[kind];
+    return value == null ? '—' : String(Math.round(value * 100) / 100);
   }
 
   readonly condState = computed(() => {

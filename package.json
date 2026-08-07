@@ -17,11 +17,11 @@
     "@angular/forms": "^22.0.0",
     "@angular/platform-browser": "^22.0.0",
     "@angular/router": "^22.0.0",
-    "@carbon/charts": "^1.27.18",
+    "@carbon/charts": "1.27.18",
+    "@carbon/charts-angular": "1.27.18",
     "@carbon/icons": "^11.82.0",
     "@clr/angular": "^18.2.0",
     "@clr/ui": "^18.2.0",
-    "chart.js": "^4.5.1",
     "rxjs": "~7.8.0",
     "tslib": "^2.6.0"
   },
