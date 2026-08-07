@@ -59,6 +59,40 @@ test('namespace-first fleet and pgAdmin layout contracts are preserved', () => {
   assert.match(service, /dataResult = signal<PgQueryResult \| null>/);
 });
 
+test('Profile Catalog is namespace scoped and keeps StackGres objects authoritative', () => {
+  const component = read('src/app/modules/postgres/postgres-plugin.component.ts');
+  const catalog = read('src/app/modules/postgres/tabs/pg-profile-catalog.tab.ts');
+  const fleet = read('src/app/modules/postgres/postgres-fleet.service.ts');
+  assert.match(component, /<pg-profile-catalog \[namespace\]="selectedNamespace\(\)"/);
+  assert.match(catalog, /Profile Catalog/);
+  assert.match(catalog, /적용 미리보기/);
+  assert.match(catalog, /참조 중인 Profile은 삭제할 수 없습니다/);
+  assert.match(catalog, /백업 Object Storage/);
+  assert.match(catalog, /Access key Secret/);
+  assert.match(fleet, /\/api\/foundation\/postgres\/profiles/);
+  assert.match(fleet, /previewProfile\(draft/);
+  assert.match(fleet, /deleteProfile\(namespace/);
+});
+
+test('backup creation stays on the audited Foundation operation boundary', () => {
+  const backups = read('src/app/modules/postgres/tabs/pg-backups.tab.ts');
+  assert.match(backups, /\/api\/foundation\/postgres\/backups/);
+  assert.match(backups, /변경 사유/);
+  assert.match(backups, /클러스터 이름 확인/);
+  assert.doesNotMatch(backups, /\/api\/k8s\/apis\/stackgres\.io\/v1\/namespaces\//);
+});
+
+test('maintenance work uses typed StackGres operations with a preview gate', () => {
+  const component = read('src/app/modules/postgres/postgres-plugin.component.ts');
+  const operations = read('src/app/modules/postgres/tabs/pg-operations.tab.ts');
+  assert.match(component, /<pg-operations><\/pg-operations>/);
+  assert.match(operations, /\/api\/foundation\/postgres\/operations/);
+  assert.match(operations, /미리보기/);
+  assert.match(operations, /Restart/);
+  assert.match(operations, /Vacuum/);
+  assert.match(operations, /Repack/);
+});
+
 test('monitoring and StackGres-only runtime contracts are preserved', () => {
   const monitoring = read('src/app/modules/postgres/tabs/pg-monitoring.tab.ts');
   const service = read('src/app/modules/postgres/cnpg.service.ts');
