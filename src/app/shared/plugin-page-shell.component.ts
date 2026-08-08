@@ -127,14 +127,16 @@ export class PluginPageHeaderComponent {
   imports: [CommonModule],
   template: `
     <nav class="pfs-plugin-tabs" [attr.aria-label]="ariaLabel" role="tablist" aria-orientation="horizontal">
-      <button *ngFor="let tab of tabs" type="button" class="pfs-plugin-tab"
+      <a *ngFor="let tab of tabs" class="pfs-plugin-tab"
         role="tab" [attr.aria-selected]="active === tab.id" [attr.tabindex]="active === tab.id ? 0 : -1"
+        [attr.href]="tabHref(tab.id)"
         [attr.aria-label]="tab.disabled ? tab.label + ' — 선행 설치 단계 완료 후 사용 가능' : tab.label"
+        [attr.aria-disabled]="tab.disabled ? 'true' : null"
         [attr.title]="tab.disabled ? '선행 설치 단계 완료 후 사용 가능' : null"
-        [class.active]="active === tab.id" [disabled]="tab.disabled"
-        (click)="selected.emit(tab.id)" (keydown)="onKeydown($event, tab.id)">
+        [class.active]="active === tab.id" [class.disabled]="tab.disabled"
+        (click)="onTabClick($event, tab)" (keydown)="onKeydown($event, tab.id)">
         {{ tab.label }}<span *ngIf="tab.badge !== undefined && tab.badge !== '' && tab.badge !== 0" class="label">{{ tab.badge }}</span>
-      </button>
+      </a>
     </nav>
   `,
 })
@@ -142,7 +144,21 @@ export class PluginTabsComponent {
   @Input({ required: true }) tabs: PluginPageTab[] = [];
   @Input({ required: true }) active = 'overview';
   @Input() ariaLabel = 'Plugin 메뉴';
+  @Input() routeBase = '';
   @Output() readonly selected = new EventEmitter<string>();
+
+  tabHref(id: string): string | null {
+    if (!this.routeBase) return null;
+    return id === 'overview' ? this.routeBase : `${this.routeBase}/${id}`;
+  }
+
+  onTabClick(event: MouseEvent, tab: PluginPageTab): void {
+    if (tab.disabled) {
+      event.preventDefault();
+      return;
+    }
+    this.selected.emit(tab.id);
+  }
 
   onKeydown(event: KeyboardEvent, currentId: string): void {
     if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
@@ -156,7 +172,7 @@ export class PluginTabsComponent {
     if (event.key === 'End') next = enabled.length - 1;
     event.preventDefault();
     const targetId = enabled[next].id;
-    const buttons = (event.currentTarget as HTMLElement).parentElement?.querySelectorAll<HTMLElement>('[role="tab"]:not(:disabled)');
+    const buttons = (event.currentTarget as HTMLElement).parentElement?.querySelectorAll<HTMLElement>('[role="tab"]:not(.disabled)');
     buttons?.[next]?.focus();
     this.selected.emit(targetId);
   }

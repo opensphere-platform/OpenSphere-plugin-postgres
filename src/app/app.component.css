@@ -367,10 +367,10 @@ pg-metric { display: block; height: 100%; }
 
 .pgp-tabs, .pfs-plugin-tabs { display: flex; gap: 0; overflow-x: auto; margin: 0 0 18px; background: #fff; border-bottom: 1px solid var(--os-border); }
 .pgp-tab, .pfs-plugin-tab { display: inline-flex; align-items: center; gap: 6px; min-height: 2.55rem; padding: 0 12px; border: 0; border-bottom: 2px solid transparent;
-  background: transparent; color: var(--os-text-sec); font: inherit; font-size: 0.78rem; white-space: nowrap; cursor: pointer; }
-.pgp-tab:hover:not(:disabled), .pfs-plugin-tab:hover:not(:disabled) { color: var(--os-ink); background: #f7f8fb; }
+  background: transparent; color: var(--os-text-sec); font: inherit; font-size: 0.78rem; text-decoration: none; white-space: nowrap; cursor: pointer; }
+.pgp-tab:hover:not(:disabled), .pfs-plugin-tab:hover:not(:disabled):not(.disabled) { color: var(--os-ink); background: #f7f8fb; text-decoration: none; }
 .pgp-tab.active, .pfs-plugin-tab.active { color: var(--os-ink); border-bottom-color: var(--os-brand-500); font-weight: 600; }
-.pgp-tab:disabled, .pfs-plugin-tab:disabled { color: #a8a8a8; cursor: not-allowed; }
+.pgp-tab:disabled, .pfs-plugin-tab:disabled, .pfs-plugin-tab.disabled { color: #a8a8a8; cursor: not-allowed; pointer-events: none; }
 .pgp-tab:focus-visible, .pfs-plugin-tab:focus-visible, .pgp-step:focus-visible { position: relative; z-index: 1; outline: 2px solid var(--os-brand-500); outline-offset: -2px; }
 
 /* PostgreSQL pilot: identity, release metadata, and local navigation are one page surface. */
@@ -386,6 +386,11 @@ pg-metric { display: block; height: 100%; }
 .pgp-page-frame .pfs-plugin-tab { min-height: 2.65rem; }
 .pgp-page-frame .pfs-plugin-tab:hover:not(:disabled) { background: transparent; }
 .pgp-page-frame .pfs-plugin-tab.active { background: transparent; }
+.pgp-subnav { display: flex; align-items: stretch; gap: 8px; min-height: 2.35rem; padding: 0 10px; background: #f7f8fa; border-bottom: 1px solid var(--os-border); }
+.pgp-subnav-label { display: inline-flex; align-items: center; flex: 0 0 auto; padding: 0 10px 0 0; color: #9f3a16; font-size: 0.64rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+.pgp-subnav .pfs-plugin-tabs { flex: 1 1 auto; border: 0; }
+.pgp-subnav .pfs-plugin-tab { min-height: 2.35rem; font-size: 0.72rem; }
+.pgp-subnav .pfs-plugin-tab.active { color: #7a2e13; border-bottom-color: #e66d24; }
 .pgp-header-context { display: grid; grid-template-columns: minmax(11rem, 1fr) minmax(14rem, 1.25fr); gap: 12px; align-items: end; }
 .pgp-header-context-unit { display: flex; align-items: flex-end; gap: 4px; min-width: 0; }
 .pgp-header-context-field { flex: 1 1 auto; min-width: 0; margin: 0; }
@@ -444,6 +449,35 @@ pg-metric { display: block; height: 100%; }
 .pgp-operator-grid > button.card { width: 100%; padding: 0; border: 1px solid var(--os-border); background: #fff; color: inherit; text-align: left; cursor: pointer; }
 .pgp-operator-grid > button.card:hover { border-color: var(--os-brand-500); }
 .pgp-operator-grid > button.pgp-selected-card { outline: 2px solid var(--os-brand-500); outline-offset: -2px; }
+.pgp-provider-flow { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr); gap: 10px; align-items: center; margin: 0 0 16px; padding: 12px 14px; border-left: 3px solid #e66d24; background: #fff8f3; }
+.pgp-provider-flow > div { display: grid; grid-template-columns: auto 1fr; gap: 1px 8px; min-width: 0; }
+.pgp-provider-flow > div > span { grid-row: 1 / 3; display: grid; place-items: center; width: 1.65rem; height: 1.65rem; border-radius: 50%; background: #e66d24; color: #fff; font-size: 0.68rem; font-weight: 700; }
+.pgp-provider-flow b { color: var(--os-ink); font-size: 0.76rem; }
+.pgp-provider-flow small { color: var(--os-muted); font-size: 0.66rem; }
+.pgp-provider-flow i { color: #b85c1f; font-style: normal; }
+.pgp-provisioning-form legend small { margin-left: 8px; color: var(--os-muted); font-size: 0.65rem; font-weight: 400; }
+.pgp-yaml-preview { max-height: 24rem; margin: 14px 0; padding: 16px; overflow: auto; border-left: 3px solid #e66d24; background: #161616; color: #f4f4f4; font-size: 0.72rem; line-height: 1.5; }
+.pgp-provisioned { margin-top: 22px; }
+.pgp-provisioned h3 { margin: 0 0 10px; color: var(--os-ink); font-size: 1rem; }
+.pgp-provider-banner { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 16px; align-items: center; margin-bottom: 18px; padding: 18px 20px; border-left: 4px solid #e66d24; background: linear-gradient(90deg, #fff6ef 0, #fff 52%); }
+.pgp-provider-banner img { width: 3.25rem; height: 3.25rem; object-fit: contain; }
+.pgp-provider-banner h2 { margin: 2px 0 4px; color: var(--os-ink); font-size: 1.45rem; font-weight: 400; }
+.pgp-provider-banner p { margin: 0; color: var(--os-text-sec); font-size: 0.76rem; }
+.pgp-provider-version { display: grid; min-width: 9rem; padding-left: 16px; border-left: 1px solid #efc6aa; }
+.pgp-provider-version small, .pgp-provider-version span { color: var(--os-muted); font-size: 0.64rem; }
+.pgp-provider-version b { margin: 2px 0; color: #9f3a16; font-size: 1rem; }
+.pgp-control-area-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; margin: 0 0 16px; background: var(--os-border); border: 1px solid var(--os-border); }
+.pgp-control-area-grid article { display: flex; flex-direction: column; min-height: 6.2rem; padding: 14px 16px; background: #fff; }
+.pgp-control-area-grid span { color: #9f3a16; font-size: 0.66rem; font-weight: 700; text-transform: uppercase; }
+.pgp-control-area-grid b { margin: 8px 0 4px; overflow-wrap: anywhere; color: var(--os-ink); font-size: 0.8rem; }
+.pgp-control-area-grid small { margin-top: auto; color: var(--os-muted); font-size: 0.66rem; }
+.pgp-selected-target { display: grid; grid-template-columns: minmax(15rem, 0.6fr) minmax(26rem, 1.4fr); gap: 24px; margin-bottom: 14px; padding: 16px 18px; background: #fff; border: 1px solid var(--os-border); }
+.pgp-selected-target h3 { margin: 4px 0 0; color: var(--os-ink); font-size: 1.05rem; }
+.pgp-profile-kinds { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 16px; }
+.pgp-profile-kinds article { display: grid; gap: 5px; padding: 14px 16px; border-top: 3px solid #e66d24; background: #fff; box-shadow: 0 1px 0 rgba(15,23,42,0.08); }
+.pgp-profile-kinds b { color: var(--os-ink); font-size: 0.8rem; }
+.pgp-profile-kinds span { color: #9f3a16; font: 0.68rem/1.3 monospace; }
+.pgp-profile-kinds small { color: var(--os-muted); font-size: 0.66rem; }
 .pgp-big { display: block; margin-bottom: 6px; color: var(--os-ink); font-size: 2.4rem; font-weight: 300; }
 .pgp-install-box { display: grid; grid-template-columns: minmax(16rem, 0.65fr) minmax(22rem, 1fr) auto; gap: 18px; align-items: end; padding: 18px; background: #fff; border: 1px solid var(--os-border); }
 .pgp-install-box .btn { display: inline-flex; align-items: center; gap: 6px; }
@@ -473,7 +507,7 @@ pg-metric { display: block; height: 100%; }
   .pgp-release .os-mono, .pfs-plugin-release .os-mono { white-space: normal; }
   .pgp-dashboard { grid-template-columns: 1fr 1fr; }
   .pgp-panel:last-child { grid-column: 1 / -1; min-height: auto; }
-  .pgp-form-grid, .pgp-check-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pgp-form-grid, .pgp-check-grid, .pgp-control-area-grid, .pgp-profile-kinds { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .pgp-install-box { grid-template-columns: 1fr; align-items: start; }
   .pgp-page-frame .pfs-plugin-release { grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(24rem, 2.5fr); }
   .pgp-empty-state { grid-template-columns: 1fr; }
@@ -487,7 +521,11 @@ pg-metric { display: block; height: 100%; }
   .pgp-page-frame .pfs-plugin-logo img { width: 42px; height: 42px; }
   .pgp-page-frame .pfs-plugin-tabs { padding: 0; }
   .pgp-release, .pfs-plugin-release { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .pgp-steps, .pgp-dashboard, .pgp-description, .pgp-operator-grid, .pgp-form-grid, .pgp-check-grid { grid-template-columns: 1fr; }
+  .pgp-steps, .pgp-dashboard, .pgp-description, .pgp-operator-grid, .pgp-form-grid, .pgp-check-grid, .pgp-control-area-grid, .pgp-profile-kinds, .pgp-selected-target { grid-template-columns: 1fr; }
+  .pgp-provider-flow { grid-template-columns: 1fr; }
+  .pgp-provider-flow > i { display: none; }
+  .pgp-provider-banner { grid-template-columns: auto 1fr; }
+  .pgp-provider-version { grid-column: 1 / -1; padding: 10px 0 0; border-left: 0; border-top: 1px solid #efc6aa; }
   .pgp-release > div, .pfs-plugin-release > div { border-left: 0; border-top: 1px solid var(--os-border); padding: 8px 6px; }
   .pgp-panel:last-child { grid-column: auto; }
   .pgp-page-frame .pfs-plugin-release { grid-template-columns: repeat(2, minmax(0, 1fr)); }

@@ -27,21 +27,42 @@ test('plugin-owned reads use the canonical proxy while governed writes remain on
   assert.equal(manifest.contributions.api.enabled, false);
 });
 
-test('PostgreSQL keeps the complete operations menu in canonical order', () => {
+test('PostgreSQL exposes the task-oriented primary navigation and grouped detail routes', () => {
   const component = read('src/app/modules/postgres/postgres-plugin.component.ts');
-  const expected = [
-    ['overview', 'Overview'], ['monitoring', 'Monitoring'], ['operator', 'Operator'],
-    ['cluster', 'Cluster plan'], ['topology', 'Topology'], ['config', 'Configuration'],
-    ['databases', 'Databases & Roles'], ['admin', 'pgAdmin'], ['backups', 'Backups'],
-    ['events', 'Events'], ['claims', 'Claims'], ['upgrade', 'Upgrade'], ['documentation', 'Documentation'],
+  const primary = [
+    ['overview', 'Overview'], ['provisioning', 'Provisioning'], ['cluster', 'Clusters'],
+    ['profiles', 'Profiles & Configuration'], ['monitoring', 'Operations'], ['databases', 'Database'],
+    ['backups', 'Data Protection'], ['operator', 'StackGres Operator'], ['documentation', 'Documentation'],
   ];
   let cursor = -1;
-  for (const [id, label] of expected) {
+  for (const [id, label] of primary) {
     const next = component.indexOf(`{ id: '${id}', label: '${label}'`, cursor + 1);
-    assert.ok(next > cursor, `${label} should remain in menu order`);
+    assert.ok(next > cursor, `${label} should remain in primary menu order`);
     cursor = next;
   }
+  assert.match(component, /cluster: \['cluster', 'topology'\]/);
+  assert.match(component, /profiles: \['profiles', 'config'\]/);
+  assert.match(component, /monitoring: \['monitoring', 'events', 'upgrade'\]/);
+  assert.match(component, /databases: \['databases', 'admin'\]/);
+  assert.match(component, /requested === 'claims' \? 'provisioning'/);
+  assert.match(component, /routeBase="\/pfss\/postgres"/);
+  const shell = read('src/app/shared/plugin-page-shell.component.ts');
+  assert.match(shell, /<a \*ngFor="let tab of tabs"/);
+  assert.match(shell, /\[attr\.href\]="tabHref\(tab\.id\)"/);
   assert.doesNotMatch(component, /CloudNativePG|cluster\.displayName \}\} · \{\{ cluster\.provider/);
+});
+
+test('provisioning is namespace-first and uses one canonical PostgresClaim v1beta1 flow', () => {
+  const component = read('src/app/modules/postgres/postgres-plugin.component.ts');
+  const fleet = read('src/app/modules/postgres/postgres-fleet.service.ts');
+  assert.match(component, /tab\(\) === 'provisioning'/);
+  assert.match(component, /\[value\]="selectedNamespace\(\)" disabled/);
+  for (const marker of ['운영 Plan', 'Instance Profile', 'PostgreSQL Profile', 'Pooling Profile', 'Object Storage Profile', 'YAML 미리보기']) {
+    assert.match(component, new RegExp(marker));
+  }
+  assert.doesNotMatch(component, /<pg-claims/);
+  assert.match(component, /apiVersion: provisioning\.opensphere\.io\/v1beta1/);
+  assert.match(fleet, /provisioning\.opensphere\.io\/v1beta1\/namespaces/);
 });
 
 test('namespace-first fleet and pgAdmin layout contracts are preserved', () => {
@@ -64,6 +85,11 @@ test('Profile Catalog is namespace scoped and keeps StackGres objects authoritat
   const catalog = read('src/app/modules/postgres/tabs/pg-profile-catalog.tab.ts');
   const fleet = read('src/app/modules/postgres/postgres-fleet.service.ts');
   assert.match(component, /<pg-profile-catalog \[namespace\]="selectedNamespace\(\)"/);
+  assert.match(component, /tab\(\) === 'profiles'/);
+  assert.match(component, /SGInstanceProfile/);
+  assert.match(component, /SGPostgresConfig/);
+  assert.match(component, /SGPoolingConfig/);
+  assert.match(component, /SGObjectStorage/);
   assert.match(catalog, /Profile Catalog/);
   assert.match(catalog, /적용 미리보기/);
   assert.match(catalog, /참조 중인 Profile은 삭제할 수 없습니다/);
@@ -72,6 +98,15 @@ test('Profile Catalog is namespace scoped and keeps StackGres objects authoritat
   assert.match(fleet, /\/api\/foundation\/postgres\/profiles/);
   assert.match(fleet, /previewProfile\(draft/);
   assert.match(fleet, /deleteProfile\(namespace/);
+});
+
+test('StackGres is visible as the PostgreSQL operating provider without replacing product language', () => {
+  const component = read('src/app/modules/postgres/postgres-plugin.component.ts');
+  assert.match(component, /logos: \[\{ src: LOGO, alt: 'PostgreSQL' \}, \{ src: STACKGRES_LOGO, alt: 'StackGres' \}\]/);
+  assert.match(component, /stack: 'PFS \/ StackGres'/);
+  for (const area of ['Admin UI & API', 'Authentication', 'Certificates', 'Container Registry', 'Extensions', 'Grafana', 'Image pull policy', 'Jobs', 'Service account']) {
+    assert.match(component, new RegExp(area));
+  }
 });
 
 test('backup creation stays on the audited Foundation operation boundary', () => {

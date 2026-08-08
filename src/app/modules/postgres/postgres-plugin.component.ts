@@ -15,7 +15,6 @@ import { PgConfigTab } from './tabs/pg-config.tab';
 import { PgDatabasesTab } from './tabs/pg-databases.tab';
 import { PgBackupsTab } from './tabs/pg-backups.tab';
 import { PgEventsTab } from './tabs/pg-events.tab';
-import { PgClaimsTab } from './tabs/pg-claims.tab';
 import { PgProfileCatalogTab } from './tabs/pg-profile-catalog.tab';
 import { PgOperationsTab } from './tabs/pg-operations.tab';
 import { PgAdminTab } from './admin/pg-admin.tab';
@@ -25,7 +24,7 @@ import ArrowLeft16 from '@carbon/icons/es/arrow--left/16';
 import Renew16 from '@carbon/icons/es/renew/16';
 import { PluginPageHeaderComponent, PluginPageHeaderModel, PluginPageTab, PluginTabsComponent } from '../../shared/plugin-page-shell.component';
 
-type PackageTab = 'overview' | 'monitoring' | 'admin' | 'fleet' | 'operator' | 'cluster' | 'topology' | 'config' | 'databases' | 'backups' | 'events' | 'claims' | 'upgrade' | 'documentation';
+type PackageTab = 'overview' | 'provisioning' | 'monitoring' | 'admin' | 'fleet' | 'operator' | 'cluster' | 'topology' | 'profiles' | 'config' | 'databases' | 'backups' | 'events' | 'claims' | 'upgrade' | 'documentation';
 type Profile = 'development' | 'compact' | 'production' | 'custom';
 
 interface StorageClassRow {
@@ -39,6 +38,7 @@ interface StorageClassRow {
 interface PgForm extends PostgresInstallParameters { profile: Profile }
 
 const LOGO = 'https://logos.opl.io.kr/i/postgresql';
+const STACKGRES_LOGO = 'https://assets.gitlab-static.net/uploads/-/system/project/avatar/12584701/logo-stackgres.png';
 const MANUAL_SOURCE_ID = 'plugin:postgres/postgresql-operations-ko';
 const DEFAULT_FORM: PgForm = {
   profile: 'development',
@@ -68,7 +68,7 @@ const DEFAULT_FORM: PgForm = {
   styles: [':host { display: block; min-width: 0; }'],
   imports: [
     CommonModule, FormsModule, ClarityModule, CarbonIcon, PluginPageHeaderComponent, PluginTabsComponent,
-    PgOverviewTab, PgMonitoringTab, PgTopologyTab, PgConfigTab, PgDatabasesTab, PgAdminTab, PgBackupsTab, PgEventsTab, PgClaimsTab, PgProfileCatalogTab, PgOperationsTab,
+    PgOverviewTab, PgMonitoringTab, PgTopologyTab, PgConfigTab, PgDatabasesTab, PgAdminTab, PgBackupsTab, PgEventsTab, PgProfileCatalogTab, PgOperationsTab,
   ],
   template: `
     <a class="vl-back" (click)="back()" (keydown.enter)="back()" role="button" tabindex="0">
@@ -103,7 +103,11 @@ const DEFAULT_FORM: PgForm = {
           </div>
         </div>
       </osp-plugin-page-header>
-      <osp-plugin-tabs [tabs]="tabsForUi()" [active]="tab()" ariaLabel="PostgreSQL plugin 메뉴" (selected)="openTab($event)" />
+      <osp-plugin-tabs [tabs]="primaryTabsForUi()" [active]="primaryTab()" routeBase="/pfss/postgres" ariaLabel="PostgreSQL 운영 영역" (selected)="openPrimaryTab($event)" />
+      <div class="pgp-subnav" *ngIf="secondaryTabsForUi().length">
+        <span class="pgp-subnav-label">{{ primaryTabLabel() }}</span>
+        <osp-plugin-tabs [tabs]="secondaryTabsForUi()" [active]="tab()" routeBase="/pfss/postgres" ariaLabel="선택한 운영 영역의 세부 메뉴" (selected)="openTab($event)" />
+      </div>
     </section>
 
     <ng-container *ngIf="tab() === 'overview'">
@@ -112,16 +116,7 @@ const DEFAULT_FORM: PgForm = {
         <div class="pgp-loading" *ngIf="fleet.busy() && fleet.state()==='loading'">Namespace와 PostgreSQL 클러스터를 확인하고 있습니다.</div>
         <article class="pgp-empty-state" *ngIf="!fleet.busy() && !selectedContextCluster()">
           <div class="pgp-empty-copy"><span class="vl-eyebrow">{{ selectedNamespace() }}</span><h2>이 Namespace에는 PostgreSQL이 없습니다</h2><p>전용 StackGres PostgreSQL을 설치하면 이 화면이 관리·모니터링 워크스페이스로 전환됩니다. 클러스터, 볼륨, 접속 자격증명과 수명주기는 다른 Claim과 공유하지 않습니다.</p></div>
-          <form class="pgp-form pgp-install-form" (ngSubmit)="createDedicatedCluster()"><fieldset [disabled]="creatingClaim"><legend>PostgreSQL 설치</legend><div class="pgp-install-target"><span>Target Namespace</span><strong class="os-mono">{{ selectedNamespace() }}</strong></div><div class="pgp-form-grid">
-            <label><span>Cluster name</span><input name="claimName" [(ngModel)]="claimName" placeholder="orders-db" /></label>
-            <label><span>Database</span><input name="claimDatabase" [(ngModel)]="claimDatabase" placeholder="orders" /></label>
-            <label><span>Application owner</span><input name="claimOwner" [(ngModel)]="claimOwner" placeholder="orders_app" /></label>
-            <label><span>Plan</span><select name="claimPlan" [(ngModel)]="claimPlan"><option *ngFor="let plan of fleet.plans()" [value]="plan.metadata.name">{{plan.metadata.name}} · {{plan.spec.instances}} instances</option></select></label>
-            <label><span>인스턴스 Profile</span><select name="claimInstanceProfile" [(ngModel)]="claimInstanceProfile"><option value="">Plan 기본값</option><option *ngFor="let profile of profilesFor('instance')" [value]="profile.name">{{profile.name}} · {{profileSummary(profile)}}</option></select></label>
-            <label><span>PostgreSQL Profile</span><select name="claimPostgresProfile" [(ngModel)]="claimPostgresProfile"><option value="">Plan 기본값</option><option *ngFor="let profile of profilesFor('postgres')" [value]="profile.name">{{profile.name}} · {{profileSummary(profile)}}</option></select></label>
-            <label><span>풀링 Profile</span><select name="claimPoolingProfile" [(ngModel)]="claimPoolingProfile"><option value="">Plan 기본값</option><option *ngFor="let profile of profilesFor('pooling')" [value]="profile.name">{{profile.name}} · {{profileSummary(profile)}}</option></select></label>
-            <label><span>백업 Object Storage</span><select name="claimObjectStorageProfile" [(ngModel)]="claimObjectStorageProfile"><option value="">Plan 기본값</option><option *ngFor="let profile of profilesFor('objectStorage')" [value]="profile.name">{{profile.name}} · {{profileSummary(profile)}}</option></select></label>
-          </div><div class="os-actions"><button class="btn btn-primary" type="submit" [disabled]="!claimName||!claimDatabase||!claimOwner||!claimPlan">PostgreSQL 설치</button><span class="os-dim">PostgresClaim → 승인된 StackGres Profile → dedicated SGCluster</span></div></fieldset></form>
+          <div class="os-actions"><button class="btn btn-primary" type="button" (click)="openTab('provisioning')">PostgreSQL 인스턴스 생성</button><span class="os-dim">Provisioning에서 Plan과 StackGres Profile을 선택합니다.</span></div>
         </article>
 
       <ng-container *ngIf="selectedContextCluster() as selected">
@@ -158,6 +153,46 @@ const DEFAULT_FORM: PgForm = {
       </section>
     </ng-container>
 
+    <section *ngIf="tab() === 'provisioning'" class="pgp-workspace pgp-workspace--full" aria-label="PostgreSQL 인스턴스 생성">
+      <div class="pgp-section-head">
+        <div><span class="vl-eyebrow">Namespace-scoped provisioning</span><h2>PostgreSQL 인스턴스 생성</h2><p><b>{{ selectedNamespace() }}</b> Namespace에 독립된 PostgreSQL 인스턴스를 생성합니다. Plan은 운영 기준을, Profile은 StackGres 런타임 설정을 결정합니다.</p></div>
+        <span class="label label-info">PostgresClaim v1beta1</span>
+      </div>
+      <div class="pgp-provider-flow" aria-label="PostgreSQL 프로비저닝 흐름">
+        <div><span>1</span><b>Plan 선택</b><small>승인된 운영 조합</small></div><i>→</i><div><span>2</span><b>Profile 연결</b><small>StackGres 설정 정본</small></div><i>→</i><div><span>3</span><b>인스턴스 생성</b><small>전용 Cluster · Volume · Secret</small></div>
+      </div>
+      <form class="pgp-form pgp-provisioning-form" (ngSubmit)="createDedicatedCluster()">
+        <fieldset [disabled]="creatingClaim">
+          <legend>인스턴스 식별</legend>
+          <div class="pgp-form-grid">
+            <label><span>Namespace</span><input name="claimNamespace" [value]="selectedNamespace()" disabled /><small>상단 Namespace 선택과 동일합니다.</small></label>
+            <label><span>인스턴스 이름</span><input name="claimName" [(ngModel)]="claimName" placeholder="orders-postgres" required /></label>
+            <label><span>초기 Database</span><input name="claimDatabase" [(ngModel)]="claimDatabase" placeholder="orders" required /></label>
+            <label><span>Owner role</span><input name="claimOwner" [(ngModel)]="claimOwner" placeholder="orders_app" required /></label>
+          </div>
+        </fieldset>
+        <fieldset [disabled]="creatingClaim">
+          <legend>운영 Plan</legend>
+          <div class="pgp-form-grid">
+            <label><span>Plan</span><select name="claimPlan" [(ngModel)]="claimPlan"><option *ngFor="let plan of fleet.plans()" [value]="plan.metadata?.name">{{ plan.metadata?.name }} · {{ plan.spec?.displayName || plan.spec?.description || 'PostgreSQL' }}</option><option *ngIf="!fleet.plans().length" value="postgresql-dev-single">postgresql-dev-single</option></select><small>인스턴스 수, 스토리지와 기본 보호 정책의 승인된 조합입니다.</small></label>
+          </div>
+        </fieldset>
+        <fieldset [disabled]="creatingClaim">
+          <legend>StackGres Profile 연결 <small>선택하지 않으면 Plan 기본값을 사용합니다.</small></legend>
+          <div class="pgp-form-grid">
+            <label><span>Instance Profile</span><select name="claimInstanceProfile" [(ngModel)]="claimInstanceProfile"><option value="">Plan 기본값</option><option *ngFor="let profile of profilesFor('instance')" [value]="profile.name">{{ profile.name }} · {{ profileSummary(profile) }}</option></select><small>CPU와 Memory request/limit</small></label>
+            <label><span>PostgreSQL Profile</span><select name="claimPostgresProfile" [(ngModel)]="claimPostgresProfile"><option value="">Plan 기본값</option><option *ngFor="let profile of profilesFor('postgres')" [value]="profile.name">{{ profile.name }} · {{ profileSummary(profile) }}</option></select><small>PostgreSQL 버전과 postgresql.conf</small></label>
+            <label><span>Pooling Profile</span><select name="claimPoolingProfile" [(ngModel)]="claimPoolingProfile"><option value="">사용 안 함 / Plan 기본값</option><option *ngFor="let profile of profilesFor('pooling')" [value]="profile.name">{{ profile.name }} · {{ profileSummary(profile) }}</option></select><small>PgBouncer 연결 풀 정책</small></label>
+            <label><span>Object Storage Profile</span><select name="claimObjectStorageProfile" [(ngModel)]="claimObjectStorageProfile"><option value="">백업 사용 안 함 / Plan 기본값</option><option *ngFor="let profile of profilesFor('objectStorage')" [value]="profile.name">{{ profile.name }} · {{ profileSummary(profile) }}</option></select><small>백업 대상과 보존 정책</small></label>
+          </div>
+        </fieldset>
+        <clr-alert *ngIf="claimResult" [clrAlertType]="claimFailed?'danger':'success'" [clrAlertClosable]="false"><clr-alert-item><span class="alert-text">{{claimResult}}</span></clr-alert-item></clr-alert>
+        <div class="os-actions"><button class="btn btn-primary" type="submit" [disabled]="creatingClaim || !claimName.trim() || !claimDatabase.trim() || !claimOwner.trim()">PostgreSQL 인스턴스 생성</button><button class="btn" type="button" (click)="previewClaim()" [disabled]="!claimName.trim()">YAML 미리보기</button><button class="btn btn-link" type="button" (click)="openTab('profiles')">Profile 관리</button></div>
+      </form>
+      <pre class="pgp-yaml-preview" *ngIf="claimYamlPreview()" aria-label="PostgresClaim YAML 미리보기">{{ claimYamlPreview() }}</pre>
+      <section class="pgp-provisioned" *ngIf="namespaceClusters().length"><h3>이 Namespace의 인스턴스</h3><div class="pgp-operator-grid"><button class="card" type="button" *ngFor="let cluster of namespaceClusters()" (click)="selectFleetClusterAndOpen(cluster.id)"><div class="card-header">{{cluster.displayName}} <span class="label" [ngClass]="cluster.ready?'label-success':'label-warning'">{{cluster.phase}}</span></div><div class="card-block"><dl class="os-kv"><dt>Plan</dt><dd>{{cluster.plan || '—'}}</dd><dt>Instances</dt><dd>{{cluster.readyInstances}} / {{cluster.instances}}</dd><dt>Storage</dt><dd>{{cluster.storage || '—'}}</dd></dl></div></button></div></section>
+    </section>
+
     <section *ngIf="tab() === 'fleet'" class="pgp-workspace" aria-label="PostgreSQL Fleet overview">
       <div class="pgp-section-head"><div><span class="vl-eyebrow">Secondary view</span><h2>PFSS PostgreSQL Fleet</h2><p>모든 Namespace의 PostgreSQL을 확인합니다. 운영 대상 선택은 상단 Namespace 컨텍스트를 기준으로 합니다.</p></div><button class="btn btn-sm" type="button" (click)="refreshFleet()" [disabled]="fleet.busy()">새로고침</button></div>
       <clr-alert clrAlertType="info" [clrAlertClosable]="false"><clr-alert-item><span class="alert-text">모든 PostgresClaim은 독립 StackGres SGCluster, 볼륨, 앱 자격증명과 수명주기를 가집니다.</span></clr-alert-item></clr-alert>
@@ -176,10 +211,12 @@ const DEFAULT_FORM: PgForm = {
     </clr-modal>
 
     <section *ngIf="tab() === 'operator' && selectedContextCluster() as selected" class="pgp-workspace">
-      <div class="pgp-section-head"><div><span class="vl-eyebrow">Platform control plane</span><h2>StackGres Operator</h2><p>Operator의 실제 구성과 선택한 PostgreSQL 클러스터의 연결 관계를 확인합니다.</p></div><button class="btn btn-sm" type="button" (click)="refreshOperator()">새로고침</button></div>
+      <div class="pgp-provider-banner"><img [src]="STACKGRES_LOGO" alt="StackGres" /><div><span class="vl-eyebrow">PostgreSQL operating provider</span><h2>StackGres Operator</h2><p>클러스터 생성·복구·백업·확장과 PostgreSQL 설정 적용을 담당하는 플랫폼 제어 계층입니다.</p></div><div class="pgp-provider-version"><small>Operator</small><b>{{ operatorVersion() }}</b><span>Platform scope</span></div></div>
+      <div class="pgp-section-head"><div><h3>Operator control areas</h3><p>StackGres 제어판의 구성을 OpenSphere 운영 규칙에 맞춰 확인합니다.</p></div><button class="btn btn-sm" type="button" (click)="refreshOperator()">새로고침</button></div>
       <clr-alert *ngIf="fleet.operatorError()" clrAlertType="danger" [clrAlertClosable]="false"><clr-alert-item><span class="alert-text">{{ fleet.operatorError() }}</span></clr-alert-item></clr-alert>
       <div class="pgp-loading" *ngIf="fleet.operatorState()==='loading'">StackGres Operator 구성을 확인하고 있습니다.</div>
-      <div class="pgp-operator-grid" *ngIf="fleet.operator() as operator"><article class="card"><div class="card-header">Operator configuration</div><div class="card-block"><dl class="os-kv"><dt>Version</dt><dd>{{operator.config?.status?.version || operator.config?.metadata?.labels?.version || '—'}}</dd><dt>Namespace</dt><dd class="os-mono">{{operator.config?.metadata?.namespace || 'stackgres'}}</dd><dt>Authentication</dt><dd>{{operator.config?.spec?.authentication?.type || '—'}}</dd><dt>Admin UI</dt><dd>{{operator.config?.spec?.deploy?.restapi ? 'REST API enabled' : 'Native Console not deployed'}}</dd><dt>Collector</dt><dd>{{operator.config?.spec?.deploy?.collector ? 'Enabled' : 'Disabled'}}</dd></dl></div></article><article class="card"><div class="card-header">Operator policy</div><div class="card-block"><dl class="os-kv"><dt>Registry</dt><dd class="os-mono">{{operator.config?.spec?.containerRegistry || '—'}}</dd><dt>Extensions</dt><dd>{{operator.config?.spec?.extensions?.refreshEnabled ? 'Refresh enabled' : 'Static'}}</dd><dt>Grafana</dt><dd>{{operator.config?.spec?.grafana?.autoEmbed ? 'Embedded' : 'External / not embedded'}}</dd><dt>Service account</dt><dd>{{operator.config?.spec?.serviceAccount?.create ? 'Operator managed' : 'Externally managed'}}</dd></dl></div></article><article class="card"><div class="card-header">Selected target</div><div class="card-block"><dl class="os-kv"><dt>Namespace</dt><dd class="os-mono">{{selected.namespace}}</dd><dt>Resource</dt><dd class="os-mono">SGCluster/{{selected.name}}</dd><dt>Profile</dt><dd class="os-mono">{{pg.cluster()?.spec?.sgInstanceProfile || '—'}}</dd><dt>Lifecycle</dt><dd>{{selected.phase}}</dd></dl></div></article></div>
+      <div class="pgp-control-area-grid" *ngIf="fleet.operator() as operator"><article><span>Admin UI & API</span><b>{{operator.config?.spec?.deploy?.restapi ? 'REST API enabled' : 'Console integrated'}}</b><small>OpenSphere Console에서 제어</small></article><article><span>Authentication</span><b>{{operator.config?.spec?.authentication?.type || 'Platform identity'}}</b><small>Console 권한 정책 적용</small></article><article><span>Certificates</span><b>{{operator.config?.spec?.cert?.autoApprove ? 'Auto managed' : 'Operator managed'}}</b><small>TLS 수명주기</small></article><article><span>Container Registry</span><b>{{operator.config?.spec?.containerRegistry || 'Operator default'}}</b><small>PostgreSQL 이미지 공급원</small></article><article><span>Extensions</span><b>{{operator.config?.spec?.extensions?.refreshEnabled ? 'Refresh enabled' : 'Catalog managed'}}</b><small>확장 카탈로그 정책</small></article><article><span>Grafana</span><b>{{operator.config?.spec?.grafana?.autoEmbed ? 'Embedded' : 'External integration'}}</b><small>관측 화면 연결</small></article><article><span>Image pull policy</span><b>{{operator.config?.spec?.imagePullPolicy || 'IfNotPresent'}}</b><small>워크로드 이미지 정책</small></article><article><span>Jobs</span><b>{{operator.config?.spec?.jobs?.annotations ? 'Customized' : 'Operator default'}}</b><small>백업·복구·유지보수 작업</small></article><article><span>Service account</span><b>{{operator.config?.spec?.serviceAccount?.create ? 'Operator managed' : 'Platform managed'}}</b><small>{{operator.config?.metadata?.namespace || 'stackgres'}}</small></article></div>
+      <article class="pgp-selected-target"><div><span class="vl-eyebrow">Selected runtime target</span><h3>{{selected.displayName}}</h3></div><dl class="os-kv"><dt>Namespace</dt><dd class="os-mono">{{selected.namespace}}</dd><dt>Cluster resource</dt><dd class="os-mono">SGCluster/{{selected.name}}</dd><dt>Instance profile</dt><dd class="os-mono">{{pg.cluster()?.spec?.sgInstanceProfile || 'Plan default'}}</dd><dt>Lifecycle</dt><dd>{{selected.phase}}</dd></dl></article>
       <clr-alert clrAlertType="info" [clrAlertClosable]="false"><clr-alert-item><span class="alert-text">Operator 설정은 플랫폼 범위이며 Namespace별 Cluster Profile과 다릅니다. 편집 기능은 승인·영향 분석과 함께 별도 단계로 제공합니다.</span></clr-alert-item></clr-alert>
     </section>
 
@@ -243,6 +280,12 @@ const DEFAULT_FORM: PgForm = {
       <div class="pgp-section-head"><div><span class="vl-eyebrow">Desired state</span><h2>PostgreSQL Cluster plan</h2><p>PostgresClaim과 AddonPlan으로 선언된 전용 StackGres 클러스터 구성입니다.</p></div><span class="label" [ngClass]="selected.ready ? 'label-success' : 'label-warning'">{{selected.phase}}</span></div>
       <div class="pgp-dashboard"><article class="pgp-panel"><h2>Plan</h2><dl class="os-kv"><dt>Name</dt><dd>{{selected.plan || '—'}}</dd><dt>Instances</dt><dd>{{selected.instances}}</dd><dt>PostgreSQL</dt><dd>{{selected.postgresVersion || '—'}}</dd></dl></article><article class="pgp-panel"><h2>Storage</h2><dl class="os-kv"><dt>Capacity</dt><dd>{{selected.storage || '—'}}</dd><dt>Isolation</dt><dd>{{selected.mode}}</dd><dt>Lifecycle</dt><dd>Dedicated SGCluster</dd></dl></article><article class="pgp-panel"><h2>Binding</h2><dl class="os-kv"><dt>Secret</dt><dd class="os-mono">{{selected.bindingSecret || '—'}}</dd><dt>Namespace</dt><dd class="os-mono">{{selected.namespace}}</dd><dt>Resource</dt><dd class="os-mono">{{selected.name}}</dd></dl></article></div>
       <clr-alert clrAlertType="info" [clrAlertClosable]="false"><clr-alert-item><span class="alert-text">Plan은 승인된 운영 조합이고, Profile은 실제 StackGres 설정의 정본입니다. Profile 변경은 적용 전에 영향과 재시작 필요성을 검토합니다.</span></clr-alert-item></clr-alert>
+      <button class="btn btn-sm" type="button" (click)="openTab('profiles')">Profiles & Configuration 열기</button>
+    </section>
+
+    <section *ngIf="tab() === 'profiles'" class="pgp-workspace pgp-workspace--full">
+      <div class="pgp-section-head"><div><span class="vl-eyebrow">StackGres runtime catalog</span><h2>Profiles & Configuration</h2><p>Plan과 분리된 재사용 가능한 StackGres 설정을 정의하고, 선택한 Namespace의 인스턴스에 연결합니다.</p></div><span class="label label-info">{{ selectedNamespace() }}</span></div>
+      <div class="pgp-profile-kinds"><article><b>Instance Profile</b><span>SGInstanceProfile</span><small>CPU · Memory</small></article><article><b>PostgreSQL Profile</b><span>SGPostgresConfig</span><small>버전 · postgresql.conf</small></article><article><b>Pooling Profile</b><span>SGPoolingConfig</span><small>PgBouncer</small></article><article><b>Object Storage</b><span>SGObjectStorage</span><small>백업 · 보존</small></article></div>
       <pg-profile-catalog [namespace]="selectedNamespace()"></pg-profile-catalog>
     </section>
 
@@ -252,7 +295,6 @@ const DEFAULT_FORM: PgForm = {
     <pg-admin *ngIf="tab() === 'admin' && hasSelectedCluster()"></pg-admin>
     <pg-backups *ngIf="tab() === 'backups' && hasSelectedCluster()"></pg-backups>
     <pg-events *ngIf="tab() === 'events' && hasSelectedCluster()"></pg-events>
-    <pg-claims *ngIf="tab() === 'claims' && hasSelectedCluster()"></pg-claims>
 
     <section *ngIf="tab() === 'upgrade' && selectedContextCluster() as selected" class="pgp-workspace">
       <div class="pgp-section-head"><div><span class="vl-eyebrow">Controlled lifecycle · {{selected.provider}}</span><h2>PostgreSQL upgrade & rollback</h2></div><span class="label label-info">PostgreSQL {{selected.postgresVersion || '—'}}</span></div>
@@ -276,6 +318,7 @@ export class PostgresPluginComponent implements OnInit, OnDestroy {
   readonly fleet = inject(PostgresFleetService);
   readonly pgAdmin = inject(PgAdminService);
   readonly LOGO = LOGO;
+  readonly STACKGRES_LOGO = STACKGRES_LOGO;
   readonly manualSourceId = MANUAL_SOURCE_ID;
   readonly manualUrl = `/manual?doc=${encodeURIComponent(MANUAL_SOURCE_ID)}`;
   readonly iBack = ArrowLeft16;
@@ -291,28 +334,51 @@ export class PostgresPluginComponent implements OnInit, OnDestroy {
   claimName = ''; claimDatabase = ''; claimOwner = ''; claimPlan = 'postgresql-dev-single';
   claimInstanceProfile = ''; claimPostgresProfile = ''; claimPoolingProfile = ''; claimObjectStorageProfile = '';
   creatingClaim = false; claimResult = ''; claimFailed = false;
+  readonly claimYamlPreview = signal('');
   namespaceModalOpen = false; creatingNamespace = false; newNamespaceName = ''; newNamespaceReason = ''; namespaceError = '';
   readonly selectedNamespace = signal(DEFAULT_FORM.namespace);
 
-  readonly tabs: { id: PackageTab; label: string; requiresCluster?: boolean; secondary?: boolean; badge?: boolean }[] = [
+  readonly tabs: { id: PackageTab; label: string; requiresCluster?: boolean; badge?: boolean }[] = [
     { id: 'overview', label: 'Overview' },
-    { id: 'monitoring', label: 'Monitoring', requiresCluster: true },
-    { id: 'operator', label: 'Operator', requiresCluster: true },
+    { id: 'provisioning', label: 'Provisioning' },
     { id: 'cluster', label: 'Cluster plan', requiresCluster: true },
     { id: 'topology', label: 'Topology', requiresCluster: true },
-    { id: 'config', label: 'Configuration', requiresCluster: true },
+    { id: 'profiles', label: 'Profile Catalog' },
+    { id: 'config', label: 'Runtime configuration', requiresCluster: true },
+    { id: 'monitoring', label: 'Monitoring', requiresCluster: true },
+    { id: 'events', label: 'Events', requiresCluster: true, badge: true },
+    { id: 'upgrade', label: 'Upgrade', requiresCluster: true },
     { id: 'databases', label: 'Databases & Roles', requiresCluster: true, badge: true },
     { id: 'admin', label: 'pgAdmin', requiresCluster: true },
     { id: 'backups', label: 'Backups', requiresCluster: true, badge: true },
-    { id: 'events', label: 'Events', requiresCluster: true, badge: true },
-    { id: 'claims', label: 'Claims', requiresCluster: true },
-    { id: 'upgrade', label: 'Upgrade', requiresCluster: true },
+    { id: 'operator', label: 'StackGres Operator', requiresCluster: true },
     { id: 'documentation', label: 'Documentation' },
-    { id: 'fleet', label: 'Fleet overview', secondary: true },
+    { id: 'fleet', label: 'Fleet overview' },
+    { id: 'claims', label: 'Claims' },
   ];
 
+  readonly primaryTabs: PluginPageTab[] = [
+    { id: 'overview', label: 'Overview' },
+    { id: 'provisioning', label: 'Provisioning' },
+    { id: 'cluster', label: 'Clusters' },
+    { id: 'profiles', label: 'Profiles & Configuration' },
+    { id: 'monitoring', label: 'Operations' },
+    { id: 'databases', label: 'Database' },
+    { id: 'backups', label: 'Data Protection' },
+    { id: 'operator', label: 'StackGres Operator' },
+    { id: 'documentation', label: 'Documentation' },
+  ];
+
+  readonly secondaryByPrimary: Partial<Record<PackageTab, PackageTab[]>> = {
+    cluster: ['cluster', 'topology'],
+    profiles: ['profiles', 'config'],
+    monitoring: ['monitoring', 'events', 'upgrade'],
+    databases: ['databases', 'admin'],
+  };
+
   readonly tab = computed<PackageTab>(() => {
-    const t = this.vr.tab() as PackageTab;
+    const requested = this.vr.tab() as PackageTab;
+    const t: PackageTab = requested === 'claims' ? 'provisioning' : requested;
     const target = this.tabs.find((item) => item.id === t);
     if (!target) return 'overview';
     if (target.requiresCluster && !this.hasSelectedCluster()) return 'overview';
@@ -348,10 +414,12 @@ export class PostgresPluginComponent implements OnInit, OnDestroy {
   back(): void { this.vr.setModule('modules'); }
   openControlPlane(): void { this.vr.setModule('control-plane'); }
   openTab(id: string): void { this.vr.setTab(id); }
+  openPrimaryTab(id: string): void { this.openTab(id); }
   selectNamespace(namespace: string): void {
     if (!namespace || namespace === this.selectedNamespace()) return;
     this.selectedNamespace.set(namespace);
     this.claimResult = '';
+    this.claimYamlPreview.set('');
     void this.fleet.refreshProfiles(namespace);
     this.syncNamespaceContext();
     const current = this.tabs.find((item) => item.id === this.tab());
@@ -401,7 +469,10 @@ export class PostgresPluginComponent implements OnInit, OnDestroy {
         profileRefs: { instanceProfile: this.claimInstanceProfile || undefined, postgresConfig: this.claimPostgresProfile || undefined, poolingConfig: this.claimPoolingProfile || undefined, objectStorage: this.claimObjectStorageProfile || undefined } });
       this.claimResult = `PostgresClaim ${namespace}/${claimName} 생성 요청이 승인되었습니다.`;
       this.claimName = ''; this.claimDatabase = ''; this.claimOwner = ''; this.claimInstanceProfile = ''; this.claimPostgresProfile = ''; this.claimPoolingProfile = ''; this.claimObjectStorageProfile = '';
+      this.claimYamlPreview.set('');
       this.syncNamespaceContext();
+      const created = this.namespaceClusters().find((cluster) => cluster.name === claimName);
+      if (created) this.selectFleetCluster(created.id);
     } catch (error: any) { this.claimFailed = true; this.claimResult = error?.message || String(error); }
     finally { this.creatingClaim = false; }
   }
@@ -412,6 +483,28 @@ export class PostgresPluginComponent implements OnInit, OnDestroy {
     if (profile.kind === 'postgres') return `PostgreSQL ${profile.spec?.postgresVersion || '—'}`;
     if (profile.kind === 'objectStorage') return `${profile.spec?.type || '—'} · ${profile.spec?.[profile.spec?.type]?.bucket || '—'}`;
     return String(profile.spec?.pgBouncer?.['pgbouncer.ini']?.pgbouncer?.pool_mode || '—');
+  }
+  previewClaim(): void {
+    const profileRefs = [
+      this.claimInstanceProfile ? `    instanceProfile: ${this.claimInstanceProfile}` : '',
+      this.claimPostgresProfile ? `    postgresConfig: ${this.claimPostgresProfile}` : '',
+      this.claimPoolingProfile ? `    poolingConfig: ${this.claimPoolingProfile}` : '',
+      this.claimObjectStorageProfile ? `    objectStorage: ${this.claimObjectStorageProfile}` : '',
+    ].filter(Boolean);
+    this.claimYamlPreview.set([
+      'apiVersion: provisioning.opensphere.io/v1beta1',
+      'kind: PostgresClaim',
+      'metadata:',
+      `  name: ${this.claimName.trim() || '<name>'}`,
+      `  namespace: ${this.selectedNamespace()}`,
+      'spec:',
+      `  planRef:\n    name: ${this.claimPlan}`,
+      '  isolation: Dedicated',
+      `  database: ${this.claimDatabase.trim() || '<database>'}`,
+      `  owner: ${this.claimOwner.trim() || '<owner>'}`,
+      '  deletionPolicy: Retain',
+      ...(profileRefs.length ? ['  profileRefs:', ...profileRefs] : []),
+    ].join('\n'));
   }
   patchBackup(patch: Partial<PgForm['backup']>): void { this.form.update((f) => ({ ...f, backup: { ...f.backup, ...patch } })); }
 
@@ -452,8 +545,8 @@ export class PostgresPluginComponent implements OnInit, OnDestroy {
   headerModel(): PluginPageHeaderModel {
     const cluster = this.selectedContextCluster();
     return {
-      name: 'PostgreSQL', logo: LOGO, capability: 'data.sql.postgres',
-      description: 'Namespace를 먼저 선택하고 전용 StackGres PostgreSQL을 설치·관리·모니터링하는 Foundation service',
+      name: 'PostgreSQL', logo: LOGO, logos: [{ src: LOGO, alt: 'PostgreSQL' }, { src: STACKGRES_LOGO, alt: 'StackGres' }], stack: 'PFS / StackGres', capability: 'data.sql.postgres',
+      description: 'Namespace별 PostgreSQL을 StackGres 운영 모델로 프로비저닝하고 수명주기·데이터·보호 정책을 관리하는 Foundation service',
       lifecycle: this.lifecycleLabel(), lifecycleClass: this.lifecyclePill(), versionLabel: 'PostgreSQL',
       version: this.compactPostgresVersion(cluster?.postgresVersion || ''), profile: cluster?.plan || cluster?.mode || 'Not installed',
     };
@@ -476,13 +569,33 @@ export class PostgresPluginComponent implements OnInit, OnDestroy {
     if (!match) return value.length > 14 ? `${value.slice(0, 13)}…` : value;
     return match[2] ? `${match[1]} beta${match[2]}` : match[1];
   }
-  tabsForUi(): PluginPageTab[] {
-    return this.tabs.filter((t) => !t.secondary).map((t) => ({
-      id: t.id,
-      label: t.label,
-      disabled: !!t.requiresCluster && !this.hasSelectedCluster(),
-      badge: t.badge ? this.badge(t.id) : '',
+  primaryTab(): PackageTab {
+    const current = this.tab();
+    if (current === 'topology' || current === 'fleet') return 'cluster';
+    if (current === 'config') return 'profiles';
+    if (current === 'events' || current === 'upgrade') return 'monitoring';
+    if (current === 'admin') return 'databases';
+    return current;
+  }
+  primaryTabsForUi(): PluginPageTab[] {
+    return this.primaryTabs.map((item) => ({
+      ...item,
+      disabled: this.tabRequiresCluster(item.id as PackageTab) && !this.hasSelectedCluster(),
+      badge: item.id === 'databases' ? this.badge('databases') : item.id === 'backups' ? this.badge('backups') : '',
     }));
+  }
+  secondaryTabsForUi(): PluginPageTab[] {
+    const ids = this.secondaryByPrimary[this.primaryTab()] || [];
+    return ids.map((id) => {
+      const item = this.tabs.find((tab) => tab.id === id)!;
+      return { id, label: item.label, disabled: !!item.requiresCluster && !this.hasSelectedCluster(), badge: item.badge ? this.badge(id) : '' };
+    });
+  }
+  primaryTabLabel(): string { return this.primaryTabs.find((item) => item.id === this.primaryTab())?.label || ''; }
+  private tabRequiresCluster(id: PackageTab): boolean { return !!this.tabs.find((item) => item.id === id)?.requiresCluster; }
+  operatorVersion(): string {
+    const operator = this.fleet.operator();
+    return operator?.config?.status?.version || operator?.config?.metadata?.labels?.version || 'Detected';
   }
   clusterAvailability(cluster: PostgresFleetCluster): number {
     return cluster.instances ? Math.round((cluster.readyInstances / cluster.instances) * 100) : 0;
