@@ -459,8 +459,7 @@ pg-metric { display: block; height: 100%; }
 .pgp-yaml-preview { max-height: 24rem; margin: 14px 0; padding: 16px; overflow: auto; border-left: 3px solid #e66d24; background: #161616; color: #f4f4f4; font-size: 0.72rem; line-height: 1.5; }
 .pgp-provisioned { margin-top: 22px; }
 .pgp-provisioned h3 { margin: 0 0 10px; color: var(--os-ink); font-size: 1rem; }
-.pgp-provider-banner { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 16px; align-items: center; margin-bottom: 18px; padding: 18px 20px; border-left: 4px solid #e66d24; background: linear-gradient(90deg, #fff6ef 0, #fff 52%); }
-.pgp-provider-banner img { width: 3.25rem; height: 3.25rem; object-fit: contain; }
+.pgp-provider-banner { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px; align-items: center; margin-bottom: 18px; padding: 18px 20px; border-left: 4px solid #e66d24; background: linear-gradient(90deg, #fff6ef 0, #fff 52%); }
 .pgp-provider-banner h2 { margin: 2px 0 4px; color: var(--os-ink); font-size: 1.45rem; font-weight: 400; }
 .pgp-provider-banner p { margin: 0; color: var(--os-text-sec); font-size: 0.76rem; }
 .pgp-provider-version { display: grid; min-width: 9rem; padding-left: 16px; border-left: 1px solid #efc6aa; }
@@ -473,11 +472,6 @@ pg-metric { display: block; height: 100%; }
 .pgp-control-area-grid small { margin-top: auto; color: var(--os-muted); font-size: 0.66rem; }
 .pgp-selected-target { display: grid; grid-template-columns: minmax(15rem, 0.6fr) minmax(26rem, 1.4fr); gap: 24px; margin-bottom: 14px; padding: 16px 18px; background: #fff; border: 1px solid var(--os-border); }
 .pgp-selected-target h3 { margin: 4px 0 0; color: var(--os-ink); font-size: 1.05rem; }
-.pgp-profile-kinds { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 16px; }
-.pgp-profile-kinds article { display: grid; gap: 5px; padding: 14px 16px; border-top: 3px solid #e66d24; background: #fff; box-shadow: 0 1px 0 rgba(15,23,42,0.08); }
-.pgp-profile-kinds b { color: var(--os-ink); font-size: 0.8rem; }
-.pgp-profile-kinds span { color: #9f3a16; font: 0.68rem/1.3 monospace; }
-.pgp-profile-kinds small { color: var(--os-muted); font-size: 0.66rem; }
 .pgp-big { display: block; margin-bottom: 6px; color: var(--os-ink); font-size: 2.4rem; font-weight: 300; }
 .pgp-install-box { display: grid; grid-template-columns: minmax(16rem, 0.65fr) minmax(22rem, 1fr) auto; gap: 18px; align-items: end; padding: 18px; background: #fff; border: 1px solid var(--os-border); }
 .pgp-install-box .btn { display: inline-flex; align-items: center; gap: 6px; }
@@ -507,7 +501,7 @@ pg-metric { display: block; height: 100%; }
   .pgp-release .os-mono, .pfs-plugin-release .os-mono { white-space: normal; }
   .pgp-dashboard { grid-template-columns: 1fr 1fr; }
   .pgp-panel:last-child { grid-column: 1 / -1; min-height: auto; }
-  .pgp-form-grid, .pgp-check-grid, .pgp-control-area-grid, .pgp-profile-kinds { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pgp-form-grid, .pgp-check-grid, .pgp-control-area-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .pgp-install-box { grid-template-columns: 1fr; align-items: start; }
   .pgp-page-frame .pfs-plugin-release { grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(24rem, 2.5fr); }
   .pgp-empty-state { grid-template-columns: 1fr; }
@@ -521,7 +515,7 @@ pg-metric { display: block; height: 100%; }
   .pgp-page-frame .pfs-plugin-logo img { width: 42px; height: 42px; }
   .pgp-page-frame .pfs-plugin-tabs { padding: 0; }
   .pgp-release, .pfs-plugin-release { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .pgp-steps, .pgp-dashboard, .pgp-description, .pgp-operator-grid, .pgp-form-grid, .pgp-check-grid, .pgp-control-area-grid, .pgp-profile-kinds, .pgp-selected-target { grid-template-columns: 1fr; }
+  .pgp-steps, .pgp-dashboard, .pgp-description, .pgp-operator-grid, .pgp-form-grid, .pgp-check-grid, .pgp-control-area-grid, .pgp-selected-target { grid-template-columns: 1fr; }
   .pgp-provider-flow { grid-template-columns: 1fr; }
   .pgp-provider-flow > i { display: none; }
   .pgp-provider-banner { grid-template-columns: auto 1fr; }

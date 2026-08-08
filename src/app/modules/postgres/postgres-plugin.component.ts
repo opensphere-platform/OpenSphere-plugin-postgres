@@ -38,7 +38,6 @@ interface StorageClassRow {
 interface PgForm extends PostgresInstallParameters { profile: Profile }
 
 const LOGO = 'https://logos.opl.io.kr/i/postgresql';
-const STACKGRES_LOGO = 'https://assets.gitlab-static.net/uploads/-/system/project/avatar/12584701/logo-stackgres.png';
 const MANUAL_SOURCE_ID = 'plugin:postgres/postgresql-operations-ko';
 const DEFAULT_FORM: PgForm = {
   profile: 'development',
@@ -211,7 +210,7 @@ const DEFAULT_FORM: PgForm = {
     </clr-modal>
 
     <section *ngIf="tab() === 'operator' && selectedContextCluster() as selected" class="pgp-workspace">
-      <div class="pgp-provider-banner"><img [src]="STACKGRES_LOGO" alt="StackGres" /><div><span class="vl-eyebrow">PostgreSQL operating provider</span><h2>StackGres Operator</h2><p>클러스터 생성·복구·백업·확장과 PostgreSQL 설정 적용을 담당하는 플랫폼 제어 계층입니다.</p></div><div class="pgp-provider-version"><small>Operator</small><b>{{ operatorVersion() }}</b><span>Platform scope</span></div></div>
+      <div class="pgp-provider-banner"><div><span class="vl-eyebrow">PostgreSQL operating provider</span><h2>StackGres Operator</h2><p>클러스터 생성·복구·백업·확장과 PostgreSQL 설정 적용을 담당하는 플랫폼 제어 계층입니다.</p></div><div class="pgp-provider-version"><small>Operator</small><b>{{ operatorVersion() }}</b><span>Platform scope</span></div></div>
       <div class="pgp-section-head"><div><h3>Operator control areas</h3><p>StackGres 제어판의 구성을 OpenSphere 운영 규칙에 맞춰 확인합니다.</p></div><button class="btn btn-sm" type="button" (click)="refreshOperator()">새로고침</button></div>
       <clr-alert *ngIf="fleet.operatorError()" clrAlertType="danger" [clrAlertClosable]="false"><clr-alert-item><span class="alert-text">{{ fleet.operatorError() }}</span></clr-alert-item></clr-alert>
       <div class="pgp-loading" *ngIf="fleet.operatorState()==='loading'">StackGres Operator 구성을 확인하고 있습니다.</div>
@@ -284,8 +283,6 @@ const DEFAULT_FORM: PgForm = {
     </section>
 
     <section *ngIf="tab() === 'profiles'" class="pgp-workspace pgp-workspace--full">
-      <div class="pgp-section-head"><div><span class="vl-eyebrow">StackGres runtime catalog</span><h2>Profiles & Configuration</h2><p>Plan과 분리된 재사용 가능한 StackGres 설정을 정의하고, 선택한 Namespace의 인스턴스에 연결합니다.</p></div><span class="label label-info">{{ selectedNamespace() }}</span></div>
-      <div class="pgp-profile-kinds"><article><b>Instance Profile</b><span>SGInstanceProfile</span><small>CPU · Memory</small></article><article><b>PostgreSQL Profile</b><span>SGPostgresConfig</span><small>버전 · postgresql.conf</small></article><article><b>Pooling Profile</b><span>SGPoolingConfig</span><small>PgBouncer</small></article><article><b>Object Storage</b><span>SGObjectStorage</span><small>백업 · 보존</small></article></div>
       <pg-profile-catalog [namespace]="selectedNamespace()"></pg-profile-catalog>
     </section>
 
@@ -318,7 +315,6 @@ export class PostgresPluginComponent implements OnInit, OnDestroy {
   readonly fleet = inject(PostgresFleetService);
   readonly pgAdmin = inject(PgAdminService);
   readonly LOGO = LOGO;
-  readonly STACKGRES_LOGO = STACKGRES_LOGO;
   readonly manualSourceId = MANUAL_SOURCE_ID;
   readonly manualUrl = `/manual?doc=${encodeURIComponent(MANUAL_SOURCE_ID)}`;
   readonly iBack = ArrowLeft16;
@@ -545,7 +541,7 @@ export class PostgresPluginComponent implements OnInit, OnDestroy {
   headerModel(): PluginPageHeaderModel {
     const cluster = this.selectedContextCluster();
     return {
-      name: 'PostgreSQL', logo: LOGO, logos: [{ src: LOGO, alt: 'PostgreSQL' }, { src: STACKGRES_LOGO, alt: 'StackGres' }], stack: 'PFS / StackGres', capability: 'data.sql.postgres',
+      name: 'PostgreSQL', logo: LOGO, stack: 'PFS / StackGres', capability: 'data.sql.postgres',
       description: 'Namespace별 PostgreSQL을 StackGres 운영 모델로 프로비저닝하고 수명주기·데이터·보호 정책을 관리하는 Foundation service',
       lifecycle: this.lifecycleLabel(), lifecycleClass: this.lifecyclePill(), versionLabel: 'PostgreSQL',
       version: this.compactPostgresVersion(cluster?.postgresVersion || ''), profile: cluster?.plan || cluster?.mode || 'Not installed',

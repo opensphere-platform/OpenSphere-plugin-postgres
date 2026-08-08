@@ -35,6 +35,21 @@ export interface PostgresProfileDraft {
   reason: string;
 }
 
+export interface ExternalBackupTarget {
+  id: string;
+  name: string;
+  provider: string;
+  vendor: string;
+  endpoint: string;
+  region: string;
+  bucketName: string;
+  pathPrefix: string;
+  enabled: boolean;
+  healthState: string;
+  credential: { configured: boolean; version: number };
+  lastTest: { status: string; at: string; errorCode?: string | null } | null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class PostgresFleetService {
   readonly clusters = signal<PostgresFleetCluster[]>([]);
@@ -43,6 +58,9 @@ export class PostgresFleetService {
   readonly profiles = signal<PostgresProfile[]>([]);
   readonly profilesState = signal<'idle' | 'loading' | 'ok' | 'empty' | 'error'>('idle');
   readonly profilesError = signal('');
+  readonly backupTargets = signal<ExternalBackupTarget[]>([]);
+  readonly backupTargetsState = signal<'idle' | 'loading' | 'ok' | 'empty' | 'error'>('idle');
+  readonly backupTargetsError = signal('');
   readonly operator = signal<any>(null);
   readonly operatorState = signal<'idle' | 'loading' | 'ok' | 'error'>('idle');
   readonly operatorError = signal('');
@@ -126,6 +144,20 @@ export class PostgresFleetService {
       this.profilesState.set(profiles.length ? 'ok' : 'empty');
     } catch (error: any) {
       this.profiles.set([]); this.profilesState.set('error'); this.profilesError.set(error?.message || String(error));
+    }
+  }
+
+  async refreshBackupTargets(): Promise<void> {
+    this.backupTargetsState.set('loading'); this.backupTargetsError.set('');
+    try {
+      const response = await hostFetch(this.api('/api/foundation/postgres/backup-targets'), { cache: 'no-store' });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(body.error || `External backup targets HTTP ${response.status}`);
+      const targets = (body.items || []) as ExternalBackupTarget[];
+      this.backupTargets.set(targets);
+      this.backupTargetsState.set(targets.length ? 'ok' : 'empty');
+    } catch (error: any) {
+      this.backupTargets.set([]); this.backupTargetsState.set('error'); this.backupTargetsError.set(error?.message || String(error));
     }
   }
 

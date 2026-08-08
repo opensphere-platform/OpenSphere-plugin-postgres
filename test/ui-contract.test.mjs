@@ -87,23 +87,24 @@ test('Profile Catalog is namespace scoped and keeps StackGres objects authoritat
   const fleet = read('src/app/modules/postgres/postgres-fleet.service.ts');
   assert.match(component, /<pg-profile-catalog \[namespace\]="selectedNamespace\(\)"/);
   assert.match(component, /tab\(\) === 'profiles'/);
-  assert.match(component, /SGInstanceProfile/);
-  assert.match(component, /SGPostgresConfig/);
-  assert.match(component, /SGPoolingConfig/);
-  assert.match(component, /SGObjectStorage/);
+  assert.doesNotMatch(component, /<h2>Profiles & Configuration<\/h2>/);
   assert.match(catalog, /Profile Catalog/);
+  assert.match(catalog, /External Channels 백업 대상/);
+  assert.match(catalog, /selectedCategory/);
+  assert.match(catalog, /SGInstanceProfile|profile\.apiKind/);
   assert.match(catalog, /적용 미리보기/);
-  assert.match(catalog, /참조 중인 Profile은 삭제할 수 없습니다/);
   assert.match(catalog, /백업 Object Storage/);
-  assert.match(catalog, /Access key Secret/);
+  assert.match(catalog, /Namespace credential Secret/);
   assert.match(fleet, /\/api\/foundation\/postgres\/profiles/);
+  assert.match(fleet, /\/api\/foundation\/postgres\/backup-targets/);
   assert.match(fleet, /previewProfile\(draft/);
   assert.match(fleet, /deleteProfile\(namespace/);
 });
 
 test('StackGres is visible as the PostgreSQL operating provider without replacing product language', () => {
   const component = read('src/app/modules/postgres/postgres-plugin.component.ts');
-  assert.match(component, /logos: \[\{ src: LOGO, alt: 'PostgreSQL' \}, \{ src: STACKGRES_LOGO, alt: 'StackGres' \}\]/);
+  assert.match(component, /name: 'PostgreSQL', logo: LOGO/);
+  assert.doesNotMatch(component, /STACKGRES_LOGO|alt="StackGres"/);
   assert.match(component, /stack: 'PFS \/ StackGres'/);
   for (const area of ['Admin UI & API', 'Authentication', 'Certificates', 'Container Registry', 'Extensions', 'Grafana', 'Image pull policy', 'Jobs', 'Service account']) {
     assert.match(component, new RegExp(area));
