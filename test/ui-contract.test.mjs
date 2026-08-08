@@ -49,6 +49,7 @@ test('PostgreSQL exposes the task-oriented primary navigation and grouped detail
   const shell = read('src/app/shared/plugin-page-shell.component.ts');
   assert.match(shell, /<a \*ngFor="let tab of tabs"/);
   assert.match(shell, /\[attr\.href\]="tabHref\(tab\.id\)"/);
+  assert.match(shell, /window\.dispatchEvent\(new PopStateEvent\('popstate'/);
   assert.doesNotMatch(component, /CloudNativePG|cluster\.displayName \}\} · \{\{ cluster\.provider/);
 });
 

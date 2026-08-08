@@ -157,6 +157,12 @@ export class PluginTabsComponent {
       event.preventDefault();
       return;
     }
+    const href = this.tabHref(tab.id);
+    if (href) {
+      event.preventDefault();
+      this.navigateTo(tab.id, href);
+      return;
+    }
     this.selected.emit(tab.id);
   }
 
@@ -174,6 +180,17 @@ export class PluginTabsComponent {
     const targetId = enabled[next].id;
     const buttons = (event.currentTarget as HTMLElement).parentElement?.querySelectorAll<HTMLElement>('[role="tab"]:not(.disabled)');
     buttons?.[next]?.focus();
-    this.selected.emit(targetId);
+    const href = this.tabHref(targetId);
+    if (href) this.navigateTo(targetId, href);
+    else this.selected.emit(targetId);
+  }
+
+  private navigateTo(id: string, href: string): void {
+    // Main Shell과 외부 plugin은 서로 다른 Angular injector를 사용한다.
+    // URL만 push하고 한쪽 signal만 바꾸면 탭이 시각적으로 눌린 채 콘텐츠가 바뀌지
+    // 않을 수 있으므로, 하나의 canonical URL을 기록한 뒤 모든 router에 popstate를 알린다.
+    if (location.pathname !== href) history.pushState(history.state, '', href + location.search + location.hash);
+    window.dispatchEvent(new PopStateEvent('popstate', { state: history.state }));
+    this.selected.emit(id);
   }
 }
