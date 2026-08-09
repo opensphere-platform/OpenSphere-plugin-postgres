@@ -67,11 +67,14 @@ test('PostgreSQL separates selected-runtime navigation from management workspace
   assert.match(component, /<legend>Profile 연결 <small>/);
   assert.doesNotMatch(component, /<legend>StackGres Profile 연결/);
   assert.match(component, /<clr-timeline class="pgp-provisioning-timeline"/);
+  assert.match(component, /\[clrLayout\]="timelineHorizontal"/);
+  assert.match(component, /ClrTimelineLayout\.HORIZONTAL/);
   assert.equal((component.match(/<clr-timeline-step \[clrState\]=/g) || []).length, 4);
   assert.match(component, /ClrTimelineStepState\.CURRENT/);
   assert.match(component, /ClrTimelineStepState\.NOT_STARTED/);
   assert.doesNotMatch(component, /pgp-provider-flow/);
   assert.doesNotMatch(css, /\.pgp-provider-flow/);
+  assert.doesNotMatch(css, /\.pgp-provisioning-timeline\s*\{[^}]*display:/);
   assert.match(component, /selectFleetCluster\(id: string\): void \{[\s\S]*?if \(this\.isManagementView\(\)\) this\.openTab\('overview'\);/);
   assert.match(component, /requested === 'claims' \? 'provisioning'/);
   assert.match(component, /routeBase="\/pfss\/postgres"/);

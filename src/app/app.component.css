@@ -477,7 +477,7 @@ pg-metric { display: block; height: 100%; }
 .pgp-operator-grid > button.card { width: 100%; padding: 0; border: 1px solid var(--os-border); background: #fff; color: inherit; text-align: left; cursor: pointer; }
 .pgp-operator-grid > button.card:hover { border-color: var(--os-brand-500); }
 .pgp-operator-grid > button.pgp-selected-card { outline: 2px solid var(--os-brand-500); outline-offset: -2px; }
-.pgp-provisioning-timeline { display: block; margin: 0 0 16px; }
+.pgp-provisioning-timeline { margin: 0 0 16px; }
 .pgp-provisioning-form legend small { margin-left: 8px; color: var(--os-muted); font-size: 0.65rem; font-weight: 400; }
 .pgp-yaml-preview { max-height: 24rem; margin: 14px 0; padding: 16px; overflow: auto; border-left: 3px solid #e66d24; background: #161616; color: #f4f4f4; font-size: 0.72rem; line-height: 1.5; }
 .pgp-provisioned { margin-top: 22px; }
