@@ -128,6 +128,12 @@ test('Profile Catalog is namespace scoped and keeps StackGres objects authoritat
   assert.doesNotMatch(component, /<h2>Profiles & Configuration<\/h2>/);
   assert.match(catalog, /Profile Catalog/);
   assert.match(catalog, /External Channels 백업 대상/);
+  assert.match(catalog, /targets\.filter\(\(target\) => this\.backupTargetReady\(target\)\)\.length/);
+  assert.match(catalog, /`\$\{targets\.filter[\s\S]*?\/\$\{targets\.length\}`/);
+  assert.match(catalog, /BACKBLAZE_LOGO_PATH/);
+  assert.match(catalog, /CEPH_LOGO_PATH/);
+  assert.match(catalog, /CEPH OBJECT GATEWAY \(RGW\)/);
+  assert.match(catalog, /target\.vendor.*target\.provider.*target\.endpoint/);
   assert.match(catalog, /selectedCategory/);
   assert.match(catalog, /SGInstanceProfile|profile\.apiKind/);
   assert.match(catalog, /적용 미리보기/);

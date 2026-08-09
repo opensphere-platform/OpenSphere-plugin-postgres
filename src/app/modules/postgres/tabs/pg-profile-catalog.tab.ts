@@ -12,6 +12,8 @@ import { ExternalBackupTarget, PostgresFleetService, PostgresProfile, PostgresPr
 
 type EditorKind = PostgresProfileKind;
 type CatalogFilter = 'all' | EditorKind;
+const BACKBLAZE_LOGO_PATH = 'M9.3108.0003c.6527 1.3502 1.5666 4.0812-1.3887 7.1738-1.8096 1.8796-3.078 3.8487-2.3496 6.0644.3642 1.1037 1.1864 2.5079 2.8867 2.7852.6107.1008 1.3425-.0006 1.7403-.1406 2.4538-.8544 2.098-3.4138 1.5546-5.0469-.07-.2129-.1915-.7333-.2363-.9238-.3726-1.6023.776-2.6562 1.129-3.8047.028-.0925.0534-.1819.0702-.2715.042-.21.067-.423.0781-.6387 0-1.8264-.9882-2.6303-1.7754-3.5996C10.1794.5643 9.3107.0003 9.3107.0003Zm6.2754 6.0175s-.709.3366-1.2188.8829c-.4454.4818-.8635.8789-1.2949 1.8593-.028.14-.0518.2863-.0742.4375-.2325 1.6416 1.1473 3.1446.7187 5.1895-.112.535-.3554.7123-.7812 1.6367-.5098 1.1065-.383 2.588.3594 3.5293.6723.8488 1.879 1.2321 3.0527.9492 2.1065-.5042 3.0646-2.2822 2.8965-4.2851-.1317-1.58-.8154-2.7536-2.754-4.961-.9607-1.0925-1.6072-2.409-1.5624-3.4062.1373-1.2074.6582-1.832.6582-1.832zM4.8928 15.1936c-.0222.0145-.0439.0614-.0586.1602a.0469.0469 0 0 1-.0059.0195v.01c-.1148.5406-.1649 1.823.1153 2.9687.353 1.4427 1.4175 3.902 4.412 5.129 2.5184 1.0336 5.718.5411 7.8497-1.627.5294-.5435.408-.4897-.4883-.2012v-.002c-1.1121.3558-3.5182.5463-4.7676-1-1.5239-1.8852-.4302-3.3633-1.3574-3.1504-3.6164.8348-5.2667-1.4657-5.5469-2.1016-.0023-.002-.0857-.2487-.1523-.205z';
+const CEPH_LOGO_PATH = 'M11.959.257A11.912 11.912 0 003.503 3.76 11.92 11.92 0 000 12.217a11.934 11.934 0 001.207 5.243c.72 1.474 1.888 2.944 3.208 4.044.86-.47 1.35-.99 1.453-1.545.1-.533-.134-1.107-.737-1.805a9.031 9.031 0 01-2.219-5.937c0-4.988 4.058-9.047 9.047-9.047h.08c4.99 0 9.048 4.059 9.048 9.047a9.03 9.03 0 01-2.218 5.936c-.599.693-.84 1.292-.735 1.83.108.556.595 1.068 1.449 1.522 1.322-1.1 2.489-2.57 3.209-4.046A11.898 11.898 0 0024 12.217a11.929 11.929 0 00-3.503-8.457A11.923 11.923 0 0012.04.257h-.041zm-.005 4.837a7.072 7.072 0 00-3.76 1.075A7.202 7.202 0 006.15 8.093a7.164 7.164 0 00-1.161 2.65 7.188 7.188 0 00.04 3.125 7.14 7.14 0 001.22 2.607c.154.207.326.396.509.597l.185.202.005.006c.007.007.017.016.026.027.635.738.957 1.533.957 2.36a3.4 3.4 0 01-1.788 2.989 11.924 11.924 0 002.685 1.087c.14-.088.614-.441 1.077-1.083a4.899 4.899 0 00.94-2.99 6.595 6.595 0 00-.49-2.37 6.717 6.717 0 00-1.302-2.033l-.002-.004-.124-.142c-.21-.245-.428-.497-.602-.792a4.104 4.104 0 01-.462-1.135 4.258 4.258 0 01-.024-1.85 4.25 4.25 0 01.686-1.564 4.216 4.216 0 013.432-1.773H12.042a4.202 4.202 0 013.432 1.773c.33.466.568 1.007.686 1.565a4.27 4.27 0 01-.023 1.849c-.093.39-.249.772-.463 1.135-.173.295-.391.547-.602.792l-.123.142-.004.004a6.736 6.736 0 00-1.301 2.033 6.607 6.607 0 00-.49 2.37 4.897 4.897 0 00.94 2.99c.463.642.937.995 1.076 1.083a11.776 11.776 0 002.687-1.087 3.399 3.399 0 01-1.789-2.988c0-.817.313-1.59.956-2.359.009-.012.02-.022.027-.03l.006-.004.184-.204c.183-.2.355-.39.51-.596a7.14 7.14 0 001.22-2.608 7.21 7.21 0 00.04-3.124 7.185 7.185 0 00-1.16-2.65 7.203 7.203 0 00-2.044-1.924 7.074 7.074 0 00-3.762-1.075h-.09zM12 9.97a2.365 2.365 0 00-2.362 2.361A2.364 2.364 0 0012 14.691c1.301 0 2.36-1.059 2.36-2.36A2.364 2.364 0 0012 9.968z';
 
 @Component({
   selector: 'pg-profile-catalog',
@@ -47,10 +49,13 @@ type CatalogFilter = 'all' | EditorKind;
     .pgpc-empty { display:grid; place-items:center; min-height:8rem; margin-top:.75rem; border:1px dashed #c6c6c6; color:#6f6f6f; text-align:center; }
     .pgpc-external { margin:.9rem 0 1rem; padding:.9rem; border-left:4px solid #0f62fe; background:#f4f4f4; }
     .pgpc-external-head { display:flex; align-items:end; justify-content:space-between; gap:1rem; }.pgpc-external-head h3 { margin:0; font-size:.92rem; }.pgpc-external-head p { margin:.15rem 0 0; color:#525252; font-size:.68rem; }
-    .pgpc-target-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.65rem; margin-top:.75rem; }
-    .pgpc-target { display:grid; grid-template-columns:2.1rem minmax(0,1fr); gap:.65rem; min-width:0; padding:.7rem; border:1px solid #d6d9dc; background:#fff; }
-    .pgpc-target b,.pgpc-target span,.pgpc-target small { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }.pgpc-target b { font-size:.73rem; }.pgpc-target span { margin-top:.12rem; color:#525252; font-size:.65rem; }.pgpc-target small { margin-top:.3rem; color:#6f6f6f; font-size:.61rem; }
-    .pgpc-target-state { color:#a2191f !important; }.pgpc-target-state.ready { color:#198038 !important; }
+    .pgpc-target-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.65rem; margin-top:.75rem; }
+    .pgpc-target { min-width:0; padding:.7rem .8rem; border:1px solid #d6d9dc; background:#fff; }
+    .pgpc-target-head { display:grid; grid-template-columns:1.75rem minmax(0,1fr) auto; align-items:start; gap:.6rem; padding-bottom:.55rem; border-bottom:1px solid #e0e0e0; }
+    .pgpc-target-logo { display:grid; place-items:center; width:1.75rem; height:1.75rem; color:#6f6f6f; }.pgpc-target-logo svg { width:1.35rem; height:1.35rem; fill:currentColor; }.pgpc-target-logo.backblaze { color:#e21e29; }.pgpc-target-logo.ceph { color:#ef5c55; }
+    .pgpc-target-title { display:grid; gap:.08rem; min-width:0; }.pgpc-target-title small { color:#6f6f6f; font-size:.58rem; font-weight:500; letter-spacing:.02em; text-transform:uppercase; }.pgpc-target-title b { overflow:hidden; font-size:.8rem; text-overflow:ellipsis; white-space:nowrap; }
+    .pgpc-target-badges { display:flex; gap:.25rem; align-items:center; }.pgpc-target-badges .label { margin:0; }
+    .pgpc-target dl { display:grid; gap:0; margin:.35rem 0 0; }.pgpc-target dl div { display:grid; grid-template-columns:4.4rem minmax(0,1fr); gap:.5rem; padding:.22rem 0; }.pgpc-target dt { color:#6f6f6f; font-size:.6rem; font-weight:400; }.pgpc-target dd { overflow:hidden; margin:0; font: .6rem/1.35 var(--clr-font-mono); text-overflow:ellipsis; white-space:nowrap; }
     .pgpc-form { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.75rem; }.pgpc-form label { display:grid; align-content:start; gap:.25rem; font-weight:600; }.pgpc-form input,.pgpc-form select,.pgpc-form textarea { width:100%; }.pgpc-form textarea { min-height:7rem; font-family:var(--clr-font-mono); font-size:.8rem; }.pgpc-form small { color:#6f6f6f; font-weight:400; }.pgpc-full { grid-column:1 / -1; }.pgpc-preview { max-height:15rem; overflow:auto; margin:0; padding:.75rem; background:#f4f6f8; font-size:.75rem; }
     .pgpc-selected-target { grid-column:1 / -1; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.5rem; padding:.65rem .75rem; border-left:3px solid #0f62fe; background:#edf5ff; }.pgpc-selected-target div { min-width:0; }.pgpc-selected-target small,.pgpc-selected-target b { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }.pgpc-selected-target small { color:#525252; }.pgpc-selected-target b { margin-top:.12rem; font-size:.7rem; }
     @media (max-width:1200px) { .pgpc-categories{grid-template-columns:repeat(3,minmax(0,1fr));}.pgpc-grid,.pgpc-target-grid{grid-template-columns:repeat(2,minmax(0,1fr));} }
@@ -78,7 +83,17 @@ type CatalogFilter = 'all' | EditorKind;
         <div class="pgpc-empty" *ngIf="fleet.backupTargetsState()==='loading'">백업 대상을 확인하고 있습니다.</div>
         <clr-alert *ngIf="fleet.backupTargetsError()" clrAlertType="warning" [clrAlertClosable]="false"><clr-alert-item><span class="alert-text">{{ fleet.backupTargetsError() }}</span></clr-alert-item></clr-alert>
         <div class="pgpc-target-grid" *ngIf="fleet.backupTargets().length">
-          <article class="pgpc-target" *ngFor="let target of fleet.backupTargets()"><span class="pgpc-card-icon"><os-cicon [icon]="CloudIcon" [size]="18"></os-cicon></span><div><b>{{ target.name }}</b><span>{{ target.bucketName }} · {{ target.region || 'default' }}</span><small>{{ target.endpoint }}</small><small class="pgpc-target-state" [class.ready]="backupTargetReady(target)">{{ backupTargetLabel(target) }}</small></div></article>
+          <article class="pgpc-target" *ngFor="let target of fleet.backupTargets()">
+            <div class="pgpc-target-head">
+              <span class="pgpc-target-logo" [ngClass]="backupTargetBrand(target)">
+                <svg *ngIf="backupTargetBrand(target)!=='generic'" role="img" viewBox="0 0 24 24"><title>{{ backupTargetVendorLabel(target) }}</title><path [attr.d]="backupTargetLogoPath(target)" /></svg>
+                <os-cicon *ngIf="backupTargetBrand(target)==='generic'" [icon]="CloudIcon" [size]="18"></os-cicon>
+              </span>
+              <div class="pgpc-target-title"><small>S3 · {{ backupTargetVendorLabel(target) }}</small><b>{{ target.name }}</b></div>
+              <div class="pgpc-target-badges"><span class="label" [class.label-success]="target.enabled" [class.label-warning]="!target.enabled">{{ target.enabled ? '활성' : '중지' }}</span><span class="label" [class.label-success]="backupTargetReady(target)" [class.label-danger]="!backupTargetReady(target)">{{ target.healthState }}</span></div>
+            </div>
+            <dl><div><dt>Endpoint</dt><dd>{{ target.endpoint }}</dd></div><div><dt>Bucket</dt><dd>{{ target.bucketName }} · {{ target.region || 'default' }}</dd></div></dl>
+          </article>
         </div>
         <div class="pgpc-empty" *ngIf="fleet.backupTargetsState()==='empty'">등록된 외부 백업 대상이 없습니다.</div>
       </section>
@@ -152,12 +167,31 @@ export class PgProfileCatalogTab implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void { if (changes['namespace']?.currentValue) this.refresh(); }
   refresh(): void { if (this.namespace) { void this.fleet.refreshProfiles(this.namespace); void this.fleet.refreshBackupTargets(); } }
-  profileCount(kind: CatalogFilter): number { return kind === 'all' ? this.profiles().length : this.profiles().filter((profile) => profile.kind === kind).length; }
+  profileCount(kind: CatalogFilter): number | string {
+    if (kind === 'objectStorage') {
+      const targets = this.fleet.backupTargets();
+      return `${targets.filter((target) => this.backupTargetReady(target)).length}/${targets.length}`;
+    }
+    return kind === 'all' ? this.profiles().length : this.profiles().filter((profile) => profile.kind === kind).length;
+  }
   selectedCategoryLabel(): string { return this.categories.find((category) => category.id === this.selectedCategory())?.label || '전체'; }
   kindLabel(kind: EditorKind): string { return ({ instance: '인스턴스 자원', postgres: 'PostgreSQL 설정', pooling: '연결 풀링', objectStorage: '백업 저장소' })[kind]; }
   kindIcon(kind: EditorKind): any { return ({ instance: BareMetalServer16, postgres: DataBase16, pooling: Connection16, objectStorage: Cloud16 })[kind]; }
   backupTargetReady(target: ExternalBackupTarget): boolean { return target.enabled && target.healthState === 'Ready' && target.credential.configured; }
   backupTargetLabel(target: ExternalBackupTarget): string { return this.backupTargetReady(target) ? `Ready · Credential v${target.credential.version}` : `${target.healthState} · ${target.credential.configured ? 'Credential configured' : 'Credential missing'}`; }
+  backupTargetBrand(target: ExternalBackupTarget): 'backblaze' | 'ceph' | 'generic' {
+    const identity = `${target.vendor} ${target.provider} ${target.endpoint}`.toLowerCase();
+    if (identity.includes('backblaze') || identity.includes('backblazeb2')) return 'backblaze';
+    if (identity.includes('ceph') || identity.includes('rgw')) return 'ceph';
+    return 'generic';
+  }
+  backupTargetVendorLabel(target: ExternalBackupTarget): string {
+    const brand = this.backupTargetBrand(target);
+    return brand === 'backblaze' ? 'BACKBLAZE B2' : brand === 'ceph' ? 'CEPH OBJECT GATEWAY (RGW)' : (target.vendor || target.provider || 'OBJECT STORAGE').toUpperCase();
+  }
+  backupTargetLogoPath(target: ExternalBackupTarget): string {
+    return this.backupTargetBrand(target) === 'backblaze' ? BACKBLAZE_LOGO_PATH : CEPH_LOGO_PATH;
+  }
   selectedBackupTarget(): ExternalBackupTarget | null { return this.fleet.backupTargets().find((target) => target.id === this.selectedBackupTargetId) || null; }
   useBackupTarget(id: string): void {
     const target = this.fleet.backupTargets().find((item) => item.id === id);
