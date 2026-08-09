@@ -10,6 +10,7 @@ export interface PostgresFleetCluster {
 
 export interface PostgresClaimDraft {
   name: string; namespace: string; database: string; owner: string; plan: string;
+  version?: string; deletionPolicy?: 'Retain' | 'Delete';
   storageSize?: string; storageClass?: string;
   profileRefs?: { instanceProfile?: string; postgresConfig?: string; poolingConfig?: string; objectStorage?: string };
 }
@@ -118,8 +119,9 @@ export class PostgresFleetService {
   async createClaim(draft: PostgresClaimDraft): Promise<void> {
     const spec: any = {
       planRef: { name: draft.plan }, isolation: 'Dedicated', database: draft.database, owner: draft.owner,
-      deletionPolicy: 'Retain',
+      deletionPolicy: draft.deletionPolicy || 'Retain',
     };
+    if (draft.version) spec.version = draft.version;
     if (draft.profileRefs && Object.values(draft.profileRefs).some(Boolean)) spec.profileRefs = draft.profileRefs;
     if (draft.storageSize || draft.storageClass) spec.storage = { size: draft.storageSize || undefined, storageClass: draft.storageClass || undefined };
     const response = await hostFetch(this.api(`/api/k8s/apis/provisioning.opensphere.io/v1beta1/namespaces/${encodeURIComponent(draft.namespace)}/postgresclaims`), {

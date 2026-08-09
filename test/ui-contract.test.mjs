@@ -27,12 +27,12 @@ test('plugin-owned reads use the canonical proxy while governed writes remain on
   assert.equal(manifest.contributions.api.enabled, false);
 });
 
-test('PostgreSQL exposes the task-oriented primary navigation and grouped detail routes', () => {
+test('PostgreSQL separates selected-runtime navigation from management workspaces', () => {
   const component = read('src/app/modules/postgres/postgres-plugin.component.ts');
   const primary = [
-    ['overview', 'Overview'], ['provisioning', 'Provisioning'], ['cluster', 'Clusters'],
-    ['profiles', 'Profiles & Configuration'], ['monitoring', 'Operations'], ['databases', 'Database'],
-    ['backups', 'Data Protection'], ['operator', 'StackGres Operator'], ['documentation', 'Documentation'],
+    ['overview', 'Overview'], ['monitoring', 'Monitoring'], ['topology', 'Topology'],
+    ['databases', 'Database'], ['backups', 'Data Protection'], ['operations', 'Operations'],
+    ['events', 'Events'], ['documentation', 'Documentation'],
   ];
   let cursor = -1;
   for (const [id, label] of primary) {
@@ -40,10 +40,11 @@ test('PostgreSQL exposes the task-oriented primary navigation and grouped detail
     assert.ok(next > cursor, `${label} should remain in primary menu order`);
     cursor = next;
   }
-  assert.match(component, /cluster: \['cluster', 'topology'\]/);
-  assert.match(component, /profiles: \['profiles', 'config'\]/);
-  assert.match(component, /monitoring: \['monitoring', 'events', 'upgrade'\]/);
   assert.match(component, /databases: \['databases', 'admin'\]/);
+  assert.match(component, /operations: \['operations', 'cluster', 'config', 'upgrade'\]/);
+  for (const marker of ['전체 클러스터', '설정 카탈로그', 'PostgreSQL 생성', '엔진 관리']) assert.match(component, new RegExp(marker));
+  assert.match(component, /class="pgp-management-actions"/);
+  assert.match(component, /isManagementView\(\)/);
   assert.match(component, /requested === 'claims' \? 'provisioning'/);
   assert.match(component, /routeBase="\/pfss\/postgres"/);
   const shell = read('src/app/shared/plugin-page-shell.component.ts');
@@ -58,12 +59,14 @@ test('provisioning is namespace-first and uses one canonical PostgresClaim v1bet
   const fleet = read('src/app/modules/postgres/postgres-fleet.service.ts');
   assert.match(component, /tab\(\) === 'provisioning'/);
   assert.match(component, /\[value\]="selectedNamespace\(\)" disabled/);
-  for (const marker of ['운영 Plan', 'Instance Profile', 'PostgreSQL Profile', 'Pooling Profile', 'Object Storage Profile', 'YAML 미리보기']) {
+  for (const marker of ['운영 Plan', 'PostgreSQL major', '삭제 정책', '스토리지 override', 'Instance Profile', 'PostgreSQL Profile', 'Pooling Profile', '백업 Object Storage', 'YAML 미리보기']) {
     assert.match(component, new RegExp(marker));
   }
   assert.doesNotMatch(component, /<pg-claims/);
   assert.match(component, /apiVersion: provisioning\.opensphere\.io\/v1beta1/);
   assert.match(fleet, /provisioning\.opensphere\.io\/v1beta1\/namespaces/);
+  assert.match(fleet, /spec\.version = draft\.version/);
+  assert.match(component, /External Channels에서 등록한 백업 대상/);
 });
 
 test('namespace-first fleet and pgAdmin layout contracts are preserved', () => {
@@ -109,6 +112,8 @@ test('StackGres is visible as the PostgreSQL operating provider without replacin
   for (const area of ['Admin UI & API', 'Authentication', 'Certificates', 'Container Registry', 'Extensions', 'Grafana', 'Image pull policy', 'Jobs', 'Service account']) {
     assert.match(component, new RegExp(area));
   }
+  assert.match(component, /tab\(\) === 'operator'" class="pgp-workspace pgp-workspace--full"/);
+  assert.doesNotMatch(component, /tab\(\) === 'operator' && selectedContextCluster/);
 });
 
 test('backup creation stays on the audited Foundation operation boundary', () => {
