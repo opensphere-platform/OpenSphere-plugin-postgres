@@ -33,6 +33,8 @@
 10. The custom four-column provisioning strip was replaced by the official Clarity Timeline component with four typed timeline steps.
 11. Redundant StackGres Operator banner and read-only execution-engine field were removed; the remaining section is titled `Profile 연결`.
 12. New PostgresClaims persist a user-provided display name in `opensphere.io/display-name`; the selected instance alias becomes the PostgreSQL header description.
+13. Profile Catalog backup storage summary now reports External Channels readiness as `ready/total`, rather than incorrectly reusing the SGObjectStorage Profile count.
+14. External backup target cards identify Backblaze B2 and Ceph Object Gateway with their provider assets, product labels, enabled/health badges, Endpoint, and Bucket.
 
 ## Final findings
 
@@ -54,6 +56,10 @@
 - Corner alignment: the final deployed icon glyph has `9.39px` top padding and `9.53px` right padding; the active control has `0px` bottom border and a transparent background.
 - Provisioning: one `clr-timeline` and four `clr-timeline-step` elements render; the old custom flow, provider banner, and execution-engine field each report zero matches.
 - Display-name contract: the creation form exposes one required 120-character `표시 이름` field and the generated Claim metadata carries the display-name annotation.
+- Backup readiness: the deployed Profile Catalog reports `1/2` for the current two External Channels targets; one is Ready and one is Misconfigured.
+- Provider cards: Backblaze and Ceph identity is derived from the target vendor/provider/endpoint contract and falls back to the Carbon Cloud icon for unknown S3 vendors.
+- Runtime release verified: `202608091150`, digest `sha256:a8186108aeb856ac93f7106d44cc4b456852676b707bf29d472d9535175c83ff`, `Ready / Current / Host 메뉴 사용 가능`.
+- Asset-final release published: `202608091202`, digest `sha256:e078900166dfd76e95e4bc07061d71aa39eeaae87dca654847147f59313d3305`; exact-digest activation is pending a fresh AAL2 session after the Console session expired during final visual verification.
 - Copy: accessible names and tooltips are consistent: 전체 클러스터, 설정 카탈로그, PostgreSQL 생성, 엔진 관리.
 
 ## Result
