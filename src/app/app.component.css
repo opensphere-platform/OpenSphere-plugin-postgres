@@ -408,7 +408,7 @@ pg-metric { display: block; height: 100%; }
 .pgp-management-actions { display: flex; flex: 0 0 auto; align-items: stretch; margin-left: auto; border-left: 1px solid var(--os-border); }
 .pgp-management-action { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 2.35rem; min-width: 2.35rem; min-height: 2.65rem; padding: 0; border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--os-text-sec); cursor: pointer; }
 .pgp-management-action span { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
-.pgp-management-action:hover { background: #f4f4f4; color: var(--os-ink); }
+.pgp-management-action:hover { background: #f4f4f4; color: var(--os-ink); text-decoration: none; }
 .pgp-management-action.active { border-bottom-color: #e66d24; color: #7a2e13; font-weight: 600; }
 .pgp-management-action--primary { color: var(--os-brand-500); }
 .pgp-management-action--primary os-cicon { color: var(--os-brand-500); }
