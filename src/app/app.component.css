@@ -402,8 +402,12 @@ pg-metric { display: block; height: 100%; }
 .pgp-header-context-action,
 .pgp-header-context-refresh { flex: 0 0 auto; min-width: auto; height: 1.35rem; min-height: 1.35rem; margin: 0 0 1px; padding: 0 4px; font-size: 0.62rem; line-height: 1.35rem; }
 .pgp-header-context-refresh { width: 1.55rem; padding: 0; }
-.pgp-management-actions { grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 3px; min-width: 0; margin-top: 1px; }
-.pgp-management-action { display: inline-flex; align-items: center; gap: 5px; min-height: 1.65rem; padding: 0 7px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--os-text-sec); font: inherit; font-size: 0.64rem; white-space: nowrap; cursor: pointer; }
+.pgp-navigation-row { display: flex; align-items: stretch; min-width: 0; border-bottom: 1px solid var(--os-border); }
+.pgp-navigation-row osp-plugin-tabs { display: block; flex: 1 1 auto; min-width: 0; }
+.pgp-navigation-row .pfs-plugin-tabs { margin: 0; border-bottom: 0; }
+.pgp-management-actions { display: flex; flex: 0 0 auto; align-items: stretch; margin-left: auto; border-left: 1px solid var(--os-border); }
+.pgp-management-action { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 2.35rem; min-width: 2.35rem; min-height: 2.65rem; padding: 0; border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--os-text-sec); cursor: pointer; }
+.pgp-management-action span { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 .pgp-management-action:hover { background: #f4f4f4; color: var(--os-ink); }
 .pgp-management-action.active { border-bottom-color: #e66d24; color: #7a2e13; font-weight: 600; }
 .pgp-management-action--primary { color: var(--os-brand-500); }
@@ -539,6 +543,6 @@ pg-metric { display: block; height: 100%; }
   .pgp-panel:last-child { grid-column: auto; }
   .pgp-page-frame .pfs-plugin-release { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .pgp-header-context { grid-column: 1 / -1; grid-template-columns: 1fr; }
-  .pgp-management-actions { justify-content: flex-start; overflow-x: auto; }
+  .pgp-navigation-row { overflow-x: auto; }
   .pgp-management-scope { align-items: flex-start; flex-direction: column; padding: 8px 10px; }
 }

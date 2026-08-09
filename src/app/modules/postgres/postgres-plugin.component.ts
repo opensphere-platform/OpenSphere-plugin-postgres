@@ -104,15 +104,17 @@ const DEFAULT_FORM: PgForm = {
               aria-label="PostgreSQL 컨텍스트 새로고침" title="새로고침"
               (click)="refreshFleet()" [disabled]="fleet.busy()"><os-cicon [icon]="iRenew" [size]="16" /></button>
           </div>
-          <nav class="pgp-management-actions" aria-label="PostgreSQL 관리 작업">
-            <button type="button" class="pgp-management-action" [class.active]="tab()==='fleet'" (click)="openTab('fleet')"><os-cicon [icon]="iFleet" [size]="16" /><span>전체 클러스터</span></button>
-            <button type="button" class="pgp-management-action" [class.active]="tab()==='profiles'" (click)="openTab('profiles')"><os-cicon [icon]="iCatalog" [size]="16" /><span>설정 카탈로그</span></button>
-            <button type="button" class="pgp-management-action pgp-management-action--primary" [class.active]="tab()==='provisioning'" (click)="openTab('provisioning')"><os-cicon [icon]="iAdd" [size]="16" /><span>PostgreSQL 생성</span></button>
-            <button type="button" class="pgp-management-action" [class.active]="tab()==='operator'" (click)="openTab('operator')"><os-cicon [icon]="iSettings" [size]="16" /><span>엔진 관리</span></button>
-          </nav>
         </div>
       </osp-plugin-page-header>
-      <osp-plugin-tabs [tabs]="primaryTabsForUi()" [active]="primaryTab()" routeBase="/pfss/postgres" ariaLabel="PostgreSQL 운영 영역" (selected)="openPrimaryTab($event)" />
+      <div class="pgp-navigation-row">
+        <osp-plugin-tabs [tabs]="primaryTabsForUi()" [active]="primaryTab()" routeBase="/pfss/postgres" ariaLabel="PostgreSQL 운영 영역" (selected)="openPrimaryTab($event)" />
+        <nav class="pgp-management-actions" aria-label="PostgreSQL 관리 작업">
+          <button type="button" class="pgp-management-action" aria-label="전체 클러스터" title="전체 클러스터" [class.active]="tab()==='fleet'" (click)="openTab('fleet')"><os-cicon [icon]="iFleet" [size]="16" /><span>전체 클러스터</span></button>
+          <button type="button" class="pgp-management-action" aria-label="설정 카탈로그" title="설정 카탈로그" [class.active]="tab()==='profiles'" (click)="openTab('profiles')"><os-cicon [icon]="iCatalog" [size]="16" /><span>설정 카탈로그</span></button>
+          <button type="button" class="pgp-management-action pgp-management-action--primary" aria-label="PostgreSQL 생성" title="PostgreSQL 생성" [class.active]="tab()==='provisioning'" (click)="openTab('provisioning')"><os-cicon [icon]="iAdd" [size]="16" /><span>PostgreSQL 생성</span></button>
+          <button type="button" class="pgp-management-action" aria-label="엔진 관리" title="엔진 관리" [class.active]="tab()==='operator'" (click)="openTab('operator')"><os-cicon [icon]="iSettings" [size]="16" /><span>엔진 관리</span></button>
+        </nav>
+      </div>
       <div class="pgp-subnav" *ngIf="secondaryTabsForUi().length">
         <span class="pgp-subnav-label">{{ primaryTabLabel() }}</span>
         <osp-plugin-tabs [tabs]="secondaryTabsForUi()" [active]="tab()" routeBase="/pfss/postgres" ariaLabel="선택한 운영 영역의 세부 메뉴" (selected)="openTab($event)" />
