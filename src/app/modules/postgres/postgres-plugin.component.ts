@@ -205,7 +205,7 @@ const DEFAULT_FORM: PgForm = {
           </div>
         </fieldset>
         <fieldset [disabled]="creatingClaim">
-          <legend>StackGres Profile 연결 <small>선택하지 않으면 Plan 기본값을 사용합니다.</small></legend>
+          <legend>Profile 연결 <small>선택하지 않으면 Plan 기본값을 사용합니다.</small></legend>
           <div class="pgp-form-grid">
             <label><span>Instance Profile</span><select name="claimInstanceProfile" [(ngModel)]="claimInstanceProfile"><option value="">Plan 기본값</option><option *ngFor="let profile of profilesFor('instance')" [value]="profile.name">{{ profile.name }} · {{ profileSummary(profile) }}</option></select><small>CPU와 Memory request/limit</small></label>
             <label><span>PostgreSQL Profile</span><select name="claimPostgresProfile" [(ngModel)]="claimPostgresProfile"><option value="">Plan 기본값</option><option *ngFor="let profile of profilesFor('postgres')" [value]="profile.name">{{ profile.name }} · {{ profileSummary(profile) }}</option></select><small>PostgreSQL 버전과 postgresql.conf</small></label>

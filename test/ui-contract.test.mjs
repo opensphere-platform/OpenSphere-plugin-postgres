@@ -64,6 +64,8 @@ test('PostgreSQL separates selected-runtime navigation from management workspace
   assert.match(component, /isManagementView\(\)/);
   assert.doesNotMatch(component, /pgp-provider-banner|PostgreSQL operating provider/);
   assert.doesNotMatch(component, /name="claimEngine"|PFSS PostgreSQL의 단일 운영 엔진입니다/);
+  assert.match(component, /<legend>Profile 연결 <small>/);
+  assert.doesNotMatch(component, /<legend>StackGres Profile 연결/);
   assert.match(component, /selectFleetCluster\(id: string\): void \{[\s\S]*?if \(this\.isManagementView\(\)\) this\.openTab\('overview'\);/);
   assert.match(component, /requested === 'claims' \? 'provisioning'/);
   assert.match(component, /routeBase="\/pfss\/postgres"/);
