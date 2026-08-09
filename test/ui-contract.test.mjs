@@ -130,8 +130,10 @@ test('Profile Catalog is namespace scoped and keeps StackGres objects authoritat
   assert.match(catalog, /External Channels 백업 대상/);
   assert.match(catalog, /targets\.filter\(\(target\) => this\.backupTargetReady\(target\)\)\.length/);
   assert.match(catalog, /`\$\{targets\.filter[\s\S]*?\/\$\{targets\.length\}`/);
-  assert.match(catalog, /BACKBLAZE_LOGO_PATH/);
-  assert.match(catalog, /CEPH_LOGO_PATH/);
+  assert.match(catalog, /BACKBLAZE_LOGO = 'data:image\/png;base64/);
+  assert.match(catalog, /CEPH_LOGO = 'data:image\/png;base64/);
+  assert.match(catalog, /backupTargetLogo\(target\)/);
+  assert.doesNotMatch(catalog, /<svg \*ngIf="backupTargetBrand/);
   assert.match(catalog, /CEPH OBJECT GATEWAY \(RGW\)/);
   assert.match(catalog, /target\.vendor.*target\.provider.*target\.endpoint/);
   assert.match(catalog, /selectedCategory/);
