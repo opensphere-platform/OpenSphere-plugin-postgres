@@ -52,6 +52,8 @@ test('PostgreSQL separates selected-runtime navigation from management workspace
   assert.match(css, /\.pgp-management-action\s*>\s*span\s*\{/);
   assert.doesNotMatch(css, /\.pgp-management-action\s+span\s*\{/);
   assert.match(css, /\.pgp-management-action:focus-visible/);
+  assert.match(css, /\.pgp-header-tools\s*\{[^}]*position:\s*relative/);
+  assert.match(css, /\.pgp-management-actions--header\s*\{[^}]*position:\s*absolute[^}]*top:\s*-0\.65rem[^}]*right:\s*0/);
   assert.match(component, /isManagementView\(\)/);
   assert.match(component, /requested === 'claims' \? 'provisioning'/);
   assert.match(component, /routeBase="\/pfss\/postgres"/);
