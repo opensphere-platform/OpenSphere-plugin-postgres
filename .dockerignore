@@ -1,0 +1,7 @@
+.git
+.angular
+node_modules
+coverage
+test
+tools
+*.log
