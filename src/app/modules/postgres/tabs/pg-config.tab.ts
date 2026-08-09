@@ -11,7 +11,7 @@ import { PgExtensionsPanel } from './pg-extensions.panel';
   imports: [CommonModule, PgKv, PgState, PgExtensionsPanel],
   styles: [`
     .pgc-workspace{margin-top:1rem}
-    .pgc-tab-toggle{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+    .pgc-tab-toggle{position:absolute;width:1px;height:1px;opacity:0}
     .pgc-tab-label{display:inline-block;margin:0 1rem 0 0;padding:.45rem .35rem .35rem;border-bottom:2px solid transparent;color:#565656;cursor:pointer}
     .pgc-tab-label:hover{color:#0072a3}
     .pgc-tab-toggle:focus-visible + .pgc-tab-label{outline:2px solid #0072a3;outline-offset:2px}

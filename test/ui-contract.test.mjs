@@ -92,6 +92,7 @@ test('runtime Extensions and Parameters use native horizontal tabs without neste
   assert.match(config, /role="group" aria-label="PostgreSQL 설정 영역"/);
   assert.match(config, /type="radio" name="pgc-workspace" id="pgc-extensions-tab" checked/);
   assert.match(config, /type="radio" name="pgc-workspace" id="pgc-parameters-tab"/);
+  assert.doesNotMatch(config, /\.pgc-tab-toggle\{[^}]*pointer-events:none/);
   assert.match(config, /<label class="pgc-tab-label" for="pgc-extensions-tab">Extensions<\/label>/);
   assert.match(config, /<label class="pgc-tab-label" for="pgc-parameters-tab">Parameters/);
   assert.match(config, /#pgc-extensions-tab:checked ~ \.pgc-tab-panels \.pgc-extensions-pane\{display:block\}/);
