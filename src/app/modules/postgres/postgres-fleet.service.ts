@@ -7,6 +7,7 @@ export interface PostgresFleetCluster {
   instances: number; readyInstances: number; postgresVersion: string; storage: string;
   plan: string; bindingSecret: string; uid: string; createdAt: string | null;
   extensions: PostgresExtensionSelection[]; extensionStatus: any[];
+  crossplane: { connected: boolean; provider: string; providerConfig: string; objects: number; readyObjects: number };
 }
 
 export interface PostgresExtensionSelection {
@@ -129,7 +130,16 @@ export class PostgresFleetService {
           return resourceNames.some((name) => cluster.name === name || cluster.name.includes(String(name)));
         });
         const alias = String(claim?.metadata?.annotations?.['opensphere.io/display-name'] || '').trim();
-        return alias ? { ...cluster, alias } : cluster;
+        const bridge = claim?.status?.crossplaneRef || {};
+        const bridgeCondition = (claim?.status?.conditions || []).find((item: any) => item.type === 'CrossplaneBridge');
+        const crossplane = {
+          connected: bridgeCondition?.status === 'True',
+          provider: String(bridge.provider || 'provider-kubernetes'),
+          providerConfig: String(bridge.providerConfig || 'opensphere-local-cluster'),
+          objects: Number(bridge.objects || 0),
+          readyObjects: Number(bridge.readyObjects || 0),
+        };
+        return alias ? { ...cluster, alias, crossplane } : { ...cluster, crossplane };
       });
       this.clusters.set(clusterRows);
       if (!clusterRows.some((cluster) => cluster.id === this.selectedId()) && clusterRows[0]) {

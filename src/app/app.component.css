@@ -431,6 +431,20 @@ pg-metric { display: block; height: 100%; }
 .pgp-runtime-context b { margin: 5px 0 2px; overflow: hidden; color: var(--os-ink); font-size: 0.82rem; text-overflow: ellipsis; white-space: nowrap; }
 .pgp-runtime-context b.ok { color: #198038; }
 .pgp-runtime-context small { color: var(--os-muted); font-size: 0.68rem; }
+.pgp-crossplane-bridge { display: grid; grid-template-columns: 9rem minmax(0, 1fr) 8rem; align-items: center; gap: 1rem; min-height: 3.4rem; margin: -4px 0 14px; padding: 7px 12px; border-block: 1px solid #c6c6c6; background: #f4f4f4; color: var(--os-text-sec); }
+.pgp-crossplane-bridge.connected { border-color: #a7d7b5; background: #f3faf5; }
+.pgp-bridge-title { display: flex; flex-direction: column; gap: 2px; }
+.pgp-bridge-title span { color: var(--os-muted); font-size: .55rem; font-weight: 700; letter-spacing: .08em; }
+.pgp-bridge-title b { color: #8d8d8d; font-size: .72rem; }
+.pgp-crossplane-bridge.connected .pgp-bridge-title b, .pgp-crossplane-bridge .ok { color: #198038; }
+.pgp-crossplane-bridge ol { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: center; gap: 1.5rem; margin: 0; padding: 0; list-style: none; }
+.pgp-crossplane-bridge li { position: relative; display: grid; min-width: 0; gap: 1px; }
+.pgp-crossplane-bridge li:not(:last-child)::after { position: absolute; top: 50%; right: -1rem; width: .55rem; height: .55rem; border-top: 1px solid #8d8d8d; border-right: 1px solid #8d8d8d; content: ''; transform: translateY(-50%) rotate(45deg); }
+.pgp-crossplane-bridge li span, .pgp-crossplane-bridge li small { color: var(--os-muted); font-size: .56rem; }
+.pgp-crossplane-bridge li strong { overflow: hidden; color: var(--os-ink); font-size: .72rem; text-overflow: ellipsis; white-space: nowrap; }
+.pgp-bridge-count { display: grid; justify-items: end; }
+.pgp-bridge-count b { color: var(--os-ink); font-size: .74rem; }
+.pgp-bridge-count span { color: var(--os-muted); font-size: .55rem; }
 .pgp-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; margin: 0 0 16px; background: var(--os-border); border: 1px solid var(--os-border); }
 .pgp-step { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: center; min-height: 4.35rem; padding: 10px 14px; border: 0; text-align: left; background: #fff; color: var(--os-ink); cursor: pointer; }
 .pgp-step:hover:not(:disabled) { background: #f7f9ff; }
@@ -549,6 +563,8 @@ pg-metric { display: block; height: 100%; }
   .pgp-page-frame .pfs-plugin-tabs { padding: 0; }
   .pgp-release, .pfs-plugin-release { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .pgp-steps, .pgp-runtime-context, .pgp-dashboard, .pgp-description, .pgp-operator-grid, .pgp-form-grid, .pgp-check-grid, .pgp-control-area-grid, .pgp-selected-target { grid-template-columns: 1fr; }
+  .pgp-crossplane-bridge { grid-template-columns: 1fr; }
+  .pgp-bridge-count { justify-items: start; }
   .pgp-release > div, .pfs-plugin-release > div { border-left: 0; border-top: 1px solid var(--os-border); padding: 8px 6px; }
   .pgp-panel:last-child { grid-column: auto; }
   .pgp-page-frame .pfs-plugin-release { grid-template-columns: repeat(2, minmax(0, 1fr)); }

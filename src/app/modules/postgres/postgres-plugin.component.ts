@@ -145,6 +145,16 @@ const DEFAULT_FORM: PgForm = {
           <div><span>운영 계약</span><b>{{ selected.plan || selected.mode }}</b><small>설정·생성 작업은 상단 관리 메뉴에서 수행합니다.</small></div>
         </section>
 
+        <section class="pgp-crossplane-bridge" [class.connected]="selected.crossplane.connected" aria-label="PostgreSQL 프로비저닝 연결 상태">
+          <div class="pgp-bridge-title"><span>PROVISIONING BRIDGE</span><b>{{ selected.crossplane.connected ? 'Connected' : 'Reconciling' }}</b></div>
+          <ol>
+            <li><span>요청</span><strong>PostgresClaim</strong></li>
+            <li><span>배정·수명주기</span><strong>Crossplane</strong><small>{{ selected.crossplane.provider }}</small></li>
+            <li><span>실행</span><strong>StackGres</strong><small>SGCluster</small></li>
+          </ol>
+          <div class="pgp-bridge-count"><b>{{ selected.crossplane.readyObjects }} / {{ selected.crossplane.objects }}</b><span>managed objects ready</span></div>
+        </section>
+
         <pg-overview part="monitoring" (jump)="openTab($event)"></pg-overview>
 
         <section class="pgp-dashboard">
@@ -248,9 +258,9 @@ const DEFAULT_FORM: PgForm = {
 
     <section *ngIf="tab() === 'fleet'" class="pgp-workspace" aria-label="PostgreSQL Fleet overview">
       <div class="pgp-section-head"><div><span class="vl-eyebrow">Secondary view</span><h2>PFSS PostgreSQL Fleet</h2><p>모든 Namespace의 PostgreSQL을 확인합니다. 운영 대상 선택은 상단 Namespace 컨텍스트를 기준으로 합니다.</p></div><button class="btn btn-sm" type="button" (click)="refreshFleet()" [disabled]="fleet.busy()">새로고침</button></div>
-      <clr-alert clrAlertType="info" [clrAlertClosable]="false"><clr-alert-item><span class="alert-text">모든 PostgresClaim은 독립 StackGres SGCluster, 볼륨, 앱 자격증명과 수명주기를 가집니다.</span></clr-alert-item></clr-alert>
+      <clr-alert clrAlertType="info" [clrAlertClosable]="false"><clr-alert-item><span class="alert-text">모든 PostgresClaim은 Crossplane provider-kubernetes를 거쳐 독립 StackGres SGCluster와 운영 리소스를 배정받습니다.</span></clr-alert-item></clr-alert>
       <div class="pgp-operator-grid" *ngIf="fleet.clusters().length; else noFleetClusters">
-        <button type="button" class="card" *ngFor="let cluster of fleet.clusters()" (click)="selectFleetClusterAndOpen(cluster.id)" [class.pgp-selected-card]="fleet.selectedId()===cluster.id"><div class="card-header pgp-instance-card-head"><img [src]="postgresInstanceLogo" alt="PostgreSQL 인스턴스" /><span>{{cluster.displayName}}</span><span class="label" [ngClass]="cluster.ready?'label-success':'label-warning'">{{cluster.phase}}</span></div><div class="card-block"><dl class="os-kv"><dt>Provider</dt><dd>{{cluster.provider}}</dd><dt>Mode</dt><dd>{{cluster.mode}}</dd><dt>Namespace</dt><dd class="os-mono">{{cluster.namespace}}</dd><dt>Instances</dt><dd>{{cluster.readyInstances}} / {{cluster.instances}}</dd><dt>Storage</dt><dd>{{cluster.storage || '—'}}</dd></dl></div></button>
+        <button type="button" class="card" *ngFor="let cluster of fleet.clusters()" (click)="selectFleetClusterAndOpen(cluster.id)" [class.pgp-selected-card]="fleet.selectedId()===cluster.id"><div class="card-header pgp-instance-card-head"><img [src]="postgresInstanceLogo" alt="PostgreSQL 인스턴스" /><span>{{cluster.displayName}}</span><span class="label" [ngClass]="cluster.ready?'label-success':'label-warning'">{{cluster.phase}}</span></div><div class="card-block"><dl class="os-kv"><dt>Provisioning</dt><dd [class.ok]="cluster.crossplane.connected">{{cluster.crossplane.connected ? 'Crossplane connected' : 'Crossplane reconciling'}}</dd><dt>Provider</dt><dd>{{cluster.provider}}</dd><dt>Mode</dt><dd>{{cluster.mode}}</dd><dt>Namespace</dt><dd class="os-mono">{{cluster.namespace}}</dd><dt>Instances</dt><dd>{{cluster.readyInstances}} / {{cluster.instances}}</dd><dt>Storage</dt><dd>{{cluster.storage || '—'}}</dd></dl></div></button>
       </div>
       <ng-template #noFleetClusters><div class="pgp-loading">등록된 PostgreSQL 클러스터가 없습니다. 상단에서 Namespace를 선택해 설치할 수 있습니다.</div></ng-template>
     </section>
