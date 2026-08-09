@@ -9,6 +9,8 @@
 - Final deployed implementation: `C:/Users/cmars/.codex/visualizations/2026/08/09/postgres-stackgres-ia-implementation/09-management-icons-final.png`
 - Header overlap report: `C:/Users/cmars/AppData/Local/Temp/codex-clipboard-7e815435-0d1e-4299-a171-6dd724b8cbaa.png`
 - Final separated header implementation: `C:/Users/cmars/.codex/visualizations/2026/08/09/postgres-stackgres-ia-implementation/11-header-icons-separated-selects-220.png`
+- Header corner and active-state report: `C:/Users/cmars/AppData/Local/Temp/codex-clipboard-95e655a1-b5d4-44d4-885b-63ae59e1dd96.png`
+- Provisioning flow reference: `C:/Users/cmars/AppData/Local/Temp/codex-clipboard-80351757-4db2-4813-86b7-60ac0e573524.png`
 
 ## Verification context
 
@@ -27,6 +29,10 @@
 6. The final visual comparison used the StackGres hierarchy reference, the prior header capture, and the final deployed capture in one review pass.
 7. A generic release-header rule overrode the management header spacing and clipped the icon row into the selectors. A higher-specificity PostgreSQL header rule now preserves the separate icon row and visible overflow.
 8. Runtime tabs are now conditional: management workspaces hide them, while selecting an instance returns to its overview and restores the operational tabs.
+9. The final header corner spacing is balanced from deployed geometry rather than an arbitrary offset; the active management icon uses color only and no tab-like underline.
+10. The custom four-column provisioning strip was replaced by the official Clarity Timeline component with four typed timeline steps.
+11. Redundant StackGres Operator banner and read-only execution-engine field were removed; the remaining section is titled `Profile 연결`.
+12. New PostgresClaims persist a user-provided display name in `opensphere.io/display-name`; the selected instance alias becomes the PostgreSQL header description.
 
 ## Final findings
 
@@ -45,10 +51,13 @@
 - Context alignment: deployed DOM measurement reports both Namespace and PostgreSQL instance selects at exactly `220px` computed width.
 - Vertical separation: the management icon row ends at `225.23px`; both selectors begin at `248.59px`, leaving a clear non-overlapping gap.
 - Navigation state: `/profiles` reports zero runtime tab rows; selecting another PostgreSQL instance returns to `/pfss/postgres` with one runtime tab row.
+- Corner alignment: the final deployed icon glyph has `9.39px` top padding and `9.53px` right padding; the active control has `0px` bottom border and a transparent background.
+- Provisioning: one `clr-timeline` and four `clr-timeline-step` elements render; the old custom flow, provider banner, and execution-engine field each report zero matches.
+- Display-name contract: the creation form exposes one required 120-character `표시 이름` field and the generated Claim metadata carries the display-name annotation.
 - Copy: accessible names and tooltips are consistent: 전체 클러스터, 설정 카탈로그, PostgreSQL 생성, 엔진 관리.
 
 ## Result
 
 final result: passed
 
-The operating-state hierarchy and engine/configuration hierarchy are visibly separated, the management controls sit above the context selectors, both context fields are 220px wide, runtime tabs appear only for an instance workspace, and no unresolved P0/P1/P2 visual issue remains in the verified state.
+The operating-state hierarchy and engine/configuration hierarchy are visibly separated, the management controls have balanced corner spacing, both context fields are 220px wide, provisioning uses the Clarity Timeline, user display names drive the header description, and no unresolved P0/P1/P2 visual issue remains in the verified state.
