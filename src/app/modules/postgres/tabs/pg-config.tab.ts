@@ -33,12 +33,12 @@ import { PgExtensionsPanel } from './pg-extensions.panel';
       </div>
     </div>
 
+    <pg-extensions-panel></pg-extensions-panel>
+
     <div class="os-sech">postgresql.conf 파라미터</div>
     <pg-state [state]="state()" hint="명시 파라미터 없음" [sub]="providerLabel() + ' 기본 튜닝을 사용합니다.'" (retry)="svc.refresh()">
       <pg-kv [params]="svc.params()"></pg-kv>
     </pg-state>
-
-    <pg-extensions-panel></pg-extensions-panel>
   `,
 })
 export class PgConfigTab {

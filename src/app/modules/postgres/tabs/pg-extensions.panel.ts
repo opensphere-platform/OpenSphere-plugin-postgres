@@ -21,8 +21,8 @@ import { PostgresExtensionCatalogItem, PostgresExtensionSelection, PostgresFleet
 
       <clr-alert *ngIf="fleet.extensionsState()==='error'" clrAlertType="danger" [clrAlertClosable]="false"><clr-alert-item><span class="alert-text">{{ fleet.extensionsError() }}</span></clr-alert-item></clr-alert>
       <div class="pge-tools">
-        <clr-input-container><label>확장 검색</label><input clrInput name="extensionSearch" [(ngModel)]="search" placeholder="이름, 설명 또는 태그" /></clr-input-container>
-        <clr-select-container><label>라이선스</label><select clrSelect name="extensionLicense" [(ngModel)]="license"><option value="">전체</option><option *ngFor="let item of licenses()" [value]="item">{{ item }}</option></select></clr-select-container>
+        <clr-input-container><label>확장 검색</label><input clrInput name="extensionSearch" [ngModel]="search()" (ngModelChange)="search.set($event)" placeholder="이름, 설명 또는 태그" /></clr-input-container>
+        <clr-select-container><label>라이선스</label><select clrSelect name="extensionLicense" [ngModel]="license()" (ngModelChange)="license.set($event)"><option value="">전체</option><option *ngFor="let item of licenses()" [value]="item">{{ item }}</option></select></clr-select-container>
       </div>
 
       <div class="pge-table-wrap" *ngIf="fleet.extensionsState()!=='loading'; else loading">
@@ -66,12 +66,15 @@ export class PgExtensionsPanel implements OnInit {
   readonly admin = inject(PgAdminService);
   readonly view = computed(() => this.fleet.extensions());
   readonly draft = signal<PostgresExtensionSelection[]>([]);
-  search = ''; license = ''; reason = ''; result = ''; busy = false;
+  readonly search = signal('');
+  readonly license = signal('');
+  reason = ''; result = ''; busy = false;
   database = ''; databaseExtension = ''; databaseAction: 'create-extension' | 'update-extension' | 'drop-extension' = 'create-extension';
   readonly licenses = computed(() => [...new Set((this.view()?.catalog || []).map((item) => item.license).filter(Boolean))].sort());
   readonly filteredCatalog = computed(() => {
-    const query = this.search.trim().toLowerCase();
-    return (this.view()?.catalog || []).filter((item) => (!this.license || item.license === this.license)
+    const query = this.search().trim().toLowerCase();
+    const license = this.license();
+    return (this.view()?.catalog || []).filter((item) => (!license || item.license === license)
       && (!query || [item.name, item.abstract, item.description, ...(item.tags || [])].join(' ').toLowerCase().includes(query)));
   });
   readonly databaseExtensionOptions = computed(() => {

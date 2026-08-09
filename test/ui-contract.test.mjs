@@ -45,6 +45,7 @@ test('PostgreSQL separates selected-runtime navigation from management workspace
   assert.match(component, /operations: \['operations', 'cluster', 'config', 'upgrade'\]/);
   for (const marker of ['전체 클러스터', '설정 카탈로그', 'PostgreSQL 생성', '엔진 관리']) assert.match(component, new RegExp(marker));
   assert.match(component, /class="pgp-navigation-row" \*ngIf="hasSelectedCluster\(\) && !isManagementView\(\)"/);
+  assert.doesNotMatch(component, /pgp-subnav-label|primaryTabLabel\(\)/);
   assert.match(component, /class="pgp-management-actions[^\"]*"/);
   assert.match(component, /pluginHeaderContext class="pgp-header-tools"/);
   assert.match(component, /pgp-management-actions pgp-management-actions--header/);
@@ -83,6 +84,16 @@ test('PostgreSQL separates selected-runtime navigation from management workspace
   assert.match(shell, /\[attr\.href\]="tabHref\(tab\.id\)"/);
   assert.match(shell, /window\.dispatchEvent\(new PopStateEvent\('popstate'/);
   assert.doesNotMatch(component, /CloudNativePG|cluster\.displayName \}\} · \{\{ cluster\.provider/);
+});
+
+test('runtime Extensions stay above the long parameter list and filters are reactive', () => {
+  const config = read('src/app/modules/postgres/tabs/pg-config.tab.ts');
+  const extensions = read('src/app/modules/postgres/tabs/pg-extensions.panel.ts');
+  assert.ok(config.indexOf('<pg-extensions-panel>') < config.indexOf('postgresql.conf 파라미터'));
+  assert.match(extensions, /readonly search = signal\(''\)/);
+  assert.match(extensions, /readonly license = signal\(''\)/);
+  assert.match(extensions, /\[ngModel\]="search\(\)" \(ngModelChange\)="search\.set\(\$event\)"/);
+  assert.match(extensions, /const query = this\.search\(\)\.trim\(\)\.toLowerCase\(\)/);
 });
 
 test('provisioning is namespace-first and uses one canonical PostgresClaim v1beta1 flow', () => {

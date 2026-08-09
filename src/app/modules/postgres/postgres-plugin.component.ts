@@ -118,7 +118,6 @@ const DEFAULT_FORM: PgForm = {
         <osp-plugin-tabs [tabs]="primaryTabsForUi()" [active]="primaryTab()" routeBase="/pfss/postgres" ariaLabel="PostgreSQL 운영 영역" (selected)="openPrimaryTab($event)" />
       </div>
       <div class="pgp-subnav" *ngIf="secondaryTabsForUi().length">
-        <span class="pgp-subnav-label">{{ primaryTabLabel() }}</span>
         <osp-plugin-tabs [tabs]="secondaryTabsForUi()" [active]="tab()" routeBase="/pfss/postgres" ariaLabel="선택한 운영 영역의 세부 메뉴" (selected)="openTab($event)" />
       </div>
       <div class="pgp-management-scope" *ngIf="isManagementView()">
@@ -687,7 +686,6 @@ export class PostgresPluginComponent implements OnInit, OnDestroy {
       return { id, label: item.label, disabled: !!item.requiresCluster && !this.hasSelectedCluster(), badge: item.badge ? this.badge(id) : '' };
     });
   }
-  primaryTabLabel(): string { return this.primaryTabs.find((item) => item.id === this.primaryTab())?.label || ''; }
   private tabRequiresCluster(id: PackageTab): boolean { return !!this.tabs.find((item) => item.id === id)?.requiresCluster; }
   clusterAvailability(cluster: PostgresFleetCluster): number {
     return cluster.instances ? Math.round((cluster.readyInstances / cluster.instances) * 100) : 0;
