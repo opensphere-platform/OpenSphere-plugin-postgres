@@ -6,6 +6,7 @@ export const PROV_VER = 'v1alpha1';
 export interface ClaimRow {
   name: string;
   namespace: string;
+  mode: string;
   primary: string;   // PG=database/owner, OS=indexName
   phase: string;     // status.phase 또는 conditions[Ready] 도출
   ready: boolean;

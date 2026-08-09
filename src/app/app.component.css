@@ -493,6 +493,12 @@ pg-metric { display: block; height: 100%; }
 .pgp-operator-grid > button.pgp-selected-card { outline: 2px solid var(--os-brand-500); outline-offset: -2px; }
 .pgp-instance-card-head { display:grid; grid-template-columns:1.875rem minmax(0,1fr) auto; align-items:center; gap:.55rem; }
 .pgp-instance-card-head img { width:1.875rem; height:1.875rem; object-fit:contain; }
+.pg-request-types { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin:0 0 16px; }
+.pg-request-type { min-height:62px; padding:10px 14px; border:1px solid var(--os-border); background:#fff; color:inherit; text-align:left; cursor:pointer; }
+.pg-request-type:hover { border-color:var(--os-brand-500); }
+.pg-request-type.is-active { border-color:var(--os-brand-500); box-shadow:inset 3px 0 var(--os-brand-500); background:#edf5ff; }
+.pg-request-title { display:block; margin-bottom:3px; color:var(--os-ink); font-size:.78rem; font-weight:600; }
+.pg-request-type span:last-child { display:block; color:var(--os-text-sec); font-size:.66rem; line-height:1.35; }
 .pgp-provisioning-timeline { margin: 0 0 16px; }
 .pgp-provisioning-form legend small { margin-left: 8px; color: var(--os-muted); font-size: 0.65rem; font-weight: 400; }
 .pgp-yaml-preview { max-height: 24rem; margin: 14px 0; padding: 16px; overflow: auto; border-left: 3px solid #e66d24; background: #161616; color: #f4f4f4; font-size: 0.72rem; line-height: 1.5; }

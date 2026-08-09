@@ -27,6 +27,7 @@ import Catalog16 from '@carbon/icons/es/catalog/16';
 import ListBoxes16 from '@carbon/icons/es/list--boxes/16';
 import Settings16 from '@carbon/icons/es/settings/16';
 import { PluginPageHeaderComponent, PluginPageHeaderModel, PluginPageTab, PluginTabsComponent } from '../../shared/plugin-page-shell.component';
+import { NewClaimFormComponent, PostgresRequestMode } from '../new-claim-form.component';
 
 type PackageTab = 'overview' | 'provisioning' | 'monitoring' | 'admin' | 'fleet' | 'operator' | 'cluster' | 'topology' | 'profiles' | 'config' | 'databases' | 'backups' | 'events' | 'claims' | 'operations' | 'upgrade' | 'documentation';
 type Profile = 'development' | 'compact' | 'production' | 'custom';
@@ -74,7 +75,7 @@ const DEFAULT_FORM: PgForm = {
   styles: [':host { display: block; min-width: 0; }'],
   imports: [
     CommonModule, FormsModule, ClarityModule, CarbonIcon, PluginPageHeaderComponent, PluginTabsComponent,
-    PgOverviewTab, PgMonitoringTab, PgTopologyTab, PgConfigTab, PgDatabasesTab, PgAdminTab, PgBackupsTab, PgEventsTab, PgProfileCatalogTab, PgOperationsTab,
+    PgOverviewTab, PgMonitoringTab, PgTopologyTab, PgConfigTab, PgDatabasesTab, PgAdminTab, PgBackupsTab, PgEventsTab, PgProfileCatalogTab, PgOperationsTab, NewClaimFormComponent,
   ],
   template: `
     <a class="vl-back" (click)="back()" (keydown.enter)="back()" role="button" tabindex="0">
@@ -182,11 +183,18 @@ const DEFAULT_FORM: PgForm = {
       </section>
     </ng-container>
 
-    <section *ngIf="tab() === 'provisioning'" class="pgp-workspace pgp-workspace--full" aria-label="PostgreSQL 인스턴스 생성">
+    <section *ngIf="tab() === 'provisioning'" class="pgp-workspace pgp-workspace--full" aria-label="PostgreSQL 리소스 요청">
       <div class="pgp-section-head">
-        <div><span class="vl-eyebrow">Namespace-scoped provisioning</span><h2>PostgreSQL 인스턴스 생성</h2><p><b>{{ selectedNamespace() }}</b> Namespace에 독립된 PostgreSQL 인스턴스를 생성합니다. Plan은 운영 기준을, Profile은 StackGres 런타임 설정을 결정합니다.</p></div>
+        <div><span class="vl-eyebrow">Namespace-scoped provisioning</span><h2>PostgreSQL 리소스 요청</h2><p><b>{{ selectedNamespace() }}</b> Namespace에서 필요한 PostgreSQL 자원 범위를 선택합니다.</p></div>
         <span class="label label-info">PostgresClaim v1beta1</span>
       </div>
+      <div class="pg-request-types" role="radiogroup" aria-label="PostgreSQL 리소스 요청 유형">
+        <button type="button" class="pg-request-type" *ngFor="let option of provisioningModeOptions"
+          [class.is-active]="provisioningMode() === option.id" (click)="provisioningMode.set(option.id)">
+          <span class="pg-request-title">{{ option.label }}</span><span>{{ option.description }}</span>
+        </button>
+      </div>
+      <ng-container *ngIf="provisioningMode() === 'Dedicated'; else sharedResourceRequest">
       <clr-timeline class="pgp-provisioning-timeline" [clrLayout]="timelineHorizontal" aria-label="PostgreSQL 프로비저닝 흐름">
         <clr-timeline-step [clrState]="timelineCurrent"><clr-timeline-step-header>1</clr-timeline-step-header><clr-timeline-step-title>기본 정보</clr-timeline-step-title><clr-timeline-step-description>Namespace · Database · Owner</clr-timeline-step-description></clr-timeline-step>
         <clr-timeline-step [clrState]="timelineNotStarted"><clr-timeline-step-header>2</clr-timeline-step-header><clr-timeline-step-title>운영 계약</clr-timeline-step-title><clr-timeline-step-description>Plan · Version · Storage</clr-timeline-step-description></clr-timeline-step>
@@ -253,6 +261,10 @@ const DEFAULT_FORM: PgForm = {
         <div class="os-actions"><button class="btn btn-primary" type="submit" [disabled]="creatingClaim || !claimName.trim() || !claimAlias.trim() || !claimDatabase.trim() || !claimOwner.trim() || claimReason.trim().length < 8">PostgreSQL 인스턴스 생성</button><button class="btn" type="button" (click)="previewClaim()" [disabled]="!claimName.trim()">YAML 미리보기</button><button class="btn btn-link" type="button" (click)="openTab('profiles')">Profile 관리</button></div>
       </form>
       <pre class="pgp-yaml-preview" *ngIf="claimYamlPreview()" aria-label="PostgresClaim YAML 미리보기">{{ claimYamlPreview() }}</pre>
+      </ng-container>
+      <ng-template #sharedResourceRequest>
+        <app-new-claim-form kind="pg" [initialMode]="provisioningMode()" [allowedModes]="[provisioningMode()]" [showModeSelector]="false" (created)="refreshFleet()"></app-new-claim-form>
+      </ng-template>
       <section class="pgp-provisioned" *ngIf="namespaceClusters().length"><h3>이 Namespace의 인스턴스</h3><div class="pgp-operator-grid"><button class="card" type="button" *ngFor="let cluster of namespaceClusters()" (click)="selectFleetClusterAndOpen(cluster.id)"><div class="card-header pgp-instance-card-head"><img [src]="postgresInstanceLogo" alt="PostgreSQL 인스턴스" /><span>{{cluster.displayName}}</span><span class="label" [ngClass]="cluster.ready?'label-success':'label-warning'">{{cluster.phase}}</span></div><div class="card-block"><dl class="os-kv"><dt>Plan</dt><dd>{{cluster.plan || '—'}}</dd><dt>Instances</dt><dd>{{cluster.readyInstances}} / {{cluster.instances}}</dd><dt>Storage</dt><dd>{{cluster.storage || '—'}}</dd></dl></div></button></div></section>
     </section>
 
@@ -355,7 +367,6 @@ const DEFAULT_FORM: PgForm = {
     <pg-admin *ngIf="tab() === 'admin' && hasSelectedCluster()"></pg-admin>
     <pg-backups *ngIf="tab() === 'backups' && hasSelectedCluster()"></pg-backups>
     <pg-events *ngIf="tab() === 'events' && hasSelectedCluster()"></pg-events>
-
     <section *ngIf="tab() === 'operations' && hasSelectedCluster()" class="pgp-workspace pgp-workspace--full">
       <div class="pgp-section-head"><div><span class="vl-eyebrow">Controlled maintenance</span><h2>PostgreSQL operations</h2><p>선택한 인스턴스의 재시작, Vacuum, Repack 등 승인된 유지보수 작업을 미리보기 후 실행합니다.</p></div></div>
       <pg-operations></pg-operations>
@@ -404,6 +415,12 @@ export class PostgresPluginComponent implements OnInit, OnDestroy {
   readonly applyLogs = signal<string[]>([]);
   private installTimer: ReturnType<typeof setInterval> | undefined;
   claimName = ''; claimAlias = ''; claimDatabase = ''; claimOwner = ''; claimPlan = 'postgresql-dev-single';
+  readonly provisioningMode = signal<PostgresRequestMode>('Dedicated');
+  readonly provisioningModeOptions: { id: PostgresRequestMode; label: string; description: string }[] = [
+    { id: 'Dedicated', label: '전용 인스턴스', description: '독립 PostgreSQL 인스턴스와 초기 Database·Owner를 생성' },
+    { id: 'SharedDatabase', label: '기존 인스턴스에 DB', description: '관리 중인 인스턴스에 Database·Owner·연결정보를 배정' },
+    { id: 'DatabaseAccess', label: '기존 DB 접근', description: '기존 Database에 읽기 또는 읽기·쓰기 계정을 발급' },
+  ];
   claimStorageSize = ''; claimStorageClass = ''; claimDeletionPolicy: 'Retain' | 'Delete' = 'Retain'; claimReason = '';
   claimInstanceProfile = ''; claimPostgresProfile = ''; claimPoolingProfile = ''; claimObjectStorageProfile = '';
   claimExtensionSearch = '';

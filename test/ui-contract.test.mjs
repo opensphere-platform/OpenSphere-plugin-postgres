@@ -133,6 +133,24 @@ test('provisioning is namespace-first and uses one canonical PostgresClaim v1bet
   assert.match(component, /External Channels에서 등록한 백업 대상/);
 });
 
+test('PostgresClaim UI exposes every supported allocation contract', () => {
+  const form = read('src/app/modules/new-claim-form.component.ts');
+  const list = read('src/app/modules/claims-list.component.ts');
+  const component = read('src/app/modules/postgres/postgres-plugin.component.ts');
+  for (const mode of ['Dedicated', 'SharedDatabase', 'DatabaseAccess']) assert.match(form, new RegExp(mode));
+  assert.match(form, /clusterRef = \{ namespace, name \}/);
+  assert.match(form, /apiVersion: `\$\{PROV_GROUP\}\/v1beta1`/);
+  assert.match(form, /읽기 전용/);
+  assert.match(form, /읽기·쓰기/);
+  assert.match(list, /status\?\.bindingRef\?\.name/);
+  assert.match(component, /readonly provisioningMode = signal<PostgresRequestMode>\('Dedicated'\)/);
+  assert.match(component, /<app-new-claim-form kind="pg"/);
+  assert.doesNotMatch(component, /<pg-claims/);
+  for (const tab of ['Overview', 'Monitoring', 'Topology', 'Database', 'Data Protection', 'Operations', 'Events', 'Documentation']) {
+    assert.match(component, new RegExp(`label: '${tab}'`));
+  }
+});
+
 test('namespace-first fleet and pgAdmin layout contracts are preserved', () => {
   const component = read('src/app/modules/postgres/postgres-plugin.component.ts');
   const admin = read('src/app/modules/postgres/admin/pg-admin.tab.ts');

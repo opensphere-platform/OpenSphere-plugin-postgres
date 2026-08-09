@@ -9,11 +9,11 @@ import { NewClaimFormComponent } from '../../new-claim-form.component';
   standalone: true,
   imports: [CommonModule, ClaimsListComponent, NewClaimFormComponent],
   template: `
-    <p class="os-sub">PostgresClaim — 선언만 하면 전용 StackGres SGCluster·DB·role·연결 Secret을 발급합니다 (provisioning.opensphere.io/v1beta1).</p>
-    <div class="os-sech">New Claim</div>
+    <p class="os-sub">PostgresClaim은 전용 인스턴스, 기존 인스턴스의 새 Database, 기존 Database의 접근 계정을 하나의 계약으로 요청합니다.</p>
+    <div class="os-sech">PostgreSQL 리소스 요청</div>
     <app-new-claim-form kind="pg" (created)="pgList.load()"></app-new-claim-form>
     <div class="os-sech">PostgresClaims</div>
-    <app-claims-list #pgList kind="pg" plural="postgresclaims" primaryLabel="DB / owner"></app-claims-list>
+    <app-claims-list #pgList kind="pg" version="v1beta1" plural="postgresclaims" primaryLabel="DB / 계정"></app-claims-list>
   `,
 })
 export class PgClaimsTab {}

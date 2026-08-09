@@ -12,21 +12,22 @@ import { PROV_GROUP, PROV_VER, ClaimRow, phaseFromStatus, age } from './claims.t
   imports: [CommonModule, ClarityModule],
   template: `
     <div class="os-title-row">
-      <span class="os-mono os-sub">{{ plural }}.{{ PROV_GROUP }}/{{ PROV_VER }}</span>
+      <span class="os-mono os-sub">{{ plural }}.{{ PROV_GROUP }}/{{ version }}</span>
       <button class="btn btn-sm os-ml-auto" (click)="load()">새로고침</button>
     </div>
     <table class="table" *ngIf="state() === 'ok'">
-      <thead><tr><th>이름</th><th>네임스페이스</th><th>{{ primaryLabel }}</th><th>상태</th><th>{{ detailLabel }}</th><th>Age</th></tr></thead>
+      <thead><tr><th>이름</th><th>네임스페이스</th><th *ngIf="kind === 'pg'">요청 유형</th><th>{{ primaryLabel }}</th><th>상태</th><th>{{ detailLabel }}</th><th>Age</th></tr></thead>
       <tbody>
         <tr *ngFor="let r of rows()">
           <td class="os-mono">{{ r.name }}</td>
           <td class="os-mono">{{ r.namespace }}</td>
+          <td *ngIf="kind === 'pg'">{{ modeLabel(r.mode) }}</td>
           <td class="os-mono">{{ r.primary }}</td>
           <td><span class="label" [ngClass]="r.ready ? 'label-success' : 'label-warning'">{{ r.phase }}</span></td>
           <td class="os-mono">{{ r.detail }}</td>
           <td>{{ r.age }}</td>
         </tr>
-        <tr *ngIf="!rows().length"><td colspan="6" class="os-muted">claim 없음 — 위 폼으로 선언하세요.</td></tr>
+        <tr *ngIf="!rows().length"><td [attr.colspan]="kind === 'pg' ? 7 : 6" class="os-muted">claim 없음 — 위 폼으로 선언하세요.</td></tr>
       </tbody>
     </table>
     <clr-alert *ngIf="state() === 'nocrd'" clrAlertType="info" [clrAlertClosable]="false" [clrAlertLightweight]="true">
@@ -43,6 +44,7 @@ export class ClaimsListComponent implements OnInit {
   @Input() primaryLabel = 'DB / owner';
   @Input() detailLabel = '연결 Secret';
   @Input() kind: 'pg' | 'os' = 'pg';
+  @Input() version = PROV_VER;
   readonly PROV_GROUP = PROV_GROUP;
   readonly PROV_VER = PROV_VER;
   readonly rows = signal<ClaimRow[]>([]);
@@ -53,7 +55,7 @@ export class ClaimsListComponent implements OnInit {
   async load(): Promise<void> {
     this.state.set('loading');
     try {
-      const r = await hostFetch(`${apiBase()}/api/k8s/apis/${PROV_GROUP}/${PROV_VER}/${this.plural}`, { cache: 'no-store' });
+      const r = await hostFetch(`${apiBase()}/api/k8s/apis/${PROV_GROUP}/${this.version}/${this.plural}`, { cache: 'no-store' });
       if (r.status === 403) { this.state.set('noperm'); return; }
       if (r.status === 404 || !r.ok) { this.state.set('nocrd'); return; }
       const items = (await r.json()).items || [];
@@ -63,14 +65,19 @@ export class ClaimsListComponent implements OnInit {
         return {
           name: c.metadata?.name,
           namespace: c.metadata?.namespace,
+          mode: sp.isolation || (this.kind === 'pg' ? 'Dedicated' : ''),
           primary: this.kind === 'pg' ? `${sp.database} / ${sp.owner}` : (sp.indexName || (sp.indexPrefix ? sp.indexPrefix + '*' : '—')),
           phase: ps.phase,
           ready: ps.ready,
-          detail: c.status?.connectionSecretRef?.name || c.status?.host || '—',
+          detail: c.status?.bindingRef?.name || c.status?.connectionSecretRef?.name || c.status?.host || '—',
           age: age(c.metadata?.creationTimestamp),
         } as ClaimRow;
       }));
       this.state.set('ok');
     } catch { this.state.set('nocrd'); }
+  }
+
+  modeLabel(mode: string): string {
+    return ({ Dedicated: '전용 인스턴스', SharedDatabase: '기존 인스턴스 DB', DatabaseAccess: '기존 DB 접근' } as Record<string, string>)[mode] || mode || '—';
   }
 }
