@@ -188,12 +188,13 @@ const DEFAULT_FORM: PgForm = {
         <div><span class="vl-eyebrow">Namespace-scoped provisioning</span><h2>PostgreSQL 리소스 요청</h2><p><b>{{ selectedNamespace() }}</b> Namespace에서 필요한 PostgreSQL 자원 범위를 선택합니다.</p></div>
         <span class="label label-info">PostgresClaim v1beta1</span>
       </div>
-      <div class="pg-request-types" role="radiogroup" aria-label="PostgreSQL 리소스 요청 유형">
-        <button type="button" class="pg-request-type" *ngFor="let option of provisioningModeOptions"
-          [class.is-active]="provisioningMode() === option.id" [attr.aria-pressed]="provisioningMode() === option.id" (click)="selectProvisioningMode(option.id)">
+      <nav class="pg-request-types" aria-label="PostgreSQL 리소스 요청 유형">
+        <a class="pg-request-type" *ngFor="let option of provisioningModeOptions"
+          [class.is-active]="provisioningMode() === option.id" [attr.aria-current]="provisioningMode() === option.id ? 'page' : null"
+          [href]="'/pfss/postgres/provisioning?request=' + provisioningModeSlug(option.id)">
           <span class="pg-request-title">{{ option.label }}</span><span>{{ option.description }}</span>
-        </button>
-      </div>
+        </a>
+      </nav>
       <ng-container *ngIf="provisioningMode() === 'Dedicated'; else sharedResourceRequest">
       <clr-timeline class="pgp-provisioning-timeline" [clrLayout]="timelineHorizontal" aria-label="PostgreSQL 프로비저닝 흐름">
         <clr-timeline-step [clrState]="timelineCurrent"><clr-timeline-step-header>1</clr-timeline-step-header><clr-timeline-step-title>기본 정보</clr-timeline-step-title><clr-timeline-step-description>Namespace · Database · Owner</clr-timeline-step-description></clr-timeline-step>
@@ -415,7 +416,7 @@ export class PostgresPluginComponent implements OnInit, OnDestroy {
   readonly applyLogs = signal<string[]>([]);
   private installTimer: ReturnType<typeof setInterval> | undefined;
   claimName = ''; claimAlias = ''; claimDatabase = ''; claimOwner = ''; claimPlan = 'postgresql-dev-single';
-  readonly provisioningMode = signal<PostgresRequestMode>('Dedicated');
+  readonly provisioningMode = signal<PostgresRequestMode>(this.provisioningModeFromLocation());
   readonly provisioningModeOptions: { id: PostgresRequestMode; label: string; description: string }[] = [
     { id: 'Dedicated', label: '전용 인스턴스', description: '독립 PostgreSQL 인스턴스와 초기 Database·Owner를 생성' },
     { id: 'SharedDatabase', label: '기존 인스턴스에 DB', description: '관리 중인 인스턴스에 Database·Owner·연결정보를 배정' },
@@ -521,10 +522,12 @@ export class PostgresPluginComponent implements OnInit, OnDestroy {
   openControlPlane(): void { this.vr.setModule('control-plane'); }
   openTab(id: string): void { this.vr.setTab(id); }
   openPrimaryTab(id: string): void { this.openTab(id); }
-  selectProvisioningMode(mode: PostgresRequestMode): void {
-    this.provisioningMode.set(mode);
-    this.claimResult = '';
-    this.claimYamlPreview.set('');
+  provisioningModeSlug(mode: PostgresRequestMode): string {
+    return mode === 'SharedDatabase' ? 'database' : mode === 'DatabaseAccess' ? 'access' : 'instance';
+  }
+  private provisioningModeFromLocation(): PostgresRequestMode {
+    const value = new URLSearchParams(globalThis.location?.search || '').get('request');
+    return value === 'database' ? 'SharedDatabase' : value === 'access' ? 'DatabaseAccess' : 'Dedicated';
   }
   selectNamespace(namespace: string): void {
     if (!namespace || namespace === this.selectedNamespace()) return;
