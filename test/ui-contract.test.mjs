@@ -29,6 +29,7 @@ test('plugin-owned reads use the canonical proxy while governed writes remain on
 
 test('PostgreSQL separates selected-runtime navigation from management workspaces', () => {
   const component = read('src/app/modules/postgres/postgres-plugin.component.ts');
+  const css = read('src/app/app.component.css');
   const primary = [
     ['overview', 'Overview'], ['monitoring', 'Monitoring'], ['topology', 'Topology'],
     ['databases', 'Database'], ['backups', 'Data Protection'], ['operations', 'Operations'],
@@ -46,6 +47,9 @@ test('PostgreSQL separates selected-runtime navigation from management workspace
   assert.match(component, /class="pgp-navigation-row"/);
   assert.match(component, /class="pgp-management-actions"/);
   for (const route of ['fleet', 'profiles', 'provisioning', 'operator']) assert.match(component, new RegExp(`href="/pfss/postgres/${route}"`));
+  assert.match(css, /\.pgp-management-action\s*>\s*span\s*\{/);
+  assert.doesNotMatch(css, /\.pgp-management-action\s+span\s*\{/);
+  assert.match(css, /\.pgp-management-action:focus-visible/);
   assert.match(component, /isManagementView\(\)/);
   assert.match(component, /requested === 'claims' \? 'provisioning'/);
   assert.match(component, /routeBase="\/pfss\/postgres"/);
