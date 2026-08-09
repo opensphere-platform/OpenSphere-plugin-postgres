@@ -176,6 +176,8 @@ test('Profile Catalog is namespace scoped and keeps StackGres objects authoritat
   assert.match(catalog, /<textarea clrTextarea name="profilePostgresqlConf"/);
   assert.match(catalog, /<input clrCheckbox type="checkbox" name="profileStoragePathStyle"/);
   assert.match(catalog, /<form clrForm clrLayout="vertical" class="pgpc-delete-form"/);
+  assert.doesNotMatch(catalog, /profileReason|deleteProfileReason|변경 사유|삭제 사유/);
+  assert.doesNotMatch(fleet, /PostgresProfileDraft[\s\S]{0,250}reason:/);
   assert.doesNotMatch(catalog, /<div class="pgpc-form">/);
   assert.match(fleet, /\/api\/foundation\/postgres\/profiles/);
   assert.match(fleet, /\/api\/foundation\/postgres\/backup-targets/);

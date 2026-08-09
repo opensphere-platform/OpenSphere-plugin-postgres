@@ -47,7 +47,6 @@ export interface PostgresProfileDraft {
   kind: PostgresProfileKind;
   name: string;
   spec: Record<string, any>;
-  reason: string;
 }
 
 export interface PostgresRuntime {
@@ -274,14 +273,14 @@ export class PostgresFleetService {
     return result;
   }
 
-  async deleteProfile(namespace: string, kind: PostgresProfileKind, name: string, reason: string, confirm: string): Promise<any> {
-    const result = await this.profileMutation('DELETE', { namespace, kind, name, reason, confirm });
+  async deleteProfile(namespace: string, kind: PostgresProfileKind, name: string, confirm: string): Promise<any> {
+    const result = await this.profileMutation('DELETE', { namespace, kind, name, confirm });
     await this.refreshProfiles(namespace);
     return result;
   }
 
   private async profileMutation(method: 'POST' | 'DELETE', body: {
-    namespace: string; kind: PostgresProfileKind; name: string; reason: string;
+    namespace: string; kind: PostgresProfileKind; name: string;
     spec?: Record<string, any>; confirm?: string; dryRun?: boolean;
   }): Promise<any> {
     const namespace = String(body.namespace || '');
