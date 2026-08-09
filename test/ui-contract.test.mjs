@@ -45,7 +45,9 @@ test('PostgreSQL separates selected-runtime navigation from management workspace
   assert.match(component, /operations: \['operations', 'cluster', 'config', 'upgrade'\]/);
   for (const marker of ['전체 클러스터', '설정 카탈로그', 'PostgreSQL 생성', '엔진 관리']) assert.match(component, new RegExp(marker));
   assert.match(component, /class="pgp-navigation-row"/);
-  assert.match(component, /class="pgp-management-actions"/);
+  assert.match(component, /class="pgp-management-actions[^\"]*"/);
+  assert.match(component, /pluginHeaderContext class="pgp-header-tools"/);
+  assert.match(component, /pgp-management-actions pgp-management-actions--header/);
   for (const route of ['fleet', 'profiles', 'provisioning', 'operator']) assert.match(component, new RegExp(`href="/pfss/postgres/${route}"`));
   assert.match(css, /\.pgp-management-action\s*>\s*span\s*\{/);
   assert.doesNotMatch(css, /\.pgp-management-action\s+span\s*\{/);

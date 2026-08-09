@@ -80,40 +80,42 @@ const DEFAULT_FORM: PgForm = {
 
     <section class="pgp-page-frame" aria-label="PostgreSQL plugin 개요와 메뉴">
       <osp-plugin-page-header [model]="headerModel()" headingId="postgres-plugin-title">
-        <div pluginHeaderContext class="pgp-header-context" aria-label="PostgreSQL 운영 컨텍스트">
-          <div class="pgp-header-context-unit">
-            <clr-select-container class="pgp-header-context-field">
-              <label>Namespace</label>
-              <select clrSelect name="postgresNamespace" aria-label="Namespace 선택"
-                [ngModel]="selectedNamespace()" (ngModelChange)="selectNamespace($event)">
-                <option *ngFor="let namespace of fleet.namespaces()" [ngValue]="namespace">{{ namespace }}</option>
-              </select>
-            </clr-select-container>
-            <button class="btn btn-sm btn-link pgp-header-context-action" type="button"
-              aria-label="Namespace 추가" title="Namespace 추가" (click)="openNamespaceModal()">추가</button>
-          </div>
-          <div class="pgp-header-context-unit">
-            <clr-select-container class="pgp-header-context-field" *ngIf="namespaceClusters().length > 1">
-              <label>PostgreSQL 인스턴스</label>
-              <select clrSelect name="postgresInstance" aria-label="PostgreSQL 인스턴스 선택"
-                [ngModel]="fleet.selectedId()" (ngModelChange)="selectFleetCluster($event)">
-                <option *ngFor="let cluster of namespaceClusters()" [ngValue]="cluster.id">{{ cluster.displayName }}</option>
-              </select>
-            </clr-select-container>
-            <button class="btn btn-sm btn-link pgp-header-context-refresh" type="button"
-              aria-label="PostgreSQL 컨텍스트 새로고침" title="새로고침"
-              (click)="refreshFleet()" [disabled]="fleet.busy()"><os-cicon [icon]="iRenew" [size]="16" /></button>
+        <div pluginHeaderContext class="pgp-header-tools">
+          <nav class="pgp-management-actions pgp-management-actions--header" aria-label="PostgreSQL 관리 작업">
+            <a class="pgp-management-action" href="/pfss/postgres/fleet" aria-label="전체 클러스터" title="전체 클러스터" [class.active]="tab()==='fleet'"><os-cicon [icon]="iFleet" [size]="16" /><span>전체 클러스터</span></a>
+            <a class="pgp-management-action" href="/pfss/postgres/profiles" aria-label="설정 카탈로그" title="설정 카탈로그" [class.active]="tab()==='profiles'"><os-cicon [icon]="iCatalog" [size]="16" /><span>설정 카탈로그</span></a>
+            <a class="pgp-management-action pgp-management-action--primary" href="/pfss/postgres/provisioning" aria-label="PostgreSQL 생성" title="PostgreSQL 생성" [class.active]="tab()==='provisioning'"><os-cicon [icon]="iAdd" [size]="16" /><span>PostgreSQL 생성</span></a>
+            <a class="pgp-management-action" href="/pfss/postgres/operator" aria-label="엔진 관리" title="엔진 관리" [class.active]="tab()==='operator'"><os-cicon [icon]="iSettings" [size]="16" /><span>엔진 관리</span></a>
+          </nav>
+          <div class="pgp-header-context" aria-label="PostgreSQL 운영 컨텍스트">
+            <div class="pgp-header-context-unit">
+              <clr-select-container class="pgp-header-context-field">
+                <label>Namespace</label>
+                <select clrSelect name="postgresNamespace" aria-label="Namespace 선택"
+                  [ngModel]="selectedNamespace()" (ngModelChange)="selectNamespace($event)">
+                  <option *ngFor="let namespace of fleet.namespaces()" [ngValue]="namespace">{{ namespace }}</option>
+                </select>
+              </clr-select-container>
+              <button class="btn btn-sm btn-link pgp-header-context-action" type="button"
+                aria-label="Namespace 추가" title="Namespace 추가" (click)="openNamespaceModal()">추가</button>
+            </div>
+            <div class="pgp-header-context-unit">
+              <clr-select-container class="pgp-header-context-field" *ngIf="namespaceClusters().length > 1">
+                <label>PostgreSQL 인스턴스</label>
+                <select clrSelect name="postgresInstance" aria-label="PostgreSQL 인스턴스 선택"
+                  [ngModel]="fleet.selectedId()" (ngModelChange)="selectFleetCluster($event)">
+                  <option *ngFor="let cluster of namespaceClusters()" [ngValue]="cluster.id">{{ cluster.displayName }}</option>
+                </select>
+              </clr-select-container>
+              <button class="btn btn-sm btn-link pgp-header-context-refresh" type="button"
+                aria-label="PostgreSQL 컨텍스트 새로고침" title="새로고침"
+                (click)="refreshFleet()" [disabled]="fleet.busy()"><os-cicon [icon]="iRenew" [size]="16" /></button>
+            </div>
           </div>
         </div>
       </osp-plugin-page-header>
       <div class="pgp-navigation-row">
         <osp-plugin-tabs [tabs]="primaryTabsForUi()" [active]="primaryTab()" routeBase="/pfss/postgres" ariaLabel="PostgreSQL 운영 영역" (selected)="openPrimaryTab($event)" />
-        <nav class="pgp-management-actions" aria-label="PostgreSQL 관리 작업">
-          <a class="pgp-management-action" href="/pfss/postgres/fleet" aria-label="전체 클러스터" title="전체 클러스터" [class.active]="tab()==='fleet'"><os-cicon [icon]="iFleet" [size]="16" /><span>전체 클러스터</span></a>
-          <a class="pgp-management-action" href="/pfss/postgres/profiles" aria-label="설정 카탈로그" title="설정 카탈로그" [class.active]="tab()==='profiles'"><os-cicon [icon]="iCatalog" [size]="16" /><span>설정 카탈로그</span></a>
-          <a class="pgp-management-action pgp-management-action--primary" href="/pfss/postgres/provisioning" aria-label="PostgreSQL 생성" title="PostgreSQL 생성" [class.active]="tab()==='provisioning'"><os-cicon [icon]="iAdd" [size]="16" /><span>PostgreSQL 생성</span></a>
-          <a class="pgp-management-action" href="/pfss/postgres/operator" aria-label="엔진 관리" title="엔진 관리" [class.active]="tab()==='operator'"><os-cicon [icon]="iSettings" [size]="16" /><span>엔진 관리</span></a>
-        </nav>
       </div>
       <div class="pgp-subnav" *ngIf="secondaryTabsForUi().length">
         <span class="pgp-subnav-label">{{ primaryTabLabel() }}</span>
