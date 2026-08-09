@@ -22,7 +22,7 @@ import { PgAdminService } from './admin/pg-admin.service';
 import { PostgresFleetCluster, PostgresFleetService } from './postgres-fleet.service';
 import ArrowLeft16 from '@carbon/icons/es/arrow--left/16';
 import Renew16 from '@carbon/icons/es/renew/16';
-import Add16 from '@carbon/icons/es/add/16';
+import DataAdd16 from '@carbon/icons/es/data--add/16';
 import Catalog16 from '@carbon/icons/es/catalog/16';
 import ListBoxes16 from '@carbon/icons/es/list--boxes/16';
 import Settings16 from '@carbon/icons/es/settings/16';
@@ -352,7 +352,7 @@ export class PostgresPluginComponent implements OnInit, OnDestroy {
   readonly manualUrl = `/manual?doc=${encodeURIComponent(MANUAL_SOURCE_ID)}`;
   readonly iBack = ArrowLeft16;
   readonly iRenew = Renew16;
-  readonly iAdd = Add16;
+  readonly iAdd = DataAdd16;
   readonly iCatalog = Catalog16;
   readonly iFleet = ListBoxes16;
   readonly iSettings = Settings16;

@@ -392,7 +392,7 @@ pg-metric { display: block; height: 100%; }
 .pgp-subnav .pfs-plugin-tab { min-height: 2.35rem; font-size: 0.72rem; }
 .pgp-subnav .pfs-plugin-tab.active { color: #7a2e13; border-bottom-color: #e66d24; }
 .pgp-header-tools { position: relative; min-width: 0; padding-top: 1rem; }
-.pgp-header-context { display: grid; grid-template-columns: minmax(11rem, 1fr) minmax(14rem, 1.25fr); gap: 12px; align-items: end; }
+.pgp-header-context { display: grid; grid-template-columns: repeat(2, minmax(14rem, 1fr)); gap: 12px; align-items: end; }
 .pgp-header-context-unit { display: flex; align-items: flex-end; gap: 4px; min-width: 0; }
 .pgp-header-context-field { flex: 1 1 auto; min-width: 0; margin: 0; }
 .pgp-header-context-field .clr-control-label { margin: 0 0 1px; color: var(--os-muted); font-size: 0.62rem; line-height: 1; }
@@ -401,8 +401,7 @@ pg-metric { display: block; height: 100%; }
 .pgp-header-context-field .clr-select { width: 100%; }
 .pgp-header-context-field .clr-select { height: 1.35rem; min-height: 1.35rem; padding-right: 1.1rem; font-size: 0.66rem; line-height: 1.35rem; }
 .pgp-header-context-action,
-.pgp-header-context-refresh { flex: 0 0 auto; min-width: auto; height: 1.35rem; min-height: 1.35rem; margin: 0 0 1px; padding: 0 4px; font-size: 0.62rem; line-height: 1.35rem; }
-.pgp-header-context-refresh { width: 1.55rem; padding: 0; }
+.pgp-header-context-refresh { flex: 0 0 1.75rem; width: 1.75rem; min-width: 1.75rem; height: 1.35rem; min-height: 1.35rem; margin: 0 0 1px; padding: 0; font-size: 0.62rem; line-height: 1.35rem; }
 .pgp-navigation-row { display: flex; align-items: stretch; min-width: 0; border-bottom: 1px solid var(--os-border); }
 .pgp-navigation-row osp-plugin-tabs { display: block; flex: 1 1 auto; min-width: 0; }
 .pgp-navigation-row .pfs-plugin-tabs { margin: 0; border-bottom: 0; }
