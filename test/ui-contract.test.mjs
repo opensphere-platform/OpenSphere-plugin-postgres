@@ -54,7 +54,9 @@ test('PostgreSQL separates selected-runtime navigation from management workspace
   assert.match(css, /\.pgp-management-action:focus-visible/);
   assert.match(css, /\.pgp-header-tools\s*\{[^}]*position:\s*relative/);
   assert.match(css, /\.pgp-page-frame\s+\.pfs-plugin-release\s*>\s*\.pgp-header-tools\s*\{[^}]*padding:\s*1\.55rem\s+10px\s+0[^}]*overflow:\s*visible/);
-  assert.match(css, /\.pgp-management-actions--header\s*\{[^}]*position:\s*absolute[^}]*top:\s*-1\.95rem[^}]*right:\s*0/);
+  assert.match(css, /\.pgp-management-actions--header\s*\{[^}]*position:\s*absolute[^}]*top:\s*-1\.45rem[^}]*right:\s*0/);
+  assert.match(css, /\.pgp-management-actions--header \.pgp-management-action\s*\{[^}]*border-bottom:\s*0/);
+  assert.match(css, /\.pgp-management-actions--header \.pgp-management-action\.active\s*\{[^}]*background:\s*transparent[^}]*color:\s*#7a2e13/);
   assert.match(css, /\.pgp-header-context\s*\{[^}]*grid-template-columns:\s*repeat\(2,\s*max-content\)/);
   assert.match(css, /\.pgp-header-context-field\s*\{[^}]*flex:\s*0\s+0\s+220px[^}]*width:\s*220px[^}]*min-width:\s*220px/);
   assert.match(css, /\.pgp-header-context-action,\s*\n\.pgp-header-context-refresh\s*\{[^}]*flex:\s*0\s+0\s+1\.75rem[^}]*width:\s*1\.75rem/);
@@ -78,6 +80,10 @@ test('provisioning is namespace-first and uses one canonical PostgresClaim v1bet
   for (const marker of ['운영 Plan', 'PostgreSQL major', '삭제 정책', '스토리지 override', 'Instance Profile', 'PostgreSQL Profile', 'Pooling Profile', '백업 Object Storage', 'YAML 미리보기']) {
     assert.match(component, new RegExp(marker));
   }
+  assert.match(component, /name="claimAlias"[^>]*maxlength="120"[^>]*차세대 MES 개발을 위한 개발 데이터 베이스/);
+  assert.match(component, /description: cluster\?\.alias \|\|/);
+  assert.match(component, /opensphere\.io\/display-name/);
+  assert.match(fleet, /annotations: \{ 'opensphere\.io\/display-name': draft\.alias\.trim\(\) \}/);
   assert.doesNotMatch(component, /<pg-claims/);
   assert.match(component, /apiVersion: provisioning\.opensphere\.io\/v1beta1/);
   assert.match(fleet, /provisioning\.opensphere\.io\/v1beta1\/namespaces/);

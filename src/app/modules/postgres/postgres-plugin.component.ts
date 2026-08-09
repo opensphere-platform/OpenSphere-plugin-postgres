@@ -184,6 +184,7 @@ const DEFAULT_FORM: PgForm = {
           <div class="pgp-form-grid">
             <label><span>Namespace</span><input name="claimNamespace" [value]="selectedNamespace()" disabled /><small>상단 Namespace 선택과 동일합니다.</small></label>
             <label><span>인스턴스 이름</span><input name="claimName" [(ngModel)]="claimName" placeholder="orders-postgres" required /></label>
+            <label><span>표시 이름</span><input name="claimAlias" [(ngModel)]="claimAlias" maxlength="120" placeholder="차세대 MES 개발을 위한 개발 데이터 베이스" required /><small>선택된 인스턴스의 PostgreSQL 헤더에 표시합니다.</small></label>
             <label><span>초기 Database</span><input name="claimDatabase" [(ngModel)]="claimDatabase" placeholder="orders" required /></label>
             <label><span>Owner role</span><input name="claimOwner" [(ngModel)]="claimOwner" placeholder="orders_app" required /></label>
           </div>
@@ -214,7 +215,7 @@ const DEFAULT_FORM: PgForm = {
           </div>
         </fieldset>
         <clr-alert *ngIf="claimResult" [clrAlertType]="claimFailed?'danger':'success'" [clrAlertClosable]="false"><clr-alert-item><span class="alert-text">{{claimResult}}</span></clr-alert-item></clr-alert>
-        <div class="os-actions"><button class="btn btn-primary" type="submit" [disabled]="creatingClaim || !claimName.trim() || !claimDatabase.trim() || !claimOwner.trim()">PostgreSQL 인스턴스 생성</button><button class="btn" type="button" (click)="previewClaim()" [disabled]="!claimName.trim()">YAML 미리보기</button><button class="btn btn-link" type="button" (click)="openTab('profiles')">Profile 관리</button></div>
+        <div class="os-actions"><button class="btn btn-primary" type="submit" [disabled]="creatingClaim || !claimName.trim() || !claimAlias.trim() || !claimDatabase.trim() || !claimOwner.trim()">PostgreSQL 인스턴스 생성</button><button class="btn" type="button" (click)="previewClaim()" [disabled]="!claimName.trim()">YAML 미리보기</button><button class="btn btn-link" type="button" (click)="openTab('profiles')">Profile 관리</button></div>
       </form>
       <pre class="pgp-yaml-preview" *ngIf="claimYamlPreview()" aria-label="PostgresClaim YAML 미리보기">{{ claimYamlPreview() }}</pre>
       <section class="pgp-provisioned" *ngIf="namespaceClusters().length"><h3>이 Namespace의 인스턴스</h3><div class="pgp-operator-grid"><button class="card" type="button" *ngFor="let cluster of namespaceClusters()" (click)="selectFleetClusterAndOpen(cluster.id)"><div class="card-header">{{cluster.displayName}} <span class="label" [ngClass]="cluster.ready?'label-success':'label-warning'">{{cluster.phase}}</span></div><div class="card-block"><dl class="os-kv"><dt>Plan</dt><dd>{{cluster.plan || '—'}}</dd><dt>Instances</dt><dd>{{cluster.readyInstances}} / {{cluster.instances}}</dd><dt>Storage</dt><dd>{{cluster.storage || '—'}}</dd></dl></div></button></div></section>
@@ -364,7 +365,7 @@ export class PostgresPluginComponent implements OnInit, OnDestroy {
   readonly applyProgress = signal(0);
   readonly applyLogs = signal<string[]>([]);
   private installTimer: ReturnType<typeof setInterval> | undefined;
-  claimName = ''; claimDatabase = ''; claimOwner = ''; claimPlan = 'postgresql-dev-single';
+  claimName = ''; claimAlias = ''; claimDatabase = ''; claimOwner = ''; claimPlan = 'postgresql-dev-single';
   claimVersion = '18'; claimStorageSize = ''; claimStorageClass = ''; claimDeletionPolicy: 'Retain' | 'Delete' = 'Retain';
   claimInstanceProfile = ''; claimPostgresProfile = ''; claimPoolingProfile = ''; claimObjectStorageProfile = '';
   creatingClaim = false; claimResult = ''; claimFailed = false;
@@ -498,12 +499,12 @@ export class PostgresPluginComponent implements OnInit, OnDestroy {
     try {
       const namespace = this.selectedNamespace();
       const claimName = this.claimName.trim();
-      await this.fleet.createClaim({ name: this.claimName.trim(), namespace, database: this.claimDatabase.trim(), owner: this.claimOwner.trim(), plan: this.claimPlan,
+      await this.fleet.createClaim({ name: this.claimName.trim(), alias: this.claimAlias.trim(), namespace, database: this.claimDatabase.trim(), owner: this.claimOwner.trim(), plan: this.claimPlan,
         version: this.claimVersion.trim() || undefined, deletionPolicy: this.claimDeletionPolicy,
         storageSize: this.claimStorageSize.trim() || undefined, storageClass: this.claimStorageClass || undefined,
         profileRefs: { instanceProfile: this.claimInstanceProfile || undefined, postgresConfig: this.claimPostgresProfile || undefined, poolingConfig: this.claimPoolingProfile || undefined, objectStorage: this.claimObjectStorageProfile || undefined } });
       this.claimResult = `PostgresClaim ${namespace}/${claimName} 생성 요청이 승인되었습니다.`;
-      this.claimName = ''; this.claimDatabase = ''; this.claimOwner = ''; this.claimStorageSize = ''; this.claimStorageClass = ''; this.claimDeletionPolicy = 'Retain'; this.claimInstanceProfile = ''; this.claimPostgresProfile = ''; this.claimPoolingProfile = ''; this.claimObjectStorageProfile = '';
+      this.claimName = ''; this.claimAlias = ''; this.claimDatabase = ''; this.claimOwner = ''; this.claimStorageSize = ''; this.claimStorageClass = ''; this.claimDeletionPolicy = 'Retain'; this.claimInstanceProfile = ''; this.claimPostgresProfile = ''; this.claimPoolingProfile = ''; this.claimObjectStorageProfile = '';
       this.claimYamlPreview.set('');
       this.syncNamespaceContext();
       const created = this.namespaceClusters().find((cluster) => cluster.name === claimName);
@@ -532,6 +533,8 @@ export class PostgresPluginComponent implements OnInit, OnDestroy {
       'metadata:',
       `  name: ${this.claimName.trim() || '<name>'}`,
       `  namespace: ${this.selectedNamespace()}`,
+      '  annotations:',
+      `    opensphere.io/display-name: ${JSON.stringify(this.claimAlias.trim() || '<display-name>')}`,
       'spec:',
       `  planRef:\n    name: ${this.claimPlan}`,
       '  isolation: Dedicated',
@@ -583,7 +586,7 @@ export class PostgresPluginComponent implements OnInit, OnDestroy {
     const cluster = this.selectedContextCluster();
     return {
       name: 'PostgreSQL', logo: LOGO, stack: 'PFS / StackGres', capability: 'data.sql.postgres',
-      description: 'Namespace별 PostgreSQL을 StackGres 운영 모델로 프로비저닝하고 수명주기·데이터·보호 정책을 관리하는 Foundation service',
+      description: cluster?.alias || (cluster ? `${cluster.displayName} PostgreSQL 인스턴스` : 'Namespace를 선택하거나 PostgreSQL 인스턴스를 생성하세요.'),
       lifecycle: this.lifecycleLabel(), lifecycleClass: this.lifecyclePill(), versionLabel: 'PostgreSQL',
       version: this.compactPostgresVersion(cluster?.postgresVersion || ''), profile: cluster?.plan || cluster?.mode || 'Not installed',
     };

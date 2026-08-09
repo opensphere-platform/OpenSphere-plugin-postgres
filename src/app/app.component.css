@@ -418,9 +418,9 @@ pg-metric { display: block; height: 100%; }
 .pgp-management-action.active { border-bottom-color: #e66d24; color: #7a2e13; font-weight: 600; }
 .pgp-management-action--primary { color: var(--os-brand-500); }
 .pgp-management-action--primary os-cicon { color: var(--os-brand-500); }
-.pgp-management-actions--header { position: absolute; top: -1.95rem; right: 0; justify-content: flex-end; align-items: center; min-height: 1.45rem; border-left: 0; }
-.pgp-management-actions--header .pgp-management-action { width: 1.75rem; min-width: 1.75rem; min-height: 1.45rem; border-bottom-width: 2px; }
-.pgp-management-actions--header .pgp-management-action.active { background: #fff8f3; }
+.pgp-management-actions--header { position: absolute; top: -1.45rem; right: 0; justify-content: flex-end; align-items: center; min-height: 1.45rem; border-left: 0; }
+.pgp-management-actions--header .pgp-management-action { width: 1.75rem; min-width: 1.75rem; min-height: 1.45rem; border-bottom: 0; }
+.pgp-management-actions--header .pgp-management-action.active { background: transparent; color: #7a2e13; }
 .pgp-management-scope { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 2.25rem; padding: 3px 10px; border-bottom: 1px solid #efc6aa; background: #fff8f3; color: var(--os-text-sec); font-size: 0.68rem; }
 .pgp-management-scope b { color: #9f3a16; }
 .pgp-management-scope .btn { margin: 0; }

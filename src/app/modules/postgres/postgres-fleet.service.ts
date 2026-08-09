@@ -3,13 +3,13 @@ import { apiBase, hostFetch, writeHeaders } from '../../api-base';
 
 export interface PostgresFleetCluster {
   id: string; provider: 'stackgres'; namespace: string; name: string;
-  displayName: string; mode: 'Dedicated'; phase: string; ready: boolean;
+  displayName: string; alias?: string; mode: 'Dedicated'; phase: string; ready: boolean;
   instances: number; readyInstances: number; postgresVersion: string; storage: string;
   plan: string; bindingSecret: string; uid: string; createdAt: string | null;
 }
 
 export interface PostgresClaimDraft {
-  name: string; namespace: string; database: string; owner: string; plan: string;
+  name: string; alias: string; namespace: string; database: string; owner: string; plan: string;
   version?: string; deletionPolicy?: 'Retain' | 'Delete';
   storageSize?: string; storageClass?: string;
   profileRefs?: { instanceProfile?: string; postgresConfig?: string; poolingConfig?: string; objectStorage?: string };
@@ -85,13 +85,29 @@ export class PostgresFleetService {
       ]);
       const fleetBody = await fleet.json().catch(() => ({}));
       if (!fleet.ok) throw new Error(fleetBody.error || `PostgreSQL fleet HTTP ${fleet.status}`);
-      const clusterRows = (fleetBody.clusters || []) as PostgresFleetCluster[];
+      const claimsBody = claims.ok ? await claims.json() : { items: [] };
+      const claimRows = (claimsBody.items || []) as any[];
+      const clusterRows = ((fleetBody.clusters || []) as PostgresFleetCluster[]).map((cluster) => {
+        const claim = claimRows.find((item) => {
+          if (item.metadata?.namespace !== cluster.namespace) return false;
+          const resourceNames = [
+            item.metadata?.name,
+            item.status?.clusterName,
+            item.status?.resourceName,
+            item.status?.clusterRef?.name,
+            item.status?.resourceRef?.name,
+          ].filter(Boolean);
+          return resourceNames.some((name) => cluster.name === name || cluster.name.includes(String(name)));
+        });
+        const alias = String(claim?.metadata?.annotations?.['opensphere.io/display-name'] || '').trim();
+        return alias ? { ...cluster, alias } : cluster;
+      });
       this.clusters.set(clusterRows);
       if (!clusterRows.some((cluster) => cluster.id === this.selectedId()) && clusterRows[0]) {
         this.selectedId.set(clusterRows[0].id);
       }
       this.plans.set(plans.ok ? ((await plans.json()).items || []).filter((item: any) => item.spec?.capabilityRef === 'postgresql') : []);
-      this.claims.set(claims.ok ? ((await claims.json()).items || []) : []);
+      this.claims.set(claimRows);
       if (namespaces.ok) {
         const rows: string[] = ((await namespaces.json()).namespaces || [])
           .map((item: any): string => String(item.name || ''))
@@ -127,7 +143,11 @@ export class PostgresFleetService {
     const response = await hostFetch(this.api(`/api/k8s/apis/provisioning.opensphere.io/v1beta1/namespaces/${encodeURIComponent(draft.namespace)}/postgresclaims`), {
       method: 'POST', headers: writeHeaders(), body: JSON.stringify({
         apiVersion: 'provisioning.opensphere.io/v1beta1', kind: 'PostgresClaim',
-        metadata: { name: draft.name, namespace: draft.namespace }, spec,
+        metadata: {
+          name: draft.name,
+          namespace: draft.namespace,
+          annotations: { 'opensphere.io/display-name': draft.alias.trim() },
+        }, spec,
       }),
     });
     const body = await response.json().catch(() => ({}));
