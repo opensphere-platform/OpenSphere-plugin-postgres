@@ -3,11 +3,12 @@ import { Component, computed, inject } from '@angular/core';
 import { CnpgService } from '../cnpg.service';
 import { PgKv } from '../ui/pg-kv';
 import { PgState } from '../ui/pg-state';
+import { PgExtensionsPanel } from './pg-extensions.panel';
 
 @Component({
   selector: 'pg-config',
   standalone: true,
-  imports: [CommonModule, PgKv, PgState],
+  imports: [CommonModule, PgKv, PgState, PgExtensionsPanel],
   template: `
     <div class="os-cardgrid">
       <div class="card">
@@ -36,6 +37,8 @@ import { PgState } from '../ui/pg-state';
     <pg-state [state]="state()" hint="명시 파라미터 없음" [sub]="providerLabel() + ' 기본 튜닝을 사용합니다.'" (retry)="svc.refresh()">
       <pg-kv [params]="svc.params()"></pg-kv>
     </pg-state>
+
+    <pg-extensions-panel></pg-extensions-panel>
   `,
 })
 export class PgConfigTab {

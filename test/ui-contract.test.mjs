@@ -100,7 +100,10 @@ test('provisioning is namespace-first and uses one canonical PostgresClaim v1bet
   assert.doesNotMatch(component, /<pg-claims/);
   assert.match(component, /apiVersion: provisioning\.opensphere\.io\/v1beta1/);
   assert.match(fleet, /provisioning\.opensphere\.io\/v1beta1\/namespaces/);
-  assert.match(fleet, /spec\.version = draft\.version/);
+  assert.match(component, /\[value\]="selectedClaimPlanVersion\(\)" disabled/);
+  assert.doesNotMatch(component, /\[\(ngModel\)\]="claimVersion"/);
+  assert.match(fleet, /spec\.extensions = draft\.extensions/);
+  assert.match(component, /호환되는 StackGres 확장만 표시/);
   assert.match(component, /External Channels에서 등록한 백업 대상/);
 });
 

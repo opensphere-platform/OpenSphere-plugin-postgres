@@ -20,8 +20,10 @@ export interface PgQueryResult {
 }
 export interface PgTypedAction {
   action: 'create-schema' | 'drop-schema' | 'create-table' | 'drop-table' | 'create-index' | 'drop-index'
-    | 'drop-view' | 'drop-materialized-view' | 'drop-sequence' | 'drop-foreign-table';
-  database: string; schema: string; name?: string; table?: string; reason: string; unique?: boolean;
+    | 'drop-view' | 'drop-materialized-view' | 'drop-sequence' | 'drop-foreign-table'
+    | 'create-extension' | 'update-extension' | 'drop-extension';
+  database: string; schema?: string; name?: string; table?: string; reason: string; unique?: boolean;
+  version?: string; cascade?: boolean;
   columns?: Array<{ name: string; type: string; nullable: boolean; default: string }>; indexColumns?: string[];
 }
 

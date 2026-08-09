@@ -6,11 +6,24 @@ export interface PostgresFleetCluster {
   displayName: string; alias?: string; mode: 'Dedicated'; phase: string; ready: boolean;
   instances: number; readyInstances: number; postgresVersion: string; storage: string;
   plan: string; bindingSecret: string; uid: string; createdAt: string | null;
+  extensions: PostgresExtensionSelection[]; extensionStatus: any[];
+}
+
+export interface PostgresExtensionSelection {
+  name: string; version?: string; publisher?: string; repository?: string;
+}
+export interface PostgresExtensionCatalogItem extends PostgresExtensionSelection {
+  license: string; abstract: string; description: string; tags: string[]; versions: string[]; channels: Record<string, string>;
+}
+export interface PostgresExtensionsView {
+  postgresVersion: string; catalog: PostgresExtensionCatalogItem[]; desired: PostgresExtensionSelection[];
+  observed: any[]; pendingRestart: boolean; refreshedAt: string;
 }
 
 export interface PostgresClaimDraft {
   name: string; alias: string; namespace: string; database: string; owner: string; plan: string;
-  version?: string; deletionPolicy?: 'Retain' | 'Delete';
+  deletionPolicy?: 'Retain' | 'Delete';
+  extensions?: PostgresExtensionSelection[];
   storageSize?: string; storageClass?: string;
   profileRefs?: { instanceProfile?: string; postgresConfig?: string; poolingConfig?: string; objectStorage?: string };
 }
@@ -67,6 +80,9 @@ export class PostgresFleetService {
   readonly operatorError = signal('');
   readonly namespaces = signal<string[]>(['opensphere-foundation']);
   readonly selectedId = signal('');
+  readonly extensions = signal<PostgresExtensionsView | null>(null);
+  readonly extensionsState = signal<'idle' | 'loading' | 'ok' | 'error'>('idle');
+  readonly extensionsError = signal('');
   readonly state = signal<'loading' | 'ok' | 'empty' | 'error'>('loading');
   readonly error = signal('');
   readonly busy = signal(false);
@@ -137,7 +153,7 @@ export class PostgresFleetService {
       planRef: { name: draft.plan }, isolation: 'Dedicated', database: draft.database, owner: draft.owner,
       deletionPolicy: draft.deletionPolicy || 'Retain',
     };
-    if (draft.version) spec.version = draft.version;
+    if (draft.extensions?.length) spec.extensions = draft.extensions;
     if (draft.profileRefs && Object.values(draft.profileRefs).some(Boolean)) spec.profileRefs = draft.profileRefs;
     if (draft.storageSize || draft.storageClass) spec.storage = { size: draft.storageSize || undefined, storageClass: draft.storageClass || undefined };
     const response = await hostFetch(this.api(`/api/k8s/apis/provisioning.opensphere.io/v1beta1/namespaces/${encodeURIComponent(draft.namespace)}/postgresclaims`), {
@@ -167,6 +183,40 @@ export class PostgresFleetService {
     } catch (error: any) {
       this.profiles.set([]); this.profilesState.set('error'); this.profilesError.set(error?.message || String(error));
     }
+  }
+
+  async refreshExtensions(input: { cluster?: string; postgresVersion?: string }): Promise<void> {
+    this.extensionsState.set('loading'); this.extensionsError.set('');
+    try {
+      const query = new URLSearchParams();
+      if (input.cluster) query.set('cluster', input.cluster);
+      if (input.postgresVersion) query.set('postgresVersion', input.postgresVersion);
+      const response = await hostFetch(this.api(`/api/foundation/postgres/extensions?${query.toString()}`), { cache: 'no-store' });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(body.error || `Extension catalog HTTP ${response.status}`);
+      this.extensions.set(body as PostgresExtensionsView); this.extensionsState.set('ok');
+    } catch (error: any) {
+      this.extensions.set(null); this.extensionsState.set('error'); this.extensionsError.set(error?.message || String(error));
+    }
+  }
+
+  async previewExtensions(cluster: string, extensions: PostgresExtensionSelection[], reason: string): Promise<any> {
+    return this.extensionMutation(cluster, extensions, reason, true);
+  }
+
+  async applyExtensions(cluster: string, extensions: PostgresExtensionSelection[], reason: string): Promise<any> {
+    const result = await this.extensionMutation(cluster, extensions, reason, false);
+    await Promise.all([this.refreshExtensions({ cluster }), this.refresh()]);
+    return result;
+  }
+
+  private async extensionMutation(cluster: string, extensions: PostgresExtensionSelection[], reason: string, dryRun: boolean): Promise<any> {
+    const response = await hostFetch(this.api('/api/foundation/postgres/extensions'), {
+      method: 'POST', headers: writeHeaders(), body: JSON.stringify({ cluster, extensions, reason, dryRun }),
+    });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(body.error || `Extension allocation HTTP ${response.status}`);
+    return body;
   }
 
   async refreshBackupTargets(): Promise<void> {
