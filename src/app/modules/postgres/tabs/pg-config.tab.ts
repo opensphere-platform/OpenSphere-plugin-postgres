@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject } from '@angular/core';
+import { ClarityModule } from '@clr/angular';
 import { CnpgService } from '../cnpg.service';
 import { PgKv } from '../ui/pg-kv';
 import { PgState } from '../ui/pg-state';
@@ -8,7 +9,13 @@ import { PgExtensionsPanel } from './pg-extensions.panel';
 @Component({
   selector: 'pg-config',
   standalone: true,
-  imports: [CommonModule, PgKv, PgState, PgExtensionsPanel],
+  imports: [CommonModule, ClarityModule, PgKv, PgState, PgExtensionsPanel],
+  styles: [`
+    .pgc-workspace{margin-top:1rem}
+    .pgc-pane{height:clamp(28rem,calc(100vh - 22rem),42rem);overflow:auto;padding:.25rem .15rem 1rem 0}
+    .pgc-parameters{padding-top:.75rem}
+    @media(max-height:760px){.pgc-pane{height:28rem}}
+  `],
   template: `
     <div class="os-cardgrid">
       <div class="card">
@@ -33,12 +40,24 @@ import { PgExtensionsPanel } from './pg-extensions.panel';
       </div>
     </div>
 
-    <pg-extensions-panel></pg-extensions-panel>
-
-    <div class="os-sech">postgresql.conf 파라미터</div>
-    <pg-state [state]="state()" hint="명시 파라미터 없음" [sub]="providerLabel() + ' 기본 튜닝을 사용합니다.'" (retry)="svc.refresh()">
-      <pg-kv [params]="svc.params()"></pg-kv>
-    </pg-state>
+    <clr-tabs class="pgc-workspace" aria-label="PostgreSQL 설정 영역">
+      <clr-tab>
+        <button clrTabLink type="button">Extensions</button>
+        <clr-tab-content *clrIfActive>
+          <div class="pgc-pane"><pg-extensions-panel></pg-extensions-panel></div>
+        </clr-tab-content>
+      </clr-tab>
+      <clr-tab>
+        <button clrTabLink type="button">Parameters <span class="badge">{{ paramCount() }}</span></button>
+        <clr-tab-content *clrIfActive>
+          <div class="pgc-pane pgc-parameters">
+            <pg-state [state]="state()" hint="명시 파라미터 없음" [sub]="providerLabel() + ' 기본 튜닝을 사용합니다.'" (retry)="svc.refresh()">
+              <pg-kv [params]="svc.params()"></pg-kv>
+            </pg-state>
+          </div>
+        </clr-tab-content>
+      </clr-tab>
+    </clr-tabs>
   `,
 })
 export class PgConfigTab {
