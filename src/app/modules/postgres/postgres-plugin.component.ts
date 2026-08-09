@@ -193,7 +193,6 @@ const DEFAULT_FORM: PgForm = {
           <legend>운영 Plan</legend>
           <div class="pgp-form-grid">
             <label><span>Plan</span><select name="claimPlan" [(ngModel)]="claimPlan"><option *ngFor="let plan of fleet.plans()" [value]="plan.metadata?.name">{{ plan.metadata?.name }} · {{ plan.spec?.displayName || plan.spec?.description || 'PostgreSQL' }}</option><option *ngIf="!fleet.plans().length" value="postgresql-dev-single">postgresql-dev-single</option></select><small>인스턴스 수, 스토리지와 기본 보호 정책의 승인된 조합입니다.</small></label>
-            <label><span>실행 엔진</span><input name="claimEngine" value="StackGres" disabled /><small>PFSS PostgreSQL의 단일 운영 엔진입니다.</small></label>
             <label><span>PostgreSQL major</span><input name="claimVersion" [(ngModel)]="claimVersion" placeholder="18" /><small>비워 두면 Plan 기본 버전을 사용합니다.</small></label>
             <label><span>삭제 정책</span><select name="claimDeletionPolicy" [(ngModel)]="claimDeletionPolicy"><option value="Retain">Retain · 데이터 보존</option><option value="Delete">Delete · 인스턴스와 함께 제거</option></select><small>Claim 삭제 시 데이터 수명주기입니다.</small></label>
           </div>
@@ -239,7 +238,6 @@ const DEFAULT_FORM: PgForm = {
     </clr-modal>
 
     <section *ngIf="tab() === 'operator'" class="pgp-workspace pgp-workspace--full">
-      <div class="pgp-provider-banner"><div><span class="vl-eyebrow">PostgreSQL operating provider</span><h2>StackGres Operator</h2><p>클러스터 생성·복구·백업·확장과 PostgreSQL 설정 적용을 담당하는 플랫폼 제어 계층입니다.</p></div><div class="pgp-provider-version"><small>Operator</small><b>{{ operatorVersion() }}</b><span>Platform scope</span></div></div>
       <div class="pgp-section-head"><div><h3>Operator control areas</h3><p>StackGres 제어판의 구성을 OpenSphere 운영 규칙에 맞춰 확인합니다.</p></div><button class="btn btn-sm" type="button" (click)="refreshOperator()">새로고침</button></div>
       <clr-alert *ngIf="fleet.operatorError()" clrAlertType="danger" [clrAlertClosable]="false"><clr-alert-item><span class="alert-text">{{ fleet.operatorError() }}</span></clr-alert-item></clr-alert>
       <div class="pgp-loading" *ngIf="fleet.operatorState()==='loading'">StackGres Operator 구성을 확인하고 있습니다.</div>
@@ -632,10 +630,6 @@ export class PostgresPluginComponent implements OnInit, OnDestroy {
   }
   primaryTabLabel(): string { return this.primaryTabs.find((item) => item.id === this.primaryTab())?.label || ''; }
   private tabRequiresCluster(id: PackageTab): boolean { return !!this.tabs.find((item) => item.id === id)?.requiresCluster; }
-  operatorVersion(): string {
-    const operator = this.fleet.operator();
-    return operator?.config?.status?.version || operator?.config?.metadata?.labels?.version || 'Detected';
-  }
   clusterAvailability(cluster: PostgresFleetCluster): number {
     return cluster.instances ? Math.round((cluster.readyInstances / cluster.instances) * 100) : 0;
   }

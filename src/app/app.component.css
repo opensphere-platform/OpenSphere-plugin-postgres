@@ -487,12 +487,6 @@ pg-metric { display: block; height: 100%; }
 .pgp-yaml-preview { max-height: 24rem; margin: 14px 0; padding: 16px; overflow: auto; border-left: 3px solid #e66d24; background: #161616; color: #f4f4f4; font-size: 0.72rem; line-height: 1.5; }
 .pgp-provisioned { margin-top: 22px; }
 .pgp-provisioned h3 { margin: 0 0 10px; color: var(--os-ink); font-size: 1rem; }
-.pgp-provider-banner { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px; align-items: center; margin-bottom: 18px; padding: 18px 20px; border-left: 4px solid #e66d24; background: linear-gradient(90deg, #fff6ef 0, #fff 52%); }
-.pgp-provider-banner h2 { margin: 2px 0 4px; color: var(--os-ink); font-size: 1.45rem; font-weight: 400; }
-.pgp-provider-banner p { margin: 0; color: var(--os-text-sec); font-size: 0.76rem; }
-.pgp-provider-version { display: grid; min-width: 9rem; padding-left: 16px; border-left: 1px solid #efc6aa; }
-.pgp-provider-version small, .pgp-provider-version span { color: var(--os-muted); font-size: 0.64rem; }
-.pgp-provider-version b { margin: 2px 0; color: #9f3a16; font-size: 1rem; }
 .pgp-control-area-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; margin: 0 0 16px; background: var(--os-border); border: 1px solid var(--os-border); }
 .pgp-control-area-grid article { display: flex; flex-direction: column; min-height: 6.2rem; padding: 14px 16px; background: #fff; }
 .pgp-control-area-grid span { color: #9f3a16; font-size: 0.66rem; font-weight: 700; text-transform: uppercase; }
@@ -547,8 +541,6 @@ pg-metric { display: block; height: 100%; }
   .pgp-steps, .pgp-runtime-context, .pgp-dashboard, .pgp-description, .pgp-operator-grid, .pgp-form-grid, .pgp-check-grid, .pgp-control-area-grid, .pgp-selected-target { grid-template-columns: 1fr; }
   .pgp-provider-flow { grid-template-columns: 1fr; }
   .pgp-provider-flow > i { display: none; }
-  .pgp-provider-banner { grid-template-columns: auto 1fr; }
-  .pgp-provider-version { grid-column: 1 / -1; padding: 10px 0 0; border-left: 0; border-top: 1px solid #efc6aa; }
   .pgp-release > div, .pfs-plugin-release > div { border-left: 0; border-top: 1px solid var(--os-border); padding: 8px 6px; }
   .pgp-panel:last-child { grid-column: auto; }
   .pgp-page-frame .pfs-plugin-release { grid-template-columns: repeat(2, minmax(0, 1fr)); }
