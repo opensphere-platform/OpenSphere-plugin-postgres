@@ -190,7 +190,7 @@ const DEFAULT_FORM: PgForm = {
       </div>
       <div class="pg-request-types" role="radiogroup" aria-label="PostgreSQL 리소스 요청 유형">
         <button type="button" class="pg-request-type" *ngFor="let option of provisioningModeOptions"
-          [class.is-active]="provisioningMode() === option.id" (click)="provisioningMode.set(option.id)">
+          [class.is-active]="provisioningMode() === option.id" [attr.aria-pressed]="provisioningMode() === option.id" (click)="selectProvisioningMode(option.id)">
           <span class="pg-request-title">{{ option.label }}</span><span>{{ option.description }}</span>
         </button>
       </div>
@@ -521,6 +521,11 @@ export class PostgresPluginComponent implements OnInit, OnDestroy {
   openControlPlane(): void { this.vr.setModule('control-plane'); }
   openTab(id: string): void { this.vr.setTab(id); }
   openPrimaryTab(id: string): void { this.openTab(id); }
+  selectProvisioningMode(mode: PostgresRequestMode): void {
+    this.provisioningMode.set(mode);
+    this.claimResult = '';
+    this.claimYamlPreview.set('');
+  }
   selectNamespace(namespace: string): void {
     if (!namespace || namespace === this.selectedNamespace()) return;
     this.selectedNamespace.set(namespace);

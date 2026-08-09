@@ -7,6 +7,10 @@ import { pathToFileURL } from 'node:url';
 const root = resolve(import.meta.dirname, '..');
 const trackedChanges = execFileSync('git', ['status', '--short', '--untracked-files=no'], { cwd: root, encoding: 'utf8' }).trim();
 if (trackedChanges) throw new Error(`package:module requires a clean tracked source tree:\n${trackedChanges}`);
+// Signing is the irreversible release boundary. Re-run the canonical UI
+// contract here so a stale branch cannot produce a valid PostgreSQL package
+// even when its Angular bundle still compiles.
+execFileSync(process.execPath, ['--test', 'test/ui-contract.test.mjs'], { cwd: root, stdio: 'inherit' });
 const keyPath = process.env.DUPA_SIGNING_KEY;
 if (!keyPath) throw new Error('DUPA_SIGNING_KEY must point to the edge-local P-256 signing key');
 const keyId = process.env.DUPA_SIGNING_KEY_ID || 'opensphere-edge-local-v1';

@@ -144,6 +144,7 @@ test('PostgresClaim UI exposes every supported allocation contract', () => {
   assert.match(form, /읽기·쓰기/);
   assert.match(list, /status\?\.bindingRef\?\.name/);
   assert.match(component, /readonly provisioningMode = signal<PostgresRequestMode>\('Dedicated'\)/);
+  assert.match(component, /selectProvisioningMode\(mode: PostgresRequestMode\)/);
   assert.match(component, /<app-new-claim-form kind="pg"/);
   assert.doesNotMatch(component, /<pg-claims/);
   for (const tab of ['Overview', 'Monitoring', 'Topology', 'Database', 'Data Protection', 'Operations', 'Events', 'Documentation']) {
