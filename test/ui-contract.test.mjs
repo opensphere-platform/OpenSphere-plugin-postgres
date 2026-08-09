@@ -53,8 +53,9 @@ test('PostgreSQL separates selected-runtime navigation from management workspace
   assert.doesNotMatch(css, /\.pgp-management-action\s+span\s*\{/);
   assert.match(css, /\.pgp-management-action:focus-visible/);
   assert.match(css, /\.pgp-header-tools\s*\{[^}]*position:\s*relative/);
-  assert.match(css, /\.pgp-management-actions--header\s*\{[^}]*position:\s*absolute[^}]*top:\s*-0\.65rem[^}]*right:\s*0/);
-  assert.match(css, /\.pgp-header-context\s*\{[^}]*grid-template-columns:\s*repeat\(2,\s*minmax\(14rem,\s*1fr\)\)/);
+  assert.match(css, /\.pgp-management-actions--header\s*\{[^}]*position:\s*absolute[^}]*top:\s*0[^}]*right:\s*0/);
+  assert.match(css, /\.pgp-header-context\s*\{[^}]*grid-template-columns:\s*repeat\(2,\s*max-content\)/);
+  assert.match(css, /\.pgp-header-context-field\s*\{[^}]*flex:\s*0\s+0\s+220px[^}]*width:\s*220px[^}]*min-width:\s*220px/);
   assert.match(css, /\.pgp-header-context-action,\s*\n\.pgp-header-context-refresh\s*\{[^}]*flex:\s*0\s+0\s+1\.75rem[^}]*width:\s*1\.75rem/);
   assert.match(component, /DataAdd16 from '@carbon\/icons\/es\/data--add\/16'/);
   assert.match(component, /isManagementView\(\)/);
