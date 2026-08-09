@@ -27,6 +27,7 @@ export interface PostgresClaimDraft {
   extensions?: PostgresExtensionSelection[];
   storageSize?: string; storageClass?: string;
   profileRefs?: { instanceProfile?: string; postgresConfig?: string; poolingConfig?: string; objectStorage?: string };
+  reason: string;
 }
 
 export type PostgresProfileKind = 'instance' | 'postgres' | 'pooling' | 'objectStorage';
@@ -134,7 +135,7 @@ export class PostgresFleetService {
       if (!clusterRows.some((cluster) => cluster.id === this.selectedId()) && clusterRows[0]) {
         this.selectedId.set(clusterRows[0].id);
       }
-      this.plans.set(plans.ok ? ((await plans.json()).items || []).filter((item: any) => item.spec?.capabilityRef === 'postgresql') : []);
+      this.plans.set(plans.ok ? ((await plans.json()).items || []).filter((item: any) => item.spec?.capabilityRef === 'postgresql' && item.spec?.lifecycle === 'Available') : []);
       this.claims.set(claimRows);
       const runtimeBody = await runtimes.json().catch(() => ({}));
       if (!runtimes.ok) throw new Error(runtimeBody.error || `PostgreSQL runtime catalog HTTP ${runtimes.status}`);
@@ -166,22 +167,14 @@ export class PostgresFleetService {
   }
 
   async createClaim(draft: PostgresClaimDraft): Promise<void> {
-    const spec: any = {
-      planRef: { name: draft.plan }, isolation: 'Dedicated', database: draft.database, owner: draft.owner,
-      postgresVersion: draft.postgresVersion,
-      deletionPolicy: draft.deletionPolicy || 'Retain',
-    };
-    if (draft.extensions?.length) spec.extensions = draft.extensions;
-    if (draft.profileRefs && Object.values(draft.profileRefs).some(Boolean)) spec.profileRefs = draft.profileRefs;
-    if (draft.storageSize || draft.storageClass) spec.storage = { size: draft.storageSize || undefined, storageClass: draft.storageClass || undefined };
-    const response = await hostFetch(this.api(`/api/k8s/apis/provisioning.opensphere.io/v1beta1/namespaces/${encodeURIComponent(draft.namespace)}/postgresclaims`), {
+    const response = await hostFetch(this.api('/api/foundation/postgres/claims'), {
       method: 'POST', headers: writeHeaders(), body: JSON.stringify({
-        apiVersion: 'provisioning.opensphere.io/v1beta1', kind: 'PostgresClaim',
-        metadata: {
-          name: draft.name,
-          namespace: draft.namespace,
-          annotations: { 'opensphere.io/display-name': draft.alias.trim() },
-        }, spec,
+        name: draft.name, namespace: draft.namespace, alias: draft.alias.trim(), database: draft.database,
+        owner: draft.owner, plan: draft.plan, postgresVersion: draft.postgresVersion,
+        deletionPolicy: draft.deletionPolicy || 'Retain', extensions: draft.extensions,
+        profileRefs: draft.profileRefs,
+        storage: draft.storageSize || draft.storageClass ? { size: draft.storageSize || undefined, storageClass: draft.storageClass || undefined } : undefined,
+        reason: draft.reason, confirm: draft.name,
       }),
     });
     const body = await response.json().catch(() => ({}));
