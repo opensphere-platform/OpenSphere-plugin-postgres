@@ -42,13 +42,13 @@ import { PgExtensionsPanel } from './pg-extensions.panel';
     <clr-tabs class="pgc-workspace" aria-label="PostgreSQL 설정 영역">
       <clr-tab>
         <button clrTabLink type="button">Extensions</button>
-        <clr-tab-content *clrIfActive>
+        <clr-tab-content>
           <div class="pgc-pane"><pg-extensions-panel></pg-extensions-panel></div>
         </clr-tab-content>
       </clr-tab>
       <clr-tab>
         <button clrTabLink type="button">Parameters <span class="badge">{{ paramCount() }}</span></button>
-        <clr-tab-content *clrIfActive>
+        <clr-tab-content>
           <div class="pgc-pane pgc-parameters">
             <pg-state [state]="state()" hint="명시 파라미터 없음" [sub]="providerLabel() + ' 기본 튜닝을 사용합니다.'" (retry)="svc.refresh()">
               <pg-kv [params]="svc.params()"></pg-kv>

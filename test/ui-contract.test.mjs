@@ -93,6 +93,8 @@ test('runtime Extensions and Parameters share a horizontal Clarity workspace wit
   assert.match(config, /<button clrTabLink type="button">Extensions<\/button>/);
   assert.match(config, /<button clrTabLink type="button">Parameters <span class="badge">\{\{ paramCount\(\) \}\}<\/span><\/button>/);
   assert.equal((config.match(/<clr-tab>/g) || []).length, 2);
+  assert.equal((config.match(/<clr-tab-content>/g) || []).length, 2);
+  assert.doesNotMatch(config, /\*clrIfActive/);
   assert.match(config, /\.pgc-pane\{padding:/);
   assert.doesNotMatch(config, /\.pgc-pane\{[^}]*(height:|overflow:)/);
   assert.doesNotMatch(config, /<div class="os-sech">postgresql\.conf 파라미터<\/div>/);
