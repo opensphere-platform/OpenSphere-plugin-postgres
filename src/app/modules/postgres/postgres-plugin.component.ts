@@ -114,7 +114,7 @@ const DEFAULT_FORM: PgForm = {
           </div>
         </div>
       </osp-plugin-page-header>
-      <div class="pgp-navigation-row">
+      <div class="pgp-navigation-row" *ngIf="hasSelectedCluster() && !isManagementView()">
         <osp-plugin-tabs [tabs]="primaryTabsForUi()" [active]="primaryTab()" routeBase="/pfss/postgres" ariaLabel="PostgreSQL 운영 영역" (selected)="openPrimaryTab($event)" />
       </div>
       <div class="pgp-subnav" *ngIf="secondaryTabsForUi().length">
@@ -466,6 +466,7 @@ export class PostgresPluginComponent implements OnInit, OnDestroy {
     if (!selected) return;
     this.selectedNamespace.set(selected.namespace);
     this.applyClusterContext(selected);
+    if (this.isManagementView()) this.openTab('overview');
   }
   selectFleetClusterAndOpen(id: string): void { this.selectFleetCluster(id); this.openTab('overview'); }
   openSelectedAdmin(): void {

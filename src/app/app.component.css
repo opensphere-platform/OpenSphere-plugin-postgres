@@ -392,6 +392,10 @@ pg-metric { display: block; height: 100%; }
 .pgp-subnav .pfs-plugin-tab { min-height: 2.35rem; font-size: 0.72rem; }
 .pgp-subnav .pfs-plugin-tab.active { color: #7a2e13; border-bottom-color: #e66d24; }
 .pgp-header-tools { position: relative; min-width: 0; padding-top: 1.55rem; }
+.pgp-page-frame .pfs-plugin-release > .pgp-header-tools {
+  padding: 1.55rem 10px 0;
+  overflow: visible;
+}
 .pgp-header-context { display: grid; grid-template-columns: repeat(2, max-content); gap: 12px; align-items: end; }
 .pgp-header-context-unit { display: flex; align-items: flex-end; gap: 4px; min-width: 0; }
 .pgp-header-context-field { flex: 0 0 220px; width: 220px; min-width: 220px; margin: 0; }
