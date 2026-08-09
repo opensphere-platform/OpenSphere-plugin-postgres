@@ -9,7 +9,7 @@
   "title": "PostgreSQL",
   "description": "StackGres 기반 PostgreSQL Fleet 관리와 pgAdmin 운영 화면.",
   "entry": "main.js",
-  "entrySha256": "65f8c17a949361a66f5996f01ec812940ebc7d1508bb50232c636628747a48be",
+  "entrySha256": "a1a10b5c64a9eec66b445feff277275c423743e556b0061589a197a5b932aba7",
   "shellCompat": ">=0.2.0 <0.9.0",
   "sdkVersion": "0.3.6",
   "apiBase": "/api/plugins/postgres",
