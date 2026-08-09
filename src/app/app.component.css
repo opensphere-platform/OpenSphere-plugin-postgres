@@ -477,12 +477,7 @@ pg-metric { display: block; height: 100%; }
 .pgp-operator-grid > button.card { width: 100%; padding: 0; border: 1px solid var(--os-border); background: #fff; color: inherit; text-align: left; cursor: pointer; }
 .pgp-operator-grid > button.card:hover { border-color: var(--os-brand-500); }
 .pgp-operator-grid > button.pgp-selected-card { outline: 2px solid var(--os-brand-500); outline-offset: -2px; }
-.pgp-provider-flow { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr); gap: 10px; align-items: center; margin: 0 0 16px; padding: 12px 14px; border-left: 3px solid #e66d24; background: #fff8f3; }
-.pgp-provider-flow > div { display: grid; grid-template-columns: auto 1fr; gap: 1px 8px; min-width: 0; }
-.pgp-provider-flow > div > span { grid-row: 1 / 3; display: grid; place-items: center; width: 1.65rem; height: 1.65rem; border-radius: 50%; background: #e66d24; color: #fff; font-size: 0.68rem; font-weight: 700; }
-.pgp-provider-flow b { color: var(--os-ink); font-size: 0.76rem; }
-.pgp-provider-flow small { color: var(--os-muted); font-size: 0.66rem; }
-.pgp-provider-flow i { color: #b85c1f; font-style: normal; }
+.pgp-provisioning-timeline { display: block; margin: 0 0 16px; }
 .pgp-provisioning-form legend small { margin-left: 8px; color: var(--os-muted); font-size: 0.65rem; font-weight: 400; }
 .pgp-yaml-preview { max-height: 24rem; margin: 14px 0; padding: 16px; overflow: auto; border-left: 3px solid #e66d24; background: #161616; color: #f4f4f4; font-size: 0.72rem; line-height: 1.5; }
 .pgp-provisioned { margin-top: 22px; }
@@ -539,8 +534,6 @@ pg-metric { display: block; height: 100%; }
   .pgp-page-frame .pfs-plugin-tabs { padding: 0; }
   .pgp-release, .pfs-plugin-release { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .pgp-steps, .pgp-runtime-context, .pgp-dashboard, .pgp-description, .pgp-operator-grid, .pgp-form-grid, .pgp-check-grid, .pgp-control-area-grid, .pgp-selected-target { grid-template-columns: 1fr; }
-  .pgp-provider-flow { grid-template-columns: 1fr; }
-  .pgp-provider-flow > i { display: none; }
   .pgp-release > div, .pfs-plugin-release > div { border-left: 0; border-top: 1px solid var(--os-border); padding: 8px 6px; }
   .pgp-panel:last-child { grid-column: auto; }
   .pgp-page-frame .pfs-plugin-release { grid-template-columns: repeat(2, minmax(0, 1fr)); }

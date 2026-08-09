@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ClarityModule } from '@clr/angular';
+import { ClarityModule, ClrTimelineStepState } from '@clr/angular';
 import { CarbonIcon } from '../../carbon-icon';
 import { apiBase, hostFetch } from '../../api-base';
 import { FoundationRegistryService, PostgresInstallParameters } from '../../registry/foundation-registry.service';
@@ -175,9 +175,12 @@ const DEFAULT_FORM: PgForm = {
         <div><span class="vl-eyebrow">Namespace-scoped provisioning</span><h2>PostgreSQL 인스턴스 생성</h2><p><b>{{ selectedNamespace() }}</b> Namespace에 독립된 PostgreSQL 인스턴스를 생성합니다. Plan은 운영 기준을, Profile은 StackGres 런타임 설정을 결정합니다.</p></div>
         <span class="label label-info">PostgresClaim v1beta1</span>
       </div>
-      <div class="pgp-provider-flow" aria-label="PostgreSQL 프로비저닝 흐름">
-        <div><span>1</span><b>기본 정보</b><small>Namespace · Database · Owner</small></div><i>→</i><div><span>2</span><b>운영 계약</b><small>Plan · Version · Storage</small></div><i>→</i><div><span>3</span><b>엔진 설정</b><small>Profile · Backup · Pooling</small></div><i>→</i><div><span>4</span><b>검토·생성</b><small>PostgresClaim 선언</small></div>
-      </div>
+      <clr-timeline class="pgp-provisioning-timeline" aria-label="PostgreSQL 프로비저닝 흐름">
+        <clr-timeline-step [clrState]="timelineCurrent"><clr-timeline-step-header>1</clr-timeline-step-header><clr-timeline-step-title>기본 정보</clr-timeline-step-title><clr-timeline-step-description>Namespace · Database · Owner</clr-timeline-step-description></clr-timeline-step>
+        <clr-timeline-step [clrState]="timelineNotStarted"><clr-timeline-step-header>2</clr-timeline-step-header><clr-timeline-step-title>운영 계약</clr-timeline-step-title><clr-timeline-step-description>Plan · Version · Storage</clr-timeline-step-description></clr-timeline-step>
+        <clr-timeline-step [clrState]="timelineNotStarted"><clr-timeline-step-header>3</clr-timeline-step-header><clr-timeline-step-title>엔진 설정</clr-timeline-step-title><clr-timeline-step-description>Profile · Backup · Pooling</clr-timeline-step-description></clr-timeline-step>
+        <clr-timeline-step [clrState]="timelineNotStarted"><clr-timeline-step-header>4</clr-timeline-step-header><clr-timeline-step-title>검토·생성</clr-timeline-step-title><clr-timeline-step-description>PostgresClaim 선언</clr-timeline-step-description></clr-timeline-step>
+      </clr-timeline>
       <form class="pgp-form pgp-provisioning-form" (ngSubmit)="createDedicatedCluster()">
         <fieldset [disabled]="creatingClaim">
           <legend>인스턴스 식별</legend>
@@ -355,6 +358,8 @@ export class PostgresPluginComponent implements OnInit, OnDestroy {
   readonly iCatalog = Catalog16;
   readonly iFleet = ListBoxes16;
   readonly iSettings = Settings16;
+  readonly timelineCurrent = ClrTimelineStepState.CURRENT;
+  readonly timelineNotStarted = ClrTimelineStepState.NOT_STARTED;
 
   readonly form = signal<PgForm>(structuredClone(DEFAULT_FORM));
   readonly storageClasses = signal<StorageClassRow[]>([]);
