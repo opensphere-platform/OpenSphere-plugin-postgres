@@ -86,15 +86,15 @@ test('PostgreSQL separates selected-runtime navigation from management workspace
   assert.doesNotMatch(component, /CloudNativePG|cluster\.displayName \}\} · \{\{ cluster\.provider/);
 });
 
-test('runtime Extensions and Parameters share a horizontal Clarity workspace without nested scrolling', () => {
+test('runtime Extensions and Parameters share a horizontal accessible workspace without nested scrolling', () => {
   const config = read('src/app/modules/postgres/tabs/pg-config.tab.ts');
   const extensions = read('src/app/modules/postgres/tabs/pg-extensions.panel.ts');
-  assert.match(config, /<clr-tabs class="pgc-workspace" aria-label="PostgreSQL 설정 영역">/);
-  assert.match(config, /<button clrTabLink type="button">Extensions<\/button>/);
-  assert.match(config, /<button clrTabLink type="button">Parameters <span class="badge">\{\{ paramCount\(\) \}\}<\/span><\/button>/);
-  assert.equal((config.match(/<clr-tab>/g) || []).length, 2);
-  assert.equal((config.match(/<clr-tab-content>/g) || []).length, 2);
-  assert.doesNotMatch(config, /\*clrIfActive/);
+  assert.match(config, /<ul class="nav" role="tablist" aria-label="PostgreSQL 설정 영역">/);
+  assert.match(config, /id="pgc-extensions-tab"[\s\S]*\(click\)="activeWorkspace\.set\('extensions'\)"/);
+  assert.match(config, /id="pgc-parameters-tab"[\s\S]*\(click\)="activeWorkspace\.set\('parameters'\)"/);
+  assert.match(config, /readonly activeWorkspace = signal<'extensions' \| 'parameters'>\('extensions'\)/);
+  assert.match(config, /@if \(activeWorkspace\(\) === 'extensions'\)/);
+  assert.equal((config.match(/role="tabpanel"/g) || []).length, 2);
   assert.match(config, /\.pgc-pane\{padding:/);
   assert.doesNotMatch(config, /\.pgc-pane\{[^}]*(height:|overflow:)/);
   assert.doesNotMatch(config, /<div class="os-sech">postgresql\.conf 파라미터<\/div>/);

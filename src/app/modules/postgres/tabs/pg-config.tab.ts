@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject } from '@angular/core';
-import { ClarityModule } from '@clr/angular';
+import { Component, computed, inject, signal } from '@angular/core';
 import { CnpgService } from '../cnpg.service';
 import { PgKv } from '../ui/pg-kv';
 import { PgState } from '../ui/pg-state';
@@ -9,7 +8,7 @@ import { PgExtensionsPanel } from './pg-extensions.panel';
 @Component({
   selector: 'pg-config',
   standalone: true,
-  imports: [CommonModule, ClarityModule, PgKv, PgState, PgExtensionsPanel],
+  imports: [CommonModule, PgKv, PgState, PgExtensionsPanel],
   styles: [`
     .pgc-workspace{margin-top:1rem}
     .pgc-pane{padding:.25rem .15rem 1rem 0}
@@ -39,28 +38,41 @@ import { PgExtensionsPanel } from './pg-extensions.panel';
       </div>
     </div>
 
-    <clr-tabs class="pgc-workspace" aria-label="PostgreSQL 설정 영역">
-      <clr-tab>
-        <button clrTabLink type="button">Extensions</button>
-        <clr-tab-content>
-          <div class="pgc-pane"><pg-extensions-panel></pg-extensions-panel></div>
-        </clr-tab-content>
-      </clr-tab>
-      <clr-tab>
-        <button clrTabLink type="button">Parameters <span class="badge">{{ paramCount() }}</span></button>
-        <clr-tab-content>
-          <div class="pgc-pane pgc-parameters">
-            <pg-state [state]="state()" hint="명시 파라미터 없음" [sub]="providerLabel() + ' 기본 튜닝을 사용합니다.'" (retry)="svc.refresh()">
-              <pg-kv [params]="svc.params()"></pg-kv>
-            </pg-state>
-          </div>
-        </clr-tab-content>
-      </clr-tab>
-    </clr-tabs>
+    <div class="pgc-workspace">
+      <ul class="nav" role="tablist" aria-label="PostgreSQL 설정 영역">
+        <li class="nav-item" role="presentation">
+          <button class="btn btn-link nav-link" type="button" role="tab" id="pgc-extensions-tab"
+                  aria-controls="pgc-extensions-panel" [class.active]="activeWorkspace() === 'extensions'"
+                  [attr.aria-selected]="activeWorkspace() === 'extensions'" (click)="activeWorkspace.set('extensions')">
+            Extensions
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="btn btn-link nav-link" type="button" role="tab" id="pgc-parameters-tab"
+                  aria-controls="pgc-parameters-panel" [class.active]="activeWorkspace() === 'parameters'"
+                  [attr.aria-selected]="activeWorkspace() === 'parameters'" (click)="activeWorkspace.set('parameters')">
+            Parameters <span class="badge">{{ paramCount() }}</span>
+          </button>
+        </li>
+      </ul>
+
+      @if (activeWorkspace() === 'extensions') {
+        <section class="pgc-pane" id="pgc-extensions-panel" role="tabpanel" aria-labelledby="pgc-extensions-tab">
+          <pg-extensions-panel></pg-extensions-panel>
+        </section>
+      } @else {
+        <section class="pgc-pane pgc-parameters" id="pgc-parameters-panel" role="tabpanel" aria-labelledby="pgc-parameters-tab">
+          <pg-state [state]="state()" hint="명시 파라미터 없음" [sub]="providerLabel() + ' 기본 튜닝을 사용합니다.'" (retry)="svc.refresh()">
+            <pg-kv [params]="svc.params()"></pg-kv>
+          </pg-state>
+        </section>
+      }
+    </div>
   `,
 })
 export class PgConfigTab {
   readonly svc = inject(CnpgService);
+  readonly activeWorkspace = signal<'extensions' | 'parameters'>('extensions');
   providerLabel(): string { return 'StackGres'; }
   readonly res = computed(() => this.svc.resources());
   readonly paramCount = computed(() => Object.keys(this.svc.params()).length);
