@@ -12,9 +12,8 @@ import { PgExtensionsPanel } from './pg-extensions.panel';
   imports: [CommonModule, ClarityModule, PgKv, PgState, PgExtensionsPanel],
   styles: [`
     .pgc-workspace{margin-top:1rem}
-    .pgc-pane{height:clamp(28rem,calc(100vh - 22rem),42rem);overflow:auto;padding:.25rem .15rem 1rem 0}
+    .pgc-pane{padding:.25rem .15rem 1rem 0}
     .pgc-parameters{padding-top:.75rem}
-    @media(max-height:760px){.pgc-pane{height:28rem}}
   `],
   template: `
     <div class="os-cardgrid">

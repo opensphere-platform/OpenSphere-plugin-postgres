@@ -86,15 +86,18 @@ test('PostgreSQL separates selected-runtime navigation from management workspace
   assert.doesNotMatch(component, /CloudNativePG|cluster\.displayName \}\} · \{\{ cluster\.provider/);
 });
 
-test('runtime Extensions and Parameters share a bounded horizontal Clarity workspace', () => {
+test('runtime Extensions and Parameters share a horizontal Clarity workspace without nested scrolling', () => {
   const config = read('src/app/modules/postgres/tabs/pg-config.tab.ts');
   const extensions = read('src/app/modules/postgres/tabs/pg-extensions.panel.ts');
   assert.match(config, /<clr-tabs class="pgc-workspace" aria-label="PostgreSQL 설정 영역">/);
   assert.match(config, /<button clrTabLink type="button">Extensions<\/button>/);
   assert.match(config, /<button clrTabLink type="button">Parameters <span class="badge">\{\{ paramCount\(\) \}\}<\/span><\/button>/);
   assert.equal((config.match(/<clr-tab>/g) || []).length, 2);
-  assert.match(config, /\.pgc-pane\{height:clamp\([^}]+overflow:auto/);
+  assert.match(config, /\.pgc-pane\{padding:/);
+  assert.doesNotMatch(config, /\.pgc-pane\{[^}]*(height:|overflow:)/);
   assert.doesNotMatch(config, /<div class="os-sech">postgresql\.conf 파라미터<\/div>/);
+  assert.match(extensions, /\.pge-table-wrap\{border:1px solid #d7dce1\}/);
+  assert.doesNotMatch(extensions, /\.pge-table-wrap\{[^}]*overflow:auto/);
   assert.match(extensions, /readonly search = signal\(''\)/);
   assert.match(extensions, /readonly license = signal\(''\)/);
   assert.match(extensions, /\[ngModel\]="search\(\)" \(ngModelChange\)="search\.set\(\$event\)"/);
