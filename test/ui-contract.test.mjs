@@ -113,7 +113,7 @@ test('provisioning is namespace-first and uses one canonical PostgresClaim v1bet
   const fleet = read('src/app/modules/postgres/postgres-fleet.service.ts');
   assert.match(component, /tab\(\) === 'provisioning'/);
   assert.match(component, /\[value\]="selectedNamespace\(\)" disabled/);
-  for (const marker of ['운영 Plan', 'PostgreSQL major', '삭제 정책', '스토리지 override', 'Instance Profile', 'PostgreSQL Profile', 'Pooling Profile', '백업 Object Storage', 'YAML 미리보기']) {
+  for (const marker of ['운영 Plan', 'PostgreSQL 버전', '삭제 정책', '스토리지 override', 'Instance Profile', 'PostgreSQL Profile', 'Pooling Profile', '백업 Object Storage', 'YAML 미리보기']) {
     assert.match(component, new RegExp(marker));
   }
   assert.match(component, /name="claimAlias"[^>]*maxlength="120"[^>]*차세대 MES 개발을 위한 개발 데이터 베이스/);
@@ -123,8 +123,10 @@ test('provisioning is namespace-first and uses one canonical PostgresClaim v1bet
   assert.doesNotMatch(component, /<pg-claims/);
   assert.match(component, /apiVersion: provisioning\.opensphere\.io\/v1beta1/);
   assert.match(fleet, /provisioning\.opensphere\.io\/v1beta1\/namespaces/);
-  assert.match(component, /\[value\]="selectedClaimPlanVersion\(\)" disabled/);
-  assert.doesNotMatch(component, /\[\(ngModel\)\]="claimVersion"/);
+  assert.match(component, /name="claimVersion" \[ngModel\]="claimPostgresVersion\(\)"/);
+  assert.match(component, /availableClaimRuntimes/);
+  assert.match(fleet, /postgresVersion: draft\.postgresVersion/);
+  assert.match(fleet, /\/api\/foundation\/postgres\/runtimes/);
   assert.match(fleet, /spec\.extensions = draft\.extensions/);
   assert.match(component, /호환되는 StackGres 확장만 표시/);
   assert.match(component, /External Channels에서 등록한 백업 대상/);
@@ -169,6 +171,7 @@ test('Profile Catalog is namespace scoped and keeps StackGres objects authoritat
   assert.match(catalog, /Namespace credential Secret/);
   assert.match(catalog, /<form clrForm clrLayout="vertical" class="pgpc-form"/);
   assert.match(catalog, /<select clrSelect name="profileKind"/);
+  assert.match(catalog, /<select clrSelect name="profilePostgresVersion"/);
   assert.match(catalog, /<input clrInput name="profileName"/);
   assert.match(catalog, /<textarea clrTextarea name="profilePostgresqlConf"/);
   assert.match(catalog, /<input clrCheckbox type="checkbox" name="profileStoragePathStyle"/);

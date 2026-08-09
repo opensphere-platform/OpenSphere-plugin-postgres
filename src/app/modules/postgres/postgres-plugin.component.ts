@@ -195,7 +195,7 @@ const DEFAULT_FORM: PgForm = {
           <legend>운영 Plan</legend>
           <div class="pgp-form-grid">
             <label><span>Plan</span><select name="claimPlan" [ngModel]="claimPlan" (ngModelChange)="selectClaimPlan($event)"><option *ngFor="let plan of fleet.plans()" [value]="plan.metadata?.name">{{ plan.metadata?.name }} · {{ plan.spec?.displayName || plan.spec?.description || 'PostgreSQL' }}</option><option *ngIf="!fleet.plans().length" value="postgresql-dev-single">postgresql-dev-single</option></select><small>인스턴스 수, 스토리지와 기본 보호 정책의 승인된 조합입니다.</small></label>
-            <label><span>PostgreSQL major</span><input name="claimVersion" [value]="selectedClaimPlanVersion()" disabled /><small>선택한 Plan의 승인 버전입니다. 직접 입력하지 않습니다.</small></label>
+            <label><span>PostgreSQL 버전</span><select name="claimVersion" [ngModel]="claimPostgresVersion()" (ngModelChange)="selectClaimPostgresVersion($event)"><option *ngFor="let runtime of availableClaimRuntimes()" [value]="runtime.version">PostgreSQL {{ runtime.version }} · Patroni {{ runtime.patroniVersion }}</option></select><small>StackGres {{ fleet.runtimeCatalog()?.operatorVersion }}와 검증된 exact-digest 이미지만 선택할 수 있습니다.</small></label>
             <label><span>삭제 정책</span><select name="claimDeletionPolicy" [(ngModel)]="claimDeletionPolicy"><option value="Retain">Retain · 데이터 보존</option><option value="Delete">Delete · 인스턴스와 함께 제거</option></select><small>Claim 삭제 시 데이터 수명주기입니다.</small></label>
           </div>
         </fieldset>
@@ -392,6 +392,7 @@ export class PostgresPluginComponent implements OnInit, OnDestroy {
   claimStorageSize = ''; claimStorageClass = ''; claimDeletionPolicy: 'Retain' | 'Delete' = 'Retain';
   claimInstanceProfile = ''; claimPostgresProfile = ''; claimPoolingProfile = ''; claimObjectStorageProfile = '';
   claimExtensionSearch = '';
+  readonly claimPostgresVersion = signal('');
   readonly claimExtensions = signal<PostgresExtensionSelection[]>([]);
   creatingClaim = false; claimResult = ''; claimFailed = false;
   readonly claimYamlPreview = signal('');
@@ -448,7 +449,15 @@ export class PostgresPluginComponent implements OnInit, OnDestroy {
   readonly hasSelectedCluster = computed(() => !!this.selectedContextCluster());
   readonly documentationVersion = computed(() => this.compactPostgresVersion(this.selectedContextCluster()?.postgresVersion || '') || 'current');
   readonly selectedClaimPlan = computed(() => this.fleet.plans().find((plan) => plan.metadata?.name === this.claimPlan) || this.fleet.plans()[0] || null);
-  readonly selectedClaimPlanVersion = computed(() => String(this.selectedClaimPlan()?.spec?.postgresVersion || '18'));
+  readonly availableClaimRuntimes = computed(() => {
+    const supported = (this.selectedClaimPlan()?.spec?.supportedPostgresVersions || []) as string[];
+    return (this.fleet.runtimeCatalog()?.versions || []).filter((runtime) => runtime.lifecycle === 'Available'
+      && (!supported.length || supported.includes(runtime.version) || supported.includes(runtime.major)));
+  });
+  readonly selectedClaimPlanVersion = computed(() => this.claimPostgresVersion()
+    || this.availableClaimRuntimes()[0]?.version
+    || this.fleet.runtimeCatalog()?.defaultVersion
+    || String(this.selectedClaimPlan()?.spec?.postgresVersion || '18'));
   readonly filteredClaimExtensionCatalog = computed(() => {
     const query = this.claimExtensionSearch.trim().toLowerCase();
     return (this.fleet.extensions()?.catalog || []).filter((item) => !query
@@ -514,14 +523,28 @@ export class PostgresPluginComponent implements OnInit, OnDestroy {
     const namespaces = this.fleet.namespaces();
     if (!namespaces.includes(this.selectedNamespace())) this.selectedNamespace.set(namespaces.includes(DEFAULT_FORM.namespace) ? DEFAULT_FORM.namespace : (namespaces[0] || DEFAULT_FORM.namespace));
     this.syncNamespaceContext();
+    this.ensureClaimPostgresVersion();
     await this.fleet.refreshProfiles(this.selectedNamespace());
     await this.fleet.refreshExtensions({ postgresVersion: this.selectedClaimPlanVersion() });
   }
   async selectClaimPlan(plan: string): Promise<void> {
     this.claimPlan = plan;
+    this.ensureClaimPostgresVersion();
     this.claimExtensions.set([]);
     if (this.claimPostgresProfile && !this.profilesFor('postgres').some((profile) => profile.name === this.claimPostgresProfile)) this.claimPostgresProfile = '';
     await this.fleet.refreshExtensions({ postgresVersion: this.selectedClaimPlanVersion() });
+  }
+  async selectClaimPostgresVersion(version: string): Promise<void> {
+    this.claimPostgresVersion.set(version);
+    this.claimExtensions.set([]);
+    if (this.claimPostgresProfile && !this.profilesFor('postgres').some((profile) => profile.name === this.claimPostgresProfile)) this.claimPostgresProfile = '';
+    await this.fleet.refreshExtensions({ postgresVersion: version });
+  }
+  private ensureClaimPostgresVersion(): void {
+    const available = this.availableClaimRuntimes();
+    if (!available.some((runtime) => runtime.version === this.claimPostgresVersion())) {
+      this.claimPostgresVersion.set(available.find((runtime) => runtime.version === this.fleet.runtimeCatalog()?.defaultVersion)?.version || available[0]?.version || '');
+    }
   }
   async createNamespace(): Promise<void> {
     this.creatingNamespace = true; this.namespaceError = '';
@@ -539,7 +562,7 @@ export class PostgresPluginComponent implements OnInit, OnDestroy {
     try {
       const namespace = this.selectedNamespace();
       const claimName = this.claimName.trim();
-      await this.fleet.createClaim({ name: this.claimName.trim(), alias: this.claimAlias.trim(), namespace, database: this.claimDatabase.trim(), owner: this.claimOwner.trim(), plan: this.claimPlan,
+      await this.fleet.createClaim({ name: this.claimName.trim(), alias: this.claimAlias.trim(), namespace, database: this.claimDatabase.trim(), owner: this.claimOwner.trim(), plan: this.claimPlan, postgresVersion: this.selectedClaimPlanVersion(),
         extensions: this.claimExtensions(), deletionPolicy: this.claimDeletionPolicy,
         storageSize: this.claimStorageSize.trim() || undefined, storageClass: this.claimStorageClass || undefined,
         profileRefs: { instanceProfile: this.claimInstanceProfile || undefined, postgresConfig: this.claimPostgresProfile || undefined, poolingConfig: this.claimPoolingProfile || undefined, objectStorage: this.claimObjectStorageProfile || undefined } });
@@ -555,7 +578,8 @@ export class PostgresPluginComponent implements OnInit, OnDestroy {
   patchForm(patch: Partial<PgForm>): void { this.form.update((f) => ({ ...f, ...patch })); }
   profilesFor(kind: 'instance' | 'postgres' | 'pooling' | 'objectStorage') {
     return this.fleet.profiles().filter((profile) => profile.kind === kind && !profile.claimOwned
-      && (kind !== 'postgres' || !profile.spec?.postgresVersion || String(profile.spec.postgresVersion) === this.selectedClaimPlanVersion()));
+      && (kind !== 'postgres' || !profile.spec?.postgresVersion || String(profile.spec.postgresVersion) === this.selectedClaimPlanVersion()
+        || String(profile.spec.postgresVersion) === this.selectedClaimPlanVersion().split('.')[0]));
   }
   private extensionKey(item: PostgresExtensionSelection): string { return `${item.publisher || 'com.ongres'}/${item.name}`; }
   claimExtensionSelected(item: PostgresExtensionSelection): boolean { return this.claimExtensions().some((row) => this.extensionKey(row) === this.extensionKey(item)); }
@@ -588,6 +612,7 @@ export class PostgresPluginComponent implements OnInit, OnDestroy {
       `    opensphere.io/display-name: ${JSON.stringify(this.claimAlias.trim() || '<display-name>')}`,
       'spec:',
       `  planRef:\n    name: ${this.claimPlan}`,
+      `  postgresVersion: ${this.selectedClaimPlanVersion()}`,
       '  isolation: Dedicated',
       `  database: ${this.claimDatabase.trim() || '<database>'}`,
       `  owner: ${this.claimOwner.trim() || '<owner>'}`,

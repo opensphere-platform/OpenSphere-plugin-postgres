@@ -22,6 +22,7 @@ export interface PostgresExtensionsView {
 
 export interface PostgresClaimDraft {
   name: string; alias: string; namespace: string; database: string; owner: string; plan: string;
+  postgresVersion: string;
   deletionPolicy?: 'Retain' | 'Delete';
   extensions?: PostgresExtensionSelection[];
   storageSize?: string; storageClass?: string;
@@ -49,6 +50,13 @@ export interface PostgresProfileDraft {
   reason: string;
 }
 
+export interface PostgresRuntime {
+  version: string; major: string; patroniVersion: string; lifecycle: 'Available' | 'Deprecated' | 'Disabled'; image: string;
+}
+export interface PostgresRuntimeCatalog {
+  name: string; provider: 'stackgres'; operatorVersion: string; defaultVersion: string; versions: PostgresRuntime[];
+}
+
 export interface ExternalBackupTarget {
   id: string;
   name: string;
@@ -72,6 +80,9 @@ export class PostgresFleetService {
   readonly profiles = signal<PostgresProfile[]>([]);
   readonly profilesState = signal<'idle' | 'loading' | 'ok' | 'empty' | 'error'>('idle');
   readonly profilesError = signal('');
+  readonly runtimeCatalog = signal<PostgresRuntimeCatalog | null>(null);
+  readonly runtimesState = signal<'idle' | 'loading' | 'ok' | 'error'>('idle');
+  readonly runtimesError = signal('');
   readonly backupTargets = signal<ExternalBackupTarget[]>([]);
   readonly backupTargetsState = signal<'idle' | 'loading' | 'ok' | 'empty' | 'error'>('idle');
   readonly backupTargetsError = signal('');
@@ -93,11 +104,13 @@ export class PostgresFleetService {
   async refresh(): Promise<void> {
     this.busy.set(true); this.error.set('');
     try {
-      const [fleet, plans, claims, namespaces] = await Promise.all([
+      this.runtimesState.set('loading'); this.runtimesError.set('');
+      const [fleet, plans, claims, namespaces, runtimes] = await Promise.all([
         hostFetch(this.api('/api/foundation/postgres/clusters'), { cache: 'no-store' }),
         hostFetch(this.api('/api/k8s/apis/catalog.opensphere.io/v1alpha1/addonplans'), { cache: 'no-store' }),
         hostFetch(this.api('/api/k8s/apis/provisioning.opensphere.io/v1beta1/postgresclaims'), { cache: 'no-store' }),
         hostFetch(this.api('/api/foundation/postgres/namespaces'), { cache: 'no-store' }),
+        hostFetch(this.api('/api/foundation/postgres/runtimes'), { cache: 'no-store' }),
       ]);
       const fleetBody = await fleet.json().catch(() => ({}));
       if (!fleet.ok) throw new Error(fleetBody.error || `PostgreSQL fleet HTTP ${fleet.status}`);
@@ -124,6 +137,10 @@ export class PostgresFleetService {
       }
       this.plans.set(plans.ok ? ((await plans.json()).items || []).filter((item: any) => item.spec?.capabilityRef === 'postgresql') : []);
       this.claims.set(claimRows);
+      const runtimeBody = await runtimes.json().catch(() => ({}));
+      if (!runtimes.ok) throw new Error(runtimeBody.error || `PostgreSQL runtime catalog HTTP ${runtimes.status}`);
+      this.runtimeCatalog.set(runtimeBody.catalog as PostgresRuntimeCatalog);
+      this.runtimesState.set('ok');
       if (namespaces.ok) {
         const rows: string[] = ((await namespaces.json()).namespaces || [])
           .map((item: any): string => String(item.name || ''))
@@ -134,6 +151,7 @@ export class PostgresFleetService {
       this.state.set(clusterRows.length ? 'ok' : 'empty');
     } catch (error: any) {
       this.error.set(error?.message || String(error)); this.state.set('error');
+      if (!this.runtimeCatalog()) { this.runtimesState.set('error'); this.runtimesError.set(error?.message || String(error)); }
     } finally { this.busy.set(false); }
   }
 
@@ -151,6 +169,7 @@ export class PostgresFleetService {
   async createClaim(draft: PostgresClaimDraft): Promise<void> {
     const spec: any = {
       planRef: { name: draft.plan }, isolation: 'Dedicated', database: draft.database, owner: draft.owner,
+      postgresVersion: draft.postgresVersion,
       deletionPolicy: draft.deletionPolicy || 'Retain',
     };
     if (draft.extensions?.length) spec.extensions = draft.extensions;
