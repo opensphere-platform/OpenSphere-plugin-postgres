@@ -11,6 +11,7 @@
 - Final separated header implementation: `C:/Users/cmars/.codex/visualizations/2026/08/09/postgres-stackgres-ia-implementation/11-header-icons-separated-selects-220.png`
 - Header corner and active-state report: `C:/Users/cmars/AppData/Local/Temp/codex-clipboard-95e655a1-b5d4-44d4-885b-63ae59e1dd96.png`
 - Provisioning flow reference: `C:/Users/cmars/AppData/Local/Temp/codex-clipboard-80351757-4db2-4813-86b7-60ac0e573524.png`
+- StackGres Extensions reference: `C:/Users/cmars/AppData/Local/Temp/codex-clipboard-2481ae54-d627-4ab0-a11d-81ac53a4f9a6.png`
 
 ## Verification context
 
@@ -35,6 +36,9 @@
 12. New PostgresClaims persist a user-provided display name in `opensphere.io/display-name`; the selected instance alias becomes the PostgreSQL header description.
 13. Profile Catalog backup storage summary now reports External Channels readiness as `ready/total`, rather than incorrectly reusing the SGObjectStorage Profile count.
 14. External backup target cards identify Backblaze B2 and Ceph Object Gateway with their provider assets, product labels, enabled/health badges, Endpoint, and Bucket.
+15. Runtime extension lifecycle is placed immediately below the resource summary and before the long `postgresql.conf` list. The catalog retains an internal scroll area so 186 compatible extensions do not push the rest of the page down.
+16. The repeated primary-area labels above secondary navigation were removed. `Operations` and `Database` now appear only in the primary operational tab row.
+17. Extension search and license filtering now use reactive Angular signals; a deployed `vector` search reduced 186 compatible rows to 7 relevant results.
 
 ## Final findings
 
@@ -58,12 +62,13 @@
 - Display-name contract: the creation form exposes one required 120-character `표시 이름` field and the generated Claim metadata carries the display-name annotation.
 - Backup readiness: the deployed Profile Catalog reports `1/2` for the current two External Channels targets; one is Ready and one is Misconfigured.
 - Provider cards: Backblaze and Ceph identity is derived from the target vendor/provider/endpoint contract and falls back to the Carbon Cloud icon for unknown S3 vendors.
-- Runtime release verified: `202608091150`, digest `sha256:a8186108aeb856ac93f7106d44cc4b456852676b707bf29d472d9535175c83ff`, `Ready / Current / Host 메뉴 사용 가능`.
-- Asset-final release published: `202608091202`, digest `sha256:e078900166dfd76e95e4bc07061d71aa39eeaae87dca654847147f59313d3305`; exact-digest activation is pending a fresh AAL2 session after the Console session expired during final visual verification.
+- Runtime release verified: `202608091335`, digest `sha256:bdce58f55c4c6b69ffbd314eb10106c4f92a9b4786e8abfa42c159ecfbb3380e`, source revision `0cf1d8c3c8e624dd15c7edb8508f8947e512c1b2`, `Activated / Ready / Current`.
+- Extensions parity: PostgreSQL 18 returned 186 compatible StackGres catalog entries; catalog placement, internal scrolling, search filtering, and database activation controls were verified in the deployed UI.
+- Navigation duplication: deployed `.pgp-subnav-label` count is `0` on both runtime configuration and database workspaces.
 - Copy: accessible names and tooltips are consistent: 전체 클러스터, 설정 카탈로그, PostgreSQL 생성, 엔진 관리.
 
 ## Result
 
 final result: passed
 
-The operating-state hierarchy and engine/configuration hierarchy are visibly separated, the management controls have balanced corner spacing, both context fields are 220px wide, provisioning uses the Clarity Timeline, user display names drive the header description, and no unresolved P0/P1/P2 visual issue remains in the verified state.
+The operating-state hierarchy and engine/configuration hierarchy are visibly separated, the management controls have balanced corner spacing, both context fields are 220px wide, provisioning uses the Clarity Timeline, user display names drive the header description, extension configuration is reachable before the parameter list without expanding the page, redundant primary labels are absent, and no unresolved P0/P1/P2 visual issue remains in the verified state.
