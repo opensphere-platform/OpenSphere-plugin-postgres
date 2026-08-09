@@ -86,16 +86,17 @@ test('PostgreSQL separates selected-runtime navigation from management workspace
   assert.doesNotMatch(component, /CloudNativePG|cluster\.displayName \}\} · \{\{ cluster\.provider/);
 });
 
-test('runtime Extensions and Parameters share a horizontal accessible workspace without nested scrolling', () => {
+test('runtime Extensions and Parameters use native horizontal tabs without nested scrolling', () => {
   const config = read('src/app/modules/postgres/tabs/pg-config.tab.ts');
   const extensions = read('src/app/modules/postgres/tabs/pg-extensions.panel.ts');
-  assert.match(config, /<ul class="nav" role="tablist" aria-label="PostgreSQL 설정 영역">/);
-  assert.match(config, /id="pgc-extensions-tab"[\s\S]*\(click\)="activeWorkspace\.set\('extensions'\)"/);
-  assert.match(config, /id="pgc-parameters-tab"[\s\S]*\(click\)="activeWorkspace\.set\('parameters'\)"/);
-  assert.match(config, /readonly activeWorkspace = signal<'extensions' \| 'parameters'>\('extensions'\)/);
-  assert.match(config, /@if \(activeWorkspace\(\) === 'extensions'\)/);
-  assert.equal((config.match(/role="tabpanel"/g) || []).length, 2);
-  assert.match(config, /\.pgc-pane\{padding:/);
+  assert.match(config, /role="group" aria-label="PostgreSQL 설정 영역"/);
+  assert.match(config, /type="radio" name="pgc-workspace" id="pgc-extensions-tab" checked/);
+  assert.match(config, /type="radio" name="pgc-workspace" id="pgc-parameters-tab"/);
+  assert.match(config, /<label class="pgc-tab-label" for="pgc-extensions-tab">Extensions<\/label>/);
+  assert.match(config, /<label class="pgc-tab-label" for="pgc-parameters-tab">Parameters/);
+  assert.match(config, /#pgc-extensions-tab:checked ~ \.pgc-tab-panels \.pgc-extensions-pane\{display:block\}/);
+  assert.match(config, /#pgc-parameters-tab:checked ~ \.pgc-tab-panels \.pgc-parameters-pane\{display:block\}/);
+  assert.match(config, /\.pgc-pane\{[^}]*padding:/);
   assert.doesNotMatch(config, /\.pgc-pane\{[^}]*(height:|overflow:)/);
   assert.doesNotMatch(config, /<div class="os-sech">postgresql\.conf 파라미터<\/div>/);
   assert.match(extensions, /\.pge-table-wrap\{border:1px solid #d7dce1\}/);

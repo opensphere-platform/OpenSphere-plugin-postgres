@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { CnpgService } from '../cnpg.service';
 import { PgKv } from '../ui/pg-kv';
 import { PgState } from '../ui/pg-state';
@@ -11,7 +11,15 @@ import { PgExtensionsPanel } from './pg-extensions.panel';
   imports: [CommonModule, PgKv, PgState, PgExtensionsPanel],
   styles: [`
     .pgc-workspace{margin-top:1rem}
-    .pgc-pane{padding:.25rem .15rem 1rem 0}
+    .pgc-tab-toggle{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+    .pgc-tab-label{display:inline-block;margin:0 1rem 0 0;padding:.45rem .35rem .35rem;border-bottom:2px solid transparent;color:#565656;cursor:pointer}
+    .pgc-tab-label:hover{color:#0072a3}
+    .pgc-tab-toggle:focus-visible + .pgc-tab-label{outline:2px solid #0072a3;outline-offset:2px}
+    #pgc-extensions-tab:checked + .pgc-tab-label,#pgc-parameters-tab:checked + .pgc-tab-label{border-bottom-color:#0072a3;color:#1b2a32}
+    .pgc-tab-panels{border-top:1px solid #d7dce1}
+    .pgc-pane{display:none;padding:.75rem .15rem 1rem 0}
+    #pgc-extensions-tab:checked ~ .pgc-tab-panels .pgc-extensions-pane{display:block}
+    #pgc-parameters-tab:checked ~ .pgc-tab-panels .pgc-parameters-pane{display:block}
     .pgc-parameters{padding-top:.75rem}
   `],
   template: `
@@ -38,41 +46,27 @@ import { PgExtensionsPanel } from './pg-extensions.panel';
       </div>
     </div>
 
-    <div class="pgc-workspace">
-      <ul class="nav" role="tablist" aria-label="PostgreSQL 설정 영역">
-        <li class="nav-item" role="presentation">
-          <button class="btn btn-link nav-link" type="button" role="tab" id="pgc-extensions-tab"
-                  aria-controls="pgc-extensions-panel" [class.active]="activeWorkspace() === 'extensions'"
-                  [attr.aria-selected]="activeWorkspace() === 'extensions'" (click)="activeWorkspace.set('extensions')">
-            Extensions
-          </button>
-        </li>
-        <li class="nav-item" role="presentation">
-          <button class="btn btn-link nav-link" type="button" role="tab" id="pgc-parameters-tab"
-                  aria-controls="pgc-parameters-panel" [class.active]="activeWorkspace() === 'parameters'"
-                  [attr.aria-selected]="activeWorkspace() === 'parameters'" (click)="activeWorkspace.set('parameters')">
-            Parameters <span class="badge">{{ paramCount() }}</span>
-          </button>
-        </li>
-      </ul>
+    <div class="pgc-workspace" role="group" aria-label="PostgreSQL 설정 영역">
+      <input class="pgc-tab-toggle" type="radio" name="pgc-workspace" id="pgc-extensions-tab" checked>
+      <label class="pgc-tab-label" for="pgc-extensions-tab">Extensions</label>
+      <input class="pgc-tab-toggle" type="radio" name="pgc-workspace" id="pgc-parameters-tab">
+      <label class="pgc-tab-label" for="pgc-parameters-tab">Parameters <span class="badge">{{ paramCount() }}</span></label>
 
-      @if (activeWorkspace() === 'extensions') {
-        <section class="pgc-pane" id="pgc-extensions-panel" role="tabpanel" aria-labelledby="pgc-extensions-tab">
+      <div class="pgc-tab-panels">
+        <section class="pgc-pane pgc-extensions-pane" id="pgc-extensions-panel" aria-label="Extensions">
           <pg-extensions-panel></pg-extensions-panel>
         </section>
-      } @else {
-        <section class="pgc-pane pgc-parameters" id="pgc-parameters-panel" role="tabpanel" aria-labelledby="pgc-parameters-tab">
+        <section class="pgc-pane pgc-parameters pgc-parameters-pane" id="pgc-parameters-panel" aria-label="Parameters">
           <pg-state [state]="state()" hint="명시 파라미터 없음" [sub]="providerLabel() + ' 기본 튜닝을 사용합니다.'" (retry)="svc.refresh()">
             <pg-kv [params]="svc.params()"></pg-kv>
           </pg-state>
         </section>
-      }
+      </div>
     </div>
   `,
 })
 export class PgConfigTab {
   readonly svc = inject(CnpgService);
-  readonly activeWorkspace = signal<'extensions' | 'parameters'>('extensions');
   providerLabel(): string { return 'StackGres'; }
   readonly res = computed(() => this.svc.resources());
   readonly paramCount = computed(() => Object.keys(this.svc.params()).length);
