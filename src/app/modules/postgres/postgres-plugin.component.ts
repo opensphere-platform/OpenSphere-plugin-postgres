@@ -706,7 +706,7 @@ export class PostgresPluginComponent implements OnInit, OnDestroy {
   headerModel(): PluginPageHeaderModel {
     const cluster = this.selectedContextCluster();
     return {
-      name: 'PostgreSQL', logo: LOGO, stack: 'PFS / StackGres', capability: 'data.sql.postgres',
+      name: 'PostgreSQL', logo: LOGO, stack: 'PFSS', capability: 'data.sql.postgres',
       description: cluster?.alias || (cluster ? `${cluster.displayName} PostgreSQL 인스턴스` : 'Namespace를 선택하거나 PostgreSQL 인스턴스를 생성하세요.'),
       lifecycle: this.lifecycleLabel(), lifecycleClass: this.lifecyclePill(), versionLabel: 'PostgreSQL',
       version: this.compactPostgresVersion(cluster?.postgresVersion || ''), profile: cluster?.plan || cluster?.mode || 'Not installed',

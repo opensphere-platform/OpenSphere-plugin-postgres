@@ -213,9 +213,11 @@ test('Profile Catalog is namespace scoped and keeps StackGres objects authoritat
 
 test('StackGres is visible as the PostgreSQL operating provider without replacing product language', () => {
   const component = read('src/app/modules/postgres/postgres-plugin.component.ts');
+  const shell = read('src/app/shared/plugin-page-shell.component.ts');
   assert.match(component, /name: 'PostgreSQL', logo: LOGO/);
   assert.doesNotMatch(component, /STACKGRES_LOGO|alt="StackGres"/);
-  assert.match(component, /stack: 'PFS \/ StackGres'/);
+  assert.match(component, /stack: 'PFSS'/);
+  assert.match(shell, /model\.stack \|\| 'PFSS' \}\} \/ \{\{ model\.capability/);
   for (const area of ['Admin UI & API', 'Authentication', 'Certificates', 'Container Registry', 'Extensions', 'Grafana', 'Image pull policy', 'Jobs', 'Service account']) {
     assert.match(component, new RegExp(area));
   }

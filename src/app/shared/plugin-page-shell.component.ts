@@ -84,7 +84,7 @@ export function pfsPluginTabs(domainLabel: string): PluginPageTab[] {
           </ng-template>
         </div>
         <div>
-          <span class="vl-eyebrow">{{ model.stack || 'PFS' }} · {{ model.capability }}</span>
+          <span class="vl-eyebrow">{{ model.stack || 'PFSS' }} / {{ model.capability }}</span>
           <h1 [id]="headingId">{{ model.name }}</h1>
           <p>{{ model.description }}</p>
         </div>
