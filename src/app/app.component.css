@@ -576,7 +576,7 @@ pg-metric { display: block; height: 100%; }
   .pgp-release > div, .pfs-plugin-release > div { border-left: 0; border-top: 1px solid var(--os-border); padding: 8px 6px; }
   .pgp-panel:last-child { grid-column: auto; }
   .pgp-page-frame .pfs-plugin-release { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .pgp-header-context { grid-column: 1 / -1; grid-template-columns: 1fr; }
+  .pgp-header-context { grid-column: 1 / -1; grid-template-columns: 1fr; justify-items: end; }
   .pgp-navigation-row { overflow-x: auto; }
   .pgp-management-scope { align-items: flex-start; flex-direction: column; padding: 8px 10px; }
 }

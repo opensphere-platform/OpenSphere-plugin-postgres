@@ -64,6 +64,7 @@ test('PostgreSQL separates selected-runtime navigation from management workspace
   assert.match(css, /\.pgp-header-context-field\s*\{[^}]*flex:\s*0\s+0\s+220px[^}]*width:\s*220px[^}]*min-width:\s*220px/);
   assert.match(css, /@media \(max-width:\s*1180px\)[\s\S]*?\.pgp-page-frame \.pfs-plugin-head\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)/);
   assert.match(css, /@media \(max-width:\s*1180px\)[\s\S]*?\.pgp-page-frame \.pfs-plugin-release > \.pgp-header-tools\s*\{[^}]*grid-column:\s*1 \/ -1[^}]*justify-self:\s*end[^}]*width:\s*min\(100%,\s*30rem\)/);
+  assert.match(css, /@media \(max-width:\s*760px\)[\s\S]*?\.pgp-header-context\s*\{[^}]*grid-template-columns:\s*1fr[^}]*justify-items:\s*end/);
   assert.match(css, /\.pgp-header-context-action,\s*\n\.pgp-header-context-refresh\s*\{[^}]*flex:\s*0\s+0\s+1\.35rem[^}]*width:\s*1\.35rem/);
   assert.match(component, /DataAdd16 from '@carbon\/icons\/es\/data--add\/16'/);
   assert.match(component, /isManagementView\(\)/);
