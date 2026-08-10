@@ -14,6 +14,8 @@
 - StackGres Extensions reference: `C:/Users/cmars/AppData/Local/Temp/codex-clipboard-2481ae54-d627-4ab0-a11d-81ac53a4f9a6.png`
 - Nested-scroll defect: `C:/Users/cmars/AppData/Local/Temp/codex-clipboard-c9135a69-6b47-4dbd-b279-5dda31c5a956.png`
 - Runtime tabs without nested scrolling: `C:/Users/cmars/.codex/visualizations/2026/08/09/postgres-runtime-tabs/02-final-runtime-tabs-no-inner-scroll.png`
+- Typography scale report: `C:/Users/cmars/AppData/Local/Temp/codex-clipboard-85401009-f02b-488a-9bfc-5177a34302f5.png`
+- Typography scale final deployment: `C:/Users/cmars/.codex/visualizations/2026/08/11/postgres-typography-scale/01-final.jpg`
 
 ## Verification context
 
@@ -41,6 +43,7 @@
 15. Runtime extension lifecycle and `postgresql.conf` parameters are separated into horizontal `Extensions` and `Parameters` views. Neither view owns a vertical scroll container; the Console page is the single scroll owner.
 16. The repeated primary-area labels above secondary navigation were removed. `Operations` and `Database` now appear only in the primary operational tab row.
 17. Extension search and license filtering now use reactive Angular signals; a deployed `vector` search reduced 186 compatible rows to 7 relevant results.
+18. The PostgreSQL header and empty-Namespace state used an oversized display scale. The deployed adjustment keeps the layout and spacing intact while reducing the product title, description, release metadata, empty-state title, body, eyebrow, and helper text by one visual step.
 
 ## Final findings
 
@@ -52,7 +55,7 @@
 - Creation contract: PostgreSQL major, deletion policy, storage override, StorageClass, reusable profiles, and External Channels-backed Object Storage selection.
 - Direct-route verification passed for `/profiles`, `/provisioning`, `/operator`, `/fleet`, `/databases`, `/operations`, and `/events`.
 - The selected runtime overview remains full-width and preserves the Namespace/instance context below the separate management icon row.
-- Typography: unchanged OpenSphere header scale and label hierarchy; no new competing heading or text label was introduced.
+- Typography: the PostgreSQL title is `1.5rem`, header description `0.72rem`, release labels/values `0.62rem`/`0.74rem`, and the empty-state title/body `1.2rem`/`0.72rem`. The hierarchy remains intact without oversized display text or new competing labels.
 - Spacing and layout: management actions are in the header upper-right, operational tabs remain a separate row, and no action overlaps the context controls.
 - Color and tokens: inherited OpenSphere text, hover, focus, active underline, and primary-action tokens; no new palette was introduced.
 - Icon fidelity: all four controls render real Carbon SVGs at 16 px; `List boxes`, `Catalog`, `Data add`, and `Settings` match their destinations.
@@ -64,7 +67,7 @@
 - Display-name contract: the creation form exposes one required 120-character `표시 이름` field and the generated Claim metadata carries the display-name annotation.
 - Backup readiness: the deployed Profile Catalog reports `1/2` for the current two External Channels targets; one is Ready and one is Misconfigured.
 - Provider cards: Backblaze and Ceph identity is derived from the target vendor/provider/endpoint contract and falls back to the Carbon Cloud icon for unknown S3 vendors.
-- Runtime release verified: `202608091454`, digest `sha256:dd39ccdf8282ee7f0606f3d542f8d96911c2a2957ab32f6d90ca7b4dbb6d6583`, source revision `39b4389fd9cef07aa4bd9da958462bc81d19bc43`, `Activated / Ready / Current`.
+- Runtime release verified: `202608110118`, digest `sha256:83590aa952a923fe5dd2cfa6a8c35b4bacbdc68080591d4fcf33eee7d2e7a048`, source revision `771148deb43950a9dbf950d8654c3b3adde0940c`, `Activated / Ready / Current`.
 - Extensions parity: PostgreSQL 18 returned 186 compatible StackGres catalog entries; the deployed catalog uses the normal Console page scrollbar only, with no nested vertical scrollbar in the tab content or table wrapper.
 - Navigation duplication: deployed `.pgp-subnav-label` count is `0` on both runtime configuration and database workspaces.
 - Copy: accessible names and tooltips are consistent: 전체 클러스터, 설정 카탈로그, PostgreSQL 생성, 엔진 관리.
@@ -73,4 +76,4 @@
 
 final result: passed
 
-The operating-state hierarchy and engine/configuration hierarchy are visibly separated, the management controls have balanced corner spacing, both context fields are 220px wide, provisioning uses the Clarity Timeline, user display names drive the header description, runtime Extensions and Parameters are horizontally separated without nested scrolling, redundant primary labels are absent, and no unresolved P0/P1/P2 visual issue remains in the verified state.
+The operating-state hierarchy and engine/configuration hierarchy are visibly separated, the management controls have balanced corner spacing, both context fields are 220px wide, provisioning uses the Clarity Timeline, user display names drive the header description, runtime Extensions and Parameters are horizontally separated without nested scrolling, redundant primary labels are absent, the empty-Namespace typography uses the compact OpenSphere scale, and no unresolved P0/P1/P2 visual issue remains in the verified state.
