@@ -79,7 +79,7 @@ const DEFAULT_FORM: PgForm = {
   ],
   template: `
     <a class="vl-back" (click)="back()" (keydown.enter)="back()" role="button" tabindex="0">
-      <os-cicon [icon]="iBack" [size]="16" /> PFS 모듈
+      <os-cicon [icon]="iBack" [size]="16" /> PFSS 모듈
     </a>
 
     <section class="pgp-page-frame" aria-label="PostgreSQL plugin 개요와 메뉴">

@@ -217,6 +217,8 @@ test('StackGres is visible as the PostgreSQL operating provider without replacin
   assert.match(component, /name: 'PostgreSQL', logo: LOGO/);
   assert.doesNotMatch(component, /STACKGRES_LOGO|alt="StackGres"/);
   assert.match(component, /stack: 'PFSS'/);
+  assert.match(component, /PFSS 모듈/);
+  assert.doesNotMatch(component, /PFS 모듈/);
   assert.match(shell, /model\.stack \|\| 'PFSS' \}\} \/ \{\{ model\.capability/);
   for (const area of ['Admin UI & API', 'Authentication', 'Certificates', 'Container Registry', 'Extensions', 'Grafana', 'Image pull policy', 'Jobs', 'Service account']) {
     assert.match(component, new RegExp(area));
