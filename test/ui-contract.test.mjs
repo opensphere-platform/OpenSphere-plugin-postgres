@@ -66,6 +66,13 @@ test('PostgreSQL separates selected-runtime navigation from management workspace
   assert.match(css, /@media \(max-width:\s*1180px\)[\s\S]*?\.pgp-page-frame \.pfs-plugin-release > \.pgp-header-tools\s*\{[^}]*grid-column:\s*1 \/ -1[^}]*justify-self:\s*end[^}]*width:\s*min\(100%,\s*30rem\)/);
   assert.match(css, /@media \(max-width:\s*760px\)[\s\S]*?\.pgp-header-context\s*\{[^}]*grid-template-columns:\s*1fr[^}]*justify-items:\s*end/);
   assert.match(css, /\.pgp-header-context-action,\s*\n\.pgp-header-context-refresh\s*\{[^}]*flex:\s*0\s+0\s+1\.35rem[^}]*width:\s*1\.35rem/);
+  assert.match(css, /\.pgp-brand h1,\s*\.pfs-plugin-brand h1\s*\{[^}]*font-size:\s*1\.5rem/);
+  assert.match(css, /\.pgp-brand p,\s*\.pfs-plugin-brand p\s*\{[^}]*font-size:\s*0\.72rem/);
+  assert.match(css, /\.pgp-release dt,\s*\.pfs-plugin-release dt\s*\{[^}]*font-size:\s*0\.62rem/);
+  assert.match(css, /\.pgp-release dd,\s*\.pfs-plugin-release dd\s*\{[^}]*font-size:\s*0\.74rem/);
+  assert.match(css, /\.pgp-empty-copy h2\s*\{[^}]*font-size:\s*1\.2rem/);
+  assert.match(css, /\.pgp-empty-copy p\s*\{[^}]*font-size:\s*0\.72rem[^}]*line-height:\s*1\.5/);
+  assert.match(css, /\.pgp-empty-state \.os-dim\s*\{[^}]*font-size:\s*0\.7rem/);
   assert.match(component, /DataAdd16 from '@carbon\/icons\/es\/data--add\/16'/);
   assert.match(component, /isManagementView\(\)/);
   assert.doesNotMatch(component, /pgp-provider-banner|PostgreSQL operating provider/);
