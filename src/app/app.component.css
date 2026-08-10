@@ -375,11 +375,12 @@ pg-metric { display: block; height: 100%; }
 
 /* PostgreSQL pilot: identity, release metadata, and local navigation are one page surface. */
 .pgp-page-frame { margin: 0 0 18px; overflow: hidden; background: #fff; border: 0; box-shadow: none; }
-.pgp-page-frame .pfs-plugin-head { min-height: 6rem; margin: 0; padding: 14px 10px 16px; border: 0; }
+.pgp-page-frame .pfs-plugin-head { grid-template-columns: minmax(11.5rem, 0.5fr) minmax(0, 1.5fr); gap: 10px; min-height: 6rem; margin: 0; padding: 14px 10px 16px; border: 0; }
+.pgp-page-frame .pfs-plugin-brand { gap: 12px; }
 .pgp-page-frame .pfs-plugin-logo { border: 0; border-radius: 0; background: transparent; }
 .pgp-page-frame .pfs-plugin-logo img { width: 55px; height: 55px; }
-.pgp-page-frame .pfs-plugin-release { grid-template-columns: minmax(5.5rem, 0.65fr) minmax(5rem, 0.6fr) minmax(10rem, 1.2fr) minmax(27rem, 2.8fr); }
-.pgp-page-frame .pfs-plugin-release > div { min-width: 0; padding: 0 10px; overflow: hidden; }
+.pgp-page-frame .pfs-plugin-release { grid-template-columns: minmax(3.5rem, 0.55fr) minmax(3rem, 0.45fr) minmax(6.75rem, 1fr) minmax(26.5rem, 3.2fr); width: 100%; }
+.pgp-page-frame .pfs-plugin-release > div { min-width: 0; padding: 0 6px; overflow: hidden; }
 .pgp-page-frame .pfs-plugin-release dd { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .pgp-page-frame .pfs-plugin-release .label { display: inline-block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom; }
 .pgp-page-frame .pfs-plugin-tabs { margin: 0; padding: 0; background: transparent; border-top: 0; border-bottom: 1px solid var(--os-border); }
@@ -393,10 +394,10 @@ pg-metric { display: block; height: 100%; }
 .pgp-subnav .pfs-plugin-tab.active { color: #7a2e13; border-bottom-color: #e66d24; }
 .pgp-header-tools { position: relative; min-width: 0; padding-top: 1.55rem; }
 .pgp-page-frame .pfs-plugin-release > .pgp-header-tools {
-  padding: 1.55rem 10px 0;
+  padding: 1.55rem 6px 0;
   overflow: visible;
 }
-.pgp-header-context { display: grid; grid-template-columns: repeat(2, max-content); gap: 12px; align-items: end; }
+.pgp-header-context { display: grid; grid-template-columns: repeat(2, max-content); gap: 6px; align-items: end; }
 .pgp-header-context-unit { display: flex; align-items: flex-end; gap: 4px; min-width: 0; }
 .pgp-header-context-field { flex: 0 0 220px; width: 220px; min-width: 220px; margin: 0; }
 .pgp-header-context-field .clr-control-label { margin: 0 0 1px; color: var(--os-muted); font-size: 0.62rem; line-height: 1; }
@@ -405,7 +406,7 @@ pg-metric { display: block; height: 100%; }
 .pgp-header-context-field .clr-select { width: 100%; }
 .pgp-header-context-field .clr-select { height: 1.35rem; min-height: 1.35rem; padding-right: 1.1rem; font-size: 0.66rem; line-height: 1.35rem; }
 .pgp-header-context-action,
-.pgp-header-context-refresh { flex: 0 0 1.75rem; width: 1.75rem; min-width: 1.75rem; height: 1.35rem; min-height: 1.35rem; margin: 0 0 1px; padding: 0; font-size: 0.62rem; line-height: 1.35rem; }
+.pgp-header-context-refresh { flex: 0 0 1.35rem; width: 1.35rem; min-width: 1.35rem; height: 1.35rem; min-height: 1.35rem; margin: 0 0 1px; padding: 0; font-size: 0.62rem; line-height: 1.35rem; }
 .pgp-navigation-row { display: flex; align-items: stretch; min-width: 0; border-bottom: 1px solid var(--os-border); }
 .pgp-navigation-row osp-plugin-tabs { display: block; flex: 1 1 auto; min-width: 0; }
 .pgp-navigation-row .pfs-plugin-tabs { margin: 0; border-bottom: 0; }
@@ -418,8 +419,8 @@ pg-metric { display: block; height: 100%; }
 .pgp-management-action.active { border-bottom-color: #e66d24; color: #7a2e13; font-weight: 600; }
 .pgp-management-action--primary { color: var(--os-brand-500); }
 .pgp-management-action--primary os-cicon { color: var(--os-brand-500); }
-.pgp-management-actions--header { position: absolute; top: -0.9rem; right: 0; justify-content: flex-end; align-items: center; min-height: 1.45rem; border-left: 0; }
-.pgp-management-actions--header .pgp-management-action { width: 1.75rem; min-width: 1.75rem; min-height: 1.45rem; border-bottom: 0; }
+.pgp-management-actions--header { position: absolute; top: -0.9rem; right: 4px; justify-content: flex-end; align-items: center; min-height: 1.45rem; border-left: 0; }
+.pgp-management-actions--header .pgp-management-action { width: 1.4rem; min-width: 1.4rem; min-height: 1.45rem; border-bottom: 0; }
 .pgp-management-actions--header .pgp-management-action.active { background: transparent; color: #7a2e13; }
 .pgp-management-scope { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 2.25rem; padding: 3px 10px; border-bottom: 1px solid #efc6aa; background: #fff8f3; color: var(--os-text-sec); font-size: 0.68rem; }
 .pgp-management-scope b { color: #9f3a16; }
