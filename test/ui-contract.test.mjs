@@ -29,6 +29,7 @@ test('plugin-owned reads use the canonical proxy while governed writes remain on
 
 test('PostgreSQL separates selected-runtime navigation from management workspaces', () => {
   const component = read('src/app/modules/postgres/postgres-plugin.component.ts');
+  const headerShell = read('src/app/shared/plugin-page-shell.component.ts');
   const css = read('src/app/app.component.css');
   const primary = [
     ['overview', 'Overview'], ['monitoring', 'Monitoring'], ['topology', 'Topology'],
@@ -46,10 +47,12 @@ test('PostgreSQL separates selected-runtime navigation from management workspace
   for (const marker of ['전체 클러스터', '설정 카탈로그', 'PostgreSQL 생성', '엔진 관리']) assert.match(component, new RegExp(marker));
   assert.match(component, /class="pgp-navigation-row" \*ngIf="hasSelectedCluster\(\) && !isManagementView\(\)"/);
   assert.doesNotMatch(component, /pgp-subnav-label|primaryTabLabel\(\)/);
-  assert.match(component, /class="pgp-management-actions[^\"]*"/);
-  assert.match(component, /pluginHeaderContext class="pgp-header-tools"/);
-  assert.match(component, /pgp-management-actions pgp-management-actions--header/);
-  for (const route of ['fleet', 'profiles', 'provisioning', 'operator']) assert.match(component, new RegExp(`href="/pfss/postgres/${route}"`));
+  assert.match(component, /\[context\]="headerContext\(\)"/);
+  assert.match(component, /\(managementSelected\)="openHeaderManagement\(\$event\)"/);
+  assert.match(headerShell, /class="pgp-management-actions[^\"]*"/);
+  assert.match(headerShell, /class="pgp-header-tools"/);
+  assert.match(headerShell, /pgp-management-actions pgp-management-actions--header/);
+  assert.match(component, /\{ cluster: 'fleet', config: 'profiles', claims: 'provisioning', operator: 'operator' \}/);
   assert.match(css, /\.pgp-management-action\s*>\s*span\s*\{/);
   assert.doesNotMatch(css, /\.pgp-management-action\s+span\s*\{/);
   assert.match(css, /\.pgp-management-action:focus-visible/);
@@ -60,7 +63,7 @@ test('PostgreSQL separates selected-runtime navigation from management workspace
   assert.match(css, /\.pgp-management-actions--header\s*\{[^}]*position:\s*absolute[^}]*top:\s*-0\.9rem[^}]*right:\s*4px/);
   assert.match(css, /\.pgp-management-actions--header \.pgp-management-action\s*\{[^}]*border-bottom:\s*0[^}]*color:\s*var\(--os-brand-500\)/);
   assert.match(css, /\.pgp-management-actions--header \.pgp-management-action\.active,[\s\S]*\.pgp-management-actions--header \.pgp-management-action\.active os-cicon\s*\{[^}]*background:\s*transparent[^}]*color:\s*#5f1f8f/);
-  assert.match(component, /aria-current/);
+  assert.match(headerShell, /aria-current/);
   assert.match(css, /\.pgp-header-context\s*\{[^}]*grid-template-columns:\s*repeat\(2,\s*max-content\)[^}]*justify-content:\s*end[^}]*gap:\s*6px/);
   assert.match(css, /\.pgp-header-context-field\s*\{[^}]*flex:\s*0\s+0\s+220px[^}]*width:\s*220px[^}]*min-width:\s*220px/);
   assert.match(css, /@media \(max-width:\s*1180px\)[\s\S]*?\.pgp-page-frame \.pfs-plugin-head\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)/);
@@ -74,7 +77,7 @@ test('PostgreSQL separates selected-runtime navigation from management workspace
   assert.match(css, /\.pgp-empty-copy h2\s*\{[^}]*font-size:\s*1\.2rem/);
   assert.match(css, /\.pgp-empty-copy p\s*\{[^}]*font-size:\s*0\.72rem[^}]*line-height:\s*1\.5/);
   assert.match(css, /\.pgp-empty-state \.os-dim\s*\{[^}]*font-size:\s*0\.7rem/);
-  assert.match(component, /DataAdd16 from '@carbon\/icons\/es\/data--add\/16'/);
+  assert.match(headerShell, /DataAdd16 from '@carbon\/icons\/es\/data--add\/16'/);
   assert.match(component, /isManagementView\(\)/);
   assert.doesNotMatch(component, /pgp-provider-banner|PostgreSQL operating provider/);
   assert.doesNotMatch(component, /name="claimEngine"|PFSS PostgreSQL의 단일 운영 엔진입니다/);
@@ -168,10 +171,13 @@ test('PostgresClaim UI exposes every supported allocation contract', () => {
 
 test('namespace-first fleet and pgAdmin layout contracts are preserved', () => {
   const component = read('src/app/modules/postgres/postgres-plugin.component.ts');
+  const shell = read('src/app/shared/plugin-page-shell.component.ts');
   const admin = read('src/app/modules/postgres/admin/pg-admin.tab.ts');
   const service = read('src/app/modules/postgres/admin/pg-admin.service.ts');
-  assert.match(component, /aria-label="Namespace 선택"/);
-  assert.match(component, /aria-label="PostgreSQL 인스턴스 선택"/);
+  assert.match(shell, /aria-label="Namespace 선택"/);
+  assert.match(component, /resourceLabel: 'PostgreSQL 인스턴스'/);
+  assert.match(shell, /\[attr\.aria-label\]="\(context\?\.resourceLabel \|\| '서비스'\) \+ ' 선택'"/);
+  assert.match(shell, /clr-select-container class="pgp-header-context-field"/);
   assert.match(component, /이 Namespace에는 PostgreSQL이 없습니다/);
   assert.match(component, /PFSS PostgreSQL Fleet/);
   for (const marker of ['Object Explorer', 'Data View', 'Query Tool', 'Query History']) assert.match(admin, new RegExp(marker));
@@ -227,7 +233,7 @@ test('StackGres is visible as the PostgreSQL operating provider without replacin
   assert.match(component, /stack: 'PFSS'/);
   assert.match(component, /PFSS 모듈/);
   assert.doesNotMatch(component, /PFS 모듈/);
-  assert.match(shell, /model\.stack \|\| 'PFSS' \}\} \/ \{\{ model\.capability/);
+  assert.match(shell, /model\.stack \|\| 'PFSS' \}\} \{\{ model\.stackSeparator \|\| '\/' \}\} \{\{ model\.capability/);
   for (const area of ['Admin UI & API', 'Authentication', 'Certificates', 'Container Registry', 'Extensions', 'Grafana', 'Image pull policy', 'Jobs', 'Service account']) {
     assert.match(component, new RegExp(area));
   }

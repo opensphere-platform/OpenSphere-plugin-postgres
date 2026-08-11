@@ -1,5 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { ClarityModule } from '@clr/angular';
+import ListBoxes16 from '@carbon/icons/es/list--boxes/16';
+import Catalog16 from '@carbon/icons/es/catalog/16';
+import DataAdd16 from '@carbon/icons/es/data--add/16';
+import Settings16 from '@carbon/icons/es/settings/16';
+import Renew16 from '@carbon/icons/es/renew/16';
+import { CarbonIcon } from '../carbon-icon';
 
 export interface PluginPageHeaderModel {
   name: string;
@@ -15,6 +23,13 @@ export interface PluginPageHeaderModel {
   version: string;
   profile: string;
   namespace?: string;
+  managedFleet?: boolean;
+  stackSeparator?: '/' | '·';
+  managementActions?: boolean;
+  fleetActionLabel?: string;
+  catalogActionLabel?: string;
+  provisioningActionLabel?: string;
+  operatorActionLabel?: string;
 }
 
 export interface PluginPageTab {
@@ -22,6 +37,19 @@ export interface PluginPageTab {
   label: string;
   disabled?: boolean;
   badge?: string | number;
+}
+
+export interface PluginHeaderOption { value: string; label: string; disabled?: boolean; }
+export type PluginManagementActionId = 'cluster' | 'config' | 'claims' | 'operator';
+export interface PluginHeaderContextModel {
+  namespace: string;
+  namespaces?: PluginHeaderOption[];
+  resourceLabel?: string;
+  resource?: string;
+  resources?: PluginHeaderOption[];
+  activeManagement?: PfsPluginTabId | '';
+  allowNamespaceAdd?: boolean;
+  refreshDisabled?: boolean;
 }
 
 /** Platform Delivery 엔진의 관리자 과업 중심 상세 화면 계약. */
@@ -70,7 +98,7 @@ export function pfsPluginTabs(domainLabel: string): PluginPageTab[] {
 @Component({
   selector: 'osp-plugin-page-header',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule, ClarityModule, CarbonIcon],
   template: `
     <section class="pfs-plugin-head" [attr.aria-labelledby]="headingId">
       <div class="pfs-plugin-brand">
@@ -84,7 +112,7 @@ export function pfsPluginTabs(domainLabel: string): PluginPageTab[] {
           </ng-template>
         </div>
         <div>
-          <span class="vl-eyebrow">{{ model.stack || 'PFSS' }} / {{ model.capability }}</span>
+          <span class="vl-eyebrow">{{ model.stack || 'PFSS' }} {{ model.stackSeparator || '/' }} {{ model.capability }}</span>
           <h1 [id]="headingId">{{ model.name }}</h1>
           <p>{{ model.description }}</p>
         </div>
@@ -93,8 +121,24 @@ export function pfsPluginTabs(domainLabel: string): PluginPageTab[] {
         <div><dt>Lifecycle</dt><dd><span class="label" [ngClass]="model.lifecycleClass || 'label-warning'">{{ model.lifecycle }}</span></dd></div>
         <div><dt>{{ model.versionLabel || 'Version' }}</dt><dd>{{ model.version }}</dd></div>
         <div><dt>Profile</dt><dd>{{ model.profile }}</dd></div>
-        <div *ngIf="model.namespace"><dt>Namespace</dt><dd class="os-mono">{{ model.namespace }}</dd></div>
-        <ng-content select="[pluginHeaderContext]" />
+        <div class="pgp-header-tools">
+          <nav *ngIf="model.managementActions !== false" class="pgp-management-actions pgp-management-actions--header" aria-label="플랫폼 관리 작업">
+            <button *ngIf="model.managedFleet !== false" type="button" class="pgp-management-action" [title]="model.fleetActionLabel || '전체 서비스'" [attr.aria-label]="model.fleetActionLabel || '전체 서비스'" [attr.aria-current]="context?.activeManagement === 'cluster' ? 'page' : null" [class.active]="context?.activeManagement === 'cluster'" (click)="managementSelected.emit('cluster')"><os-cicon [icon]="iFleet" [size]="16" /><span>{{ model.fleetActionLabel || '전체 서비스' }}</span></button>
+            <button type="button" class="pgp-management-action" [title]="model.catalogActionLabel || '설정 카탈로그'" [attr.aria-label]="model.catalogActionLabel || '설정 카탈로그'" [attr.aria-current]="context?.activeManagement === 'config' ? 'page' : null" [class.active]="context?.activeManagement === 'config'" (click)="managementSelected.emit('config')"><os-cicon [icon]="iCatalog" [size]="16" /><span>{{ model.catalogActionLabel || '설정 카탈로그' }}</span></button>
+            <button type="button" class="pgp-management-action pgp-management-action--primary" [title]="model.provisioningActionLabel || '서비스 생성'" [attr.aria-label]="model.provisioningActionLabel || '서비스 생성'" [attr.aria-current]="context?.activeManagement === 'claims' ? 'page' : null" [class.active]="context?.activeManagement === 'claims'" (click)="managementSelected.emit('claims')"><os-cicon [icon]="iProvisioning" [size]="16" /><span>{{ model.provisioningActionLabel || '서비스 생성' }}</span></button>
+            <button type="button" class="pgp-management-action" [title]="model.operatorActionLabel || '엔진 관리'" [attr.aria-label]="model.operatorActionLabel || '엔진 관리'" [attr.aria-current]="context?.activeManagement === 'operator' ? 'page' : null" [class.active]="context?.activeManagement === 'operator'" (click)="managementSelected.emit('operator')"><os-cicon [icon]="iOperator" [size]="16" /><span>{{ model.operatorActionLabel || '엔진 관리' }}</span></button>
+          </nav>
+          <div class="pgp-header-context" aria-label="PFSS 운영 컨텍스트">
+            <div class="pgp-header-context-unit">
+              <clr-select-container class="pgp-header-context-field"><label>Namespace</label><select clrSelect name="pfssHeaderNamespace" aria-label="Namespace 선택" [ngModel]="context?.namespace" (ngModelChange)="namespaceSelected.emit($event)"><option *ngFor="let option of context?.namespaces || []" [ngValue]="option.value" [disabled]="option.disabled">{{option.label}}</option></select></clr-select-container>
+              <button *ngIf="context?.allowNamespaceAdd !== false" class="btn btn-sm btn-link pgp-header-context-action" type="button" aria-label="Namespace 추가" title="Namespace 추가" (click)="namespaceAdd.emit()">추가</button>
+            </div>
+            <div class="pgp-header-context-unit">
+              <clr-select-container class="pgp-header-context-field" *ngIf="context?.resources?.length"><label>{{context?.resourceLabel || '서비스'}}</label><select clrSelect name="pfssHeaderResource" [attr.aria-label]="(context?.resourceLabel || '서비스') + ' 선택'" [ngModel]="context?.resource || ''" (ngModelChange)="resourceSelected.emit($event)"><option *ngFor="let option of context?.resources || []" [ngValue]="option.value" [disabled]="option.disabled">{{option.label}}</option></select></clr-select-container>
+              <button class="btn btn-sm btn-link pgp-header-context-refresh" type="button" aria-label="운영 컨텍스트 새로고침" title="새로고침" [disabled]="context?.refreshDisabled" (click)="refreshRequested.emit()"><os-cicon [icon]="iRenew" [size]="16" /></button>
+            </div>
+          </div>
+        </div>
       </dl>
     </section>
   `,
@@ -117,8 +161,19 @@ export function pfsPluginTabs(domainLabel: string): PluginPageTab[] {
   `],
 })
 export class PluginPageHeaderComponent {
+  readonly iFleet = ListBoxes16;
+  readonly iCatalog = Catalog16;
+  readonly iProvisioning = DataAdd16;
+  readonly iOperator = Settings16;
+  readonly iRenew = Renew16;
   @Input({ required: true }) model!: PluginPageHeaderModel;
+  @Input({ required: true }) context!: PluginHeaderContextModel;
   @Input() headingId = 'pfs-plugin-page-title';
+  @Output() readonly managementSelected = new EventEmitter<PluginManagementActionId>();
+  @Output() readonly namespaceSelected = new EventEmitter<string>();
+  @Output() readonly resourceSelected = new EventEmitter<string>();
+  @Output() readonly namespaceAdd = new EventEmitter<void>();
+  @Output() readonly refreshRequested = new EventEmitter<void>();
 }
 
 @Component({

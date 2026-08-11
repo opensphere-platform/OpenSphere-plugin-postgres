@@ -21,12 +21,7 @@ import { PgAdminTab } from './admin/pg-admin.tab';
 import { PgAdminService } from './admin/pg-admin.service';
 import { PostgresExtensionCatalogItem, PostgresExtensionSelection, PostgresFleetCluster, PostgresFleetService } from './postgres-fleet.service';
 import ArrowLeft16 from '@carbon/icons/es/arrow--left/16';
-import Renew16 from '@carbon/icons/es/renew/16';
-import DataAdd16 from '@carbon/icons/es/data--add/16';
-import Catalog16 from '@carbon/icons/es/catalog/16';
-import ListBoxes16 from '@carbon/icons/es/list--boxes/16';
-import Settings16 from '@carbon/icons/es/settings/16';
-import { PluginPageHeaderComponent, PluginPageHeaderModel, PluginPageTab, PluginTabsComponent } from '../../shared/plugin-page-shell.component';
+import { PluginHeaderContextModel, PluginPageHeaderComponent, PluginPageHeaderModel, PluginPageTab, PluginTabsComponent } from '../../shared/plugin-page-shell.component';
 import { NewClaimFormComponent, PostgresRequestMode } from '../new-claim-form.component';
 
 type PackageTab = 'overview' | 'provisioning' | 'monitoring' | 'admin' | 'fleet' | 'operator' | 'cluster' | 'topology' | 'profiles' | 'config' | 'databases' | 'backups' | 'events' | 'claims' | 'operations' | 'upgrade' | 'documentation';
@@ -83,41 +78,10 @@ const DEFAULT_FORM: PgForm = {
     </a>
 
     <section class="pgp-page-frame" aria-label="PostgreSQL plugin 개요와 메뉴">
-      <osp-plugin-page-header [model]="headerModel()" headingId="postgres-plugin-title">
-        <div pluginHeaderContext class="pgp-header-tools">
-          <nav class="pgp-management-actions pgp-management-actions--header" aria-label="PostgreSQL 관리 작업">
-            <a class="pgp-management-action" href="/pfss/postgres/fleet" aria-label="전체 클러스터" title="전체 클러스터" [class.active]="tab()==='fleet'" [attr.aria-current]="tab()==='fleet'?'page':null"><os-cicon [icon]="iFleet" [size]="16" /><span>전체 클러스터</span></a>
-            <a class="pgp-management-action" href="/pfss/postgres/profiles" aria-label="설정 카탈로그" title="설정 카탈로그" [class.active]="tab()==='profiles'" [attr.aria-current]="tab()==='profiles'?'page':null"><os-cicon [icon]="iCatalog" [size]="16" /><span>설정 카탈로그</span></a>
-            <a class="pgp-management-action pgp-management-action--primary" href="/pfss/postgres/provisioning" aria-label="PostgreSQL 생성" title="PostgreSQL 생성" [class.active]="tab()==='provisioning'" [attr.aria-current]="tab()==='provisioning'?'page':null"><os-cicon [icon]="iAdd" [size]="16" /><span>PostgreSQL 생성</span></a>
-            <a class="pgp-management-action" href="/pfss/postgres/operator" aria-label="엔진 관리" title="엔진 관리" [class.active]="tab()==='operator'" [attr.aria-current]="tab()==='operator'?'page':null"><os-cicon [icon]="iSettings" [size]="16" /><span>엔진 관리</span></a>
-          </nav>
-          <div class="pgp-header-context" aria-label="PostgreSQL 운영 컨텍스트">
-            <div class="pgp-header-context-unit">
-              <clr-select-container class="pgp-header-context-field">
-                <label>Namespace</label>
-                <select clrSelect name="postgresNamespace" aria-label="Namespace 선택"
-                  [ngModel]="selectedNamespace()" (ngModelChange)="selectNamespace($event)">
-                  <option *ngFor="let namespace of fleet.namespaces()" [ngValue]="namespace">{{ namespace }}</option>
-                </select>
-              </clr-select-container>
-              <button class="btn btn-sm btn-link pgp-header-context-action" type="button"
-                aria-label="Namespace 추가" title="Namespace 추가" (click)="openNamespaceModal()">추가</button>
-            </div>
-            <div class="pgp-header-context-unit">
-              <clr-select-container class="pgp-header-context-field" *ngIf="namespaceClusters().length > 1">
-                <label>PostgreSQL 인스턴스</label>
-                <select clrSelect name="postgresInstance" aria-label="PostgreSQL 인스턴스 선택"
-                  [ngModel]="fleet.selectedId()" (ngModelChange)="selectFleetCluster($event)">
-                  <option *ngFor="let cluster of namespaceClusters()" [ngValue]="cluster.id">{{ cluster.displayName }}</option>
-                </select>
-              </clr-select-container>
-              <button class="btn btn-sm btn-link pgp-header-context-refresh" type="button"
-                aria-label="PostgreSQL 컨텍스트 새로고침" title="새로고침"
-                (click)="refreshFleet()" [disabled]="fleet.busy()"><os-cicon [icon]="iRenew" [size]="16" /></button>
-            </div>
-          </div>
-        </div>
-      </osp-plugin-page-header>
+      <osp-plugin-page-header [model]="headerModel()" [context]="headerContext()" headingId="postgres-plugin-title"
+        (managementSelected)="openHeaderManagement($event)" (namespaceSelected)="selectNamespace($event)"
+        (resourceSelected)="selectFleetCluster($event)" (namespaceAdd)="openNamespaceModal()"
+        (refreshRequested)="refreshFleet()" />
       <div class="pgp-navigation-row" *ngIf="hasSelectedCluster() && !isManagementView()">
         <osp-plugin-tabs [tabs]="primaryTabsForUi()" [active]="primaryTab()" routeBase="/pfss/postgres" ariaLabel="PostgreSQL 운영 영역" (selected)="openPrimaryTab($event)" />
       </div>
@@ -399,11 +363,6 @@ export class PostgresPluginComponent implements OnInit, OnDestroy {
   readonly manualSourceId = MANUAL_SOURCE_ID;
   readonly manualUrl = `/manual?doc=${encodeURIComponent(MANUAL_SOURCE_ID)}`;
   readonly iBack = ArrowLeft16;
-  readonly iRenew = Renew16;
-  readonly iAdd = DataAdd16;
-  readonly iCatalog = Catalog16;
-  readonly iFleet = ListBoxes16;
-  readonly iSettings = Settings16;
   readonly timelineHorizontal = ClrTimelineLayout.HORIZONTAL;
   readonly timelineCurrent = ClrTimelineStepState.CURRENT;
   readonly timelineNotStarted = ClrTimelineStepState.NOT_STARTED;
@@ -709,8 +668,30 @@ export class PostgresPluginComponent implements OnInit, OnDestroy {
       name: 'PostgreSQL', logo: LOGO, stack: 'PFSS', capability: 'data.sql.postgres',
       description: cluster?.alias || (cluster ? `${cluster.displayName} PostgreSQL 인스턴스` : 'Namespace를 선택하거나 PostgreSQL 인스턴스를 생성하세요.'),
       lifecycle: this.lifecycleLabel(), lifecycleClass: this.lifecyclePill(), versionLabel: 'PostgreSQL',
-      version: this.compactPostgresVersion(cluster?.postgresVersion || ''), profile: cluster?.plan || cluster?.mode || 'Not installed',
+      version: this.compactPostgresVersion(cluster?.postgresVersion || ''), profile: cluster?.plan || cluster?.mode || 'Not installed', managedFleet: true,
+      fleetActionLabel: '전체 클러스터', catalogActionLabel: '설정 카탈로그',
+      provisioningActionLabel: 'PostgreSQL 생성', operatorActionLabel: '엔진 관리',
     };
+  }
+  headerContext(): PluginHeaderContextModel {
+    const managementMap: Record<string, 'cluster'|'config'|'claims'|'operator'> = {
+      fleet: 'cluster', profiles: 'config', provisioning: 'claims', operator: 'operator',
+    };
+    return {
+      namespace: this.selectedNamespace(),
+      namespaces: this.fleet.namespaces().map((namespace) => ({ value: namespace, label: namespace })),
+      resourceLabel: 'PostgreSQL 인스턴스',
+      resource: this.fleet.selectedId(),
+      resources: this.namespaceClusters().length > 1
+        ? this.namespaceClusters().map((cluster) => ({ value: cluster.id, label: cluster.displayName }))
+        : [],
+      activeManagement: managementMap[this.tab()] || '',
+      refreshDisabled: this.fleet.busy(),
+    };
+  }
+  openHeaderManagement(tab: 'cluster'|'config'|'claims'|'operator'): void {
+    const route = ({ cluster: 'fleet', config: 'profiles', claims: 'provisioning', operator: 'operator' } as const)[tab];
+    this.openTab(route);
   }
   compactLifecycle(phase: string, ready = false): string {
     if (ready) return 'Ready';
