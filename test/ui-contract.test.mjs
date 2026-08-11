@@ -62,6 +62,7 @@ test('PostgreSQL separates selected-runtime navigation from management workspace
   assert.match(css, /\.pgp-page-frame\s+\.pfs-plugin-release\s*>\s*\.pgp-header-tools\s*\{[^}]*padding:\s*1\.55rem\s+6px\s+0[^}]*overflow:\s*visible/);
   assert.match(css, /\.pgp-management-actions--header\s*\{[^}]*position:\s*absolute[^}]*top:\s*-0\.9rem[^}]*right:\s*4px/);
   assert.match(css, /\.pgp-management-actions--header \.pgp-management-action\s*\{[^}]*border-bottom:\s*0[^}]*color:\s*var\(--os-brand-500\)/);
+  assert.match(css, /\.pgp-management-actions--header \.pgp-management-action os-cicon\s*\{[^}]*width:\s*16px[^}]*min-width:\s*16px[^}]*height:\s*16px[^}]*min-height:\s*16px/);
   assert.match(css, /\.pgp-management-actions--header \.pgp-management-action\.active,[\s\S]*\.pgp-management-actions--header \.pgp-management-action\.active os-cicon\s*\{[^}]*background:\s*transparent[^}]*color:\s*#5f1f8f/);
   assert.match(headerShell, /aria-current/);
   assert.match(css, /\.pgp-header-context\s*\{[^}]*grid-template-columns:\s*repeat\(2,\s*max-content\)[^}]*justify-content:\s*end[^}]*gap:\s*6px/);
