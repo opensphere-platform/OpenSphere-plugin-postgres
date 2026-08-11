@@ -86,10 +86,10 @@ const DEFAULT_FORM: PgForm = {
       <osp-plugin-page-header [model]="headerModel()" headingId="postgres-plugin-title">
         <div pluginHeaderContext class="pgp-header-tools">
           <nav class="pgp-management-actions pgp-management-actions--header" aria-label="PostgreSQL 관리 작업">
-            <a class="pgp-management-action" href="/pfss/postgres/fleet" aria-label="전체 클러스터" title="전체 클러스터" [class.active]="tab()==='fleet'"><os-cicon [icon]="iFleet" [size]="16" /><span>전체 클러스터</span></a>
-            <a class="pgp-management-action" href="/pfss/postgres/profiles" aria-label="설정 카탈로그" title="설정 카탈로그" [class.active]="tab()==='profiles'"><os-cicon [icon]="iCatalog" [size]="16" /><span>설정 카탈로그</span></a>
-            <a class="pgp-management-action pgp-management-action--primary" href="/pfss/postgres/provisioning" aria-label="PostgreSQL 생성" title="PostgreSQL 생성" [class.active]="tab()==='provisioning'"><os-cicon [icon]="iAdd" [size]="16" /><span>PostgreSQL 생성</span></a>
-            <a class="pgp-management-action" href="/pfss/postgres/operator" aria-label="엔진 관리" title="엔진 관리" [class.active]="tab()==='operator'"><os-cicon [icon]="iSettings" [size]="16" /><span>엔진 관리</span></a>
+            <a class="pgp-management-action" href="/pfss/postgres/fleet" aria-label="전체 클러스터" title="전체 클러스터" [class.active]="tab()==='fleet'" [attr.aria-current]="tab()==='fleet'?'page':null"><os-cicon [icon]="iFleet" [size]="16" /><span>전체 클러스터</span></a>
+            <a class="pgp-management-action" href="/pfss/postgres/profiles" aria-label="설정 카탈로그" title="설정 카탈로그" [class.active]="tab()==='profiles'" [attr.aria-current]="tab()==='profiles'?'page':null"><os-cicon [icon]="iCatalog" [size]="16" /><span>설정 카탈로그</span></a>
+            <a class="pgp-management-action pgp-management-action--primary" href="/pfss/postgres/provisioning" aria-label="PostgreSQL 생성" title="PostgreSQL 생성" [class.active]="tab()==='provisioning'" [attr.aria-current]="tab()==='provisioning'?'page':null"><os-cicon [icon]="iAdd" [size]="16" /><span>PostgreSQL 생성</span></a>
+            <a class="pgp-management-action" href="/pfss/postgres/operator" aria-label="엔진 관리" title="엔진 관리" [class.active]="tab()==='operator'" [attr.aria-current]="tab()==='operator'?'page':null"><os-cicon [icon]="iSettings" [size]="16" /><span>엔진 관리</span></a>
           </nav>
           <div class="pgp-header-context" aria-label="PostgreSQL 운영 컨텍스트">
             <div class="pgp-header-context-unit">

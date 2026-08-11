@@ -58,8 +58,9 @@ test('PostgreSQL separates selected-runtime navigation from management workspace
   assert.match(css, /\.pgp-page-frame\s+\.pfs-plugin-release\s*\{[^}]*minmax\(26\.5rem,\s*3\.2fr\)[^}]*width:\s*100%/);
   assert.match(css, /\.pgp-page-frame\s+\.pfs-plugin-release\s*>\s*\.pgp-header-tools\s*\{[^}]*padding:\s*1\.55rem\s+6px\s+0[^}]*overflow:\s*visible/);
   assert.match(css, /\.pgp-management-actions--header\s*\{[^}]*position:\s*absolute[^}]*top:\s*-0\.9rem[^}]*right:\s*4px/);
-  assert.match(css, /\.pgp-management-actions--header \.pgp-management-action\s*\{[^}]*border-bottom:\s*0/);
-  assert.match(css, /\.pgp-management-actions--header \.pgp-management-action\.active\s*\{[^}]*background:\s*transparent[^}]*color:\s*#7a2e13/);
+  assert.match(css, /\.pgp-management-actions--header \.pgp-management-action\s*\{[^}]*border-bottom:\s*0[^}]*color:\s*var\(--os-brand-500\)/);
+  assert.match(css, /\.pgp-management-actions--header \.pgp-management-action\.active,[\s\S]*\.pgp-management-actions--header \.pgp-management-action\.active os-cicon\s*\{[^}]*background:\s*transparent[^}]*color:\s*#5f1f8f/);
+  assert.match(component, /aria-current/);
   assert.match(css, /\.pgp-header-context\s*\{[^}]*grid-template-columns:\s*repeat\(2,\s*max-content\)[^}]*justify-content:\s*end[^}]*gap:\s*6px/);
   assert.match(css, /\.pgp-header-context-field\s*\{[^}]*flex:\s*0\s+0\s+220px[^}]*width:\s*220px[^}]*min-width:\s*220px/);
   assert.match(css, /@media \(max-width:\s*1180px\)[\s\S]*?\.pgp-page-frame \.pfs-plugin-head\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)/);
