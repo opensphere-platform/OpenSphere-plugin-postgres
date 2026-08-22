@@ -34,8 +34,9 @@
       "reason": "Foundation owns child navigation"
     },
     "api": {
-      "enabled": false,
-      "reason": "Governed PostgreSQL writes remain on the Foundation host API"
+      "enabled": true,
+      "basePath": "/api/plugins/postgres",
+      "reason": "Plugin runtime endpoints only; governed PostgreSQL writes remain on the Foundation host API"
     },
     "cli": {
       "enabled": true,

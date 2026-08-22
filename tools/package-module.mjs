@@ -43,7 +43,6 @@ const descriptor = {
   sdkVersion: manifest.sdkVersion,
   permissions: manifest.permissions,
   permissionProfile: 'none',
-  api: manifest.apiBase ? { basePath: manifest.apiBase } : undefined,
   runtime: {
     port: 8080,
     healthPath: '/healthz',
